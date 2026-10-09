@@ -1,0 +1,15 @@
+{
+ "backend": "xlwings",
+ "args": {
+  "hwnd": 527408,
+  "pid": 28816,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "ok": false,
+ "error_type": "HandoffError",
+ "error": "workbook 'E2_FixtureA.xlsx' is not open in the target Excel instance",
+ "timings": {
+  "attach_ms": 806.8136999499984,
+  "process_ms": 844.6933000232093
+ }
+}

@@ -22,3 +22,7 @@ pyxll.cfg
 prototypes/**/build/
 prototypes/**/*.xlam
 
+prototypes/e2/work/
+
+prototypes/e2/fixtures/*.xlsx
+

@@ -1,0 +1,14 @@
+{
+ "backend": "xlwings",
+ "args": {
+  "hwnd": 527408,
+  "pid": 28816,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "ok": false,
+ "error_type": "HandoffError",
+ "error": "window 527408 does not exist",
+ "timings": {
+  "process_ms": 820.4187999945134
+ }
+}

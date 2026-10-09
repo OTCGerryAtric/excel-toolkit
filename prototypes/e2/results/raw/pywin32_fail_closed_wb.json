@@ -1,0 +1,15 @@
+{
+ "backend": "pywin32",
+ "args": {
+  "hwnd": 527408,
+  "pid": 28816,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "ok": false,
+ "error_type": "HandoffError",
+ "error": "workbook 'E2_FixtureA.xlsx' is not open in the target Excel instance",
+ "timings": {
+  "attach_ms": 611.0915999743156,
+  "process_ms": 636.9445999735035
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "backend": "pywin32",
+ "args": {
+  "hwnd": 396202,
+  "pid": 30676,
+  "workbook": "Missing.xlsx"
+ },
+ "ok": false,
+ "error_type": "HandoffError",
+ "error": "workbook 'Missing.xlsx' is not open in the target Excel instance",
+ "timings": {
+  "attach_ms": 607.5335000059567,
+  "process_ms": 640.7405000063591
+ }
+}

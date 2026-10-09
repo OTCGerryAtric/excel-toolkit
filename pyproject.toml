@@ -16,4 +16,5 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pywin32>=312",
+    "xlwings>=0.37.5",
 ]

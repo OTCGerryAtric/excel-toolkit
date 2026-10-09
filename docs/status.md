@@ -88,12 +88,12 @@ Source extracted to `baseline/vba/PERSONAL_XLSB_olevba.txt`. Shortcuts are set v
 | git + uv project | Done (`740fb1e`) |
 | PyXLL removed from project; no Excel registration | Done (pyproject clean, `.venv` clean, registry verified, no installer process) |
 | E1 `.xlam` hotkey format cycle on a test key, timed against the VBA original | **Passed** 2026-10-09 — 21/21 equivalence checks; ~1 ms, same as VBA. See `docs/validation/phase0-e1.md`. Manual Ctrl+Shift+J keypress check outstanding. |
-| E2 Python reads the live workbook (correct Excel instance, unsaved edits, multi-area, other sheets) — via pywin32 **and** via free xlwings | Not started |
+| E2 Python reads the live workbook (correct Excel instance, unsaved edits, multi-area, other sheets) — via pywin32 **and** via free xlwings | **Done** 2026-10-09 — pywin32 27/27, xlwings 25/27; explicit handoff (window + process id + workbook name) never attached to the wrong instance; naive `GetActiveObject` did. Reads verified read-only. Recommendation: direct pywin32. See `docs/validation/phase0-e2.md`. Awaiting review. |
 | E3 Reversibility by command category (toggle / bulk / destructive), incl. `Application.OnUndo` from VBA and intervening-edit detection | Not started |
-| E4 Bridge latency (VBA → Python → result) and read/write timing for 1, 1k, 10k, 100k cells | Not started |
+| E4 Bridge latency (VBA → Python → result) and read/write timing for 1, 1k, 10k, 100k cells | Not started. E2 measured ~0.9 s per handoff (mostly Python start-up and imports); E4 to test a long-running Python process and returning results to VBA. |
 | E5 Excel's own precedent tracing via COM from Python | Not started |
 | E6 Install on another Windows PC with **no manual Python/dependency install**, no global macro-security changes | Not started — needs a colleague machine |
-| Bridge comparison: pywin32 vs xlwings core (simplicity, reliability, speed, install, licences, maintainability) | Not started |
+| Bridge comparison: pywin32 vs xlwings core (simplicity, reliability, speed, install, licences, maintainability) | Done in E2 — recommends direct pywin32 (install/packaging comparison still to come in E6) |
 | Licence register for all bundled components | Not started |
 | Phase 0 results document + ADR-001 | Not started |
 

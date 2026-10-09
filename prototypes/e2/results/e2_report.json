@@ -1,0 +1,7005 @@
+{
+ "runs": {
+  "pywin32": [
+   {
+    "backend": "pywin32",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         "#N/A"
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#SPILL!"
+         },
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 599.2430000333115,
+     "read_small_ms": 85.2741000126116,
+     "bulk": {
+      "1k": {
+       "ms": 5.185699963476509,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 21.223199961241335,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 749.6737000183202
+    },
+    "wall_ms": 854.0188000188209,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend pywin32 --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\pywin32_vba_0.json\""
+   },
+   {
+    "backend": "pywin32",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         "#N/A"
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#SPILL!"
+         },
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 655.8890999876894,
+     "read_small_ms": 82.7294000191614,
+     "bulk": {
+      "1k": {
+       "ms": 3.8531000027433038,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 18.873799999710172,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 798.9906999864615
+    },
+    "wall_ms": 913.0431999801658,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend pywin32 --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\pywin32_vba_1.json\""
+   },
+   {
+    "backend": "pywin32",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         "#N/A"
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#SPILL!"
+         },
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 617.7763000014238,
+     "read_small_ms": 90.43779998319224,
+     "bulk": {
+      "1k": {
+       "ms": 4.122900019865483,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 21.876599988900125,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 772.2335000289604
+    },
+    "wall_ms": 871.8920999672264,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend pywin32 --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\pywin32_vba_2.json\""
+   },
+   {
+    "backend": "pywin32",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         "#N/A"
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#SPILL!"
+         },
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 626.3727999757975,
+     "read_small_ms": 90.851399989333,
+     "bulk": {
+      "1k": {
+       "ms": 4.412600013893098,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 19.455400004517287,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 783.577400026843
+    },
+    "wall_ms": 893.4556000167504,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend pywin32 --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\pywin32_vba_3.json\""
+   },
+   {
+    "backend": "pywin32",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         "#N/A"
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#SPILL!"
+         },
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 631.8919000332244,
+     "read_small_ms": 86.73140004975721,
+     "bulk": {
+      "1k": {
+       "ms": 4.011200042441487,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 19.652999995741993,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 782.0042999810539
+    },
+    "wall_ms": 891.6024999925867,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend pywin32 --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\pywin32_vba_4.json\""
+   }
+  ],
+  "xlwings": [
+   {
+    "backend": "xlwings",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         {
+          "error": "#N/A"
+         }
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         -2146826243,
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [
+      "Workbook.Saved",
+      "Range.Areas (multi-area selection)",
+      "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+      "Worksheet.ProtectContents",
+      "Range.HasSpill / SpillingToRange"
+     ],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 833.6413000361063,
+     "read_small_ms": 134.00180003372952,
+     "bulk": {
+      "1k": {
+       "ms": 10.092000011354685,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 27.395599987357855,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 1068.2894000201486
+    },
+    "wall_ms": 1176.8491000402719,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend xlwings --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\xlwings_vba_0.json\""
+   },
+   {
+    "backend": "xlwings",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         {
+          "error": "#N/A"
+         }
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         -2146826243,
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [
+      "Workbook.Saved",
+      "Range.Areas (multi-area selection)",
+      "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+      "Worksheet.ProtectContents",
+      "Range.HasSpill / SpillingToRange"
+     ],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 852.462699986063,
+     "read_small_ms": 113.4466000366956,
+     "bulk": {
+      "1k": {
+       "ms": 7.7618000213988125,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 26.62419999251142,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 1060.6054000090808
+    },
+    "wall_ms": 1175.723799970001,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend xlwings --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\xlwings_vba_1.json\""
+   },
+   {
+    "backend": "xlwings",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         {
+          "error": "#N/A"
+         }
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         -2146826243,
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [
+      "Workbook.Saved",
+      "Range.Areas (multi-area selection)",
+      "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+      "Worksheet.ProtectContents",
+      "Range.HasSpill / SpillingToRange"
+     ],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 824.8306000023149,
+     "read_small_ms": 114.06920000445098,
+     "bulk": {
+      "1k": {
+       "ms": 8.229800034314394,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 27.654799981974065,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 1031.943699985277
+    },
+    "wall_ms": 1134.3928000424057,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend xlwings --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\xlwings_vba_2.json\""
+   },
+   {
+    "backend": "xlwings",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         {
+          "error": "#N/A"
+         }
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         -2146826243,
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [
+      "Workbook.Saved",
+      "Range.Areas (multi-area selection)",
+      "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+      "Worksheet.ProtectContents",
+      "Range.HasSpill / SpillingToRange"
+     ],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 824.0040999953635,
+     "read_small_ms": 116.49789998773485,
+     "bulk": {
+      "1k": {
+       "ms": 8.628699986729771,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 27.070800017099828,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 1035.7313999556936
+    },
+    "wall_ms": 1133.0029999953695,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend xlwings --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\xlwings_vba_3.json\""
+   },
+   {
+    "backend": "xlwings",
+    "args": {
+     "hwnd": 396202,
+     "pid": 30676,
+     "workbook": "E2_FixtureA.xlsx"
+    },
+    "data": {
+     "name": "E2_FixtureA.xlsx",
+     "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+     "saved": false,
+     "selection": {
+      "sheet": "Calc",
+      "areas": [
+       "$B$2:$B$5",
+       "$D$7:$E$9"
+      ]
+     },
+     "sheets": {
+      "Inputs": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$10",
+       "formula2": [
+        [
+         "10",
+         "label"
+        ],
+        [
+         "11",
+         ""
+        ],
+        [
+         "12",
+         ""
+        ],
+        [
+         "13",
+         ""
+        ],
+        [
+         "14",
+         ""
+        ],
+        [
+         "15",
+         ""
+        ],
+        [
+         "16",
+         ""
+        ],
+        [
+         "17",
+         ""
+        ],
+        [
+         "18",
+         ""
+        ],
+        [
+         "19",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         10.0,
+         "label"
+        ],
+        [
+         11.0,
+         null
+        ],
+        [
+         12.0,
+         null
+        ],
+        [
+         13.0,
+         null
+        ],
+        [
+         14.0,
+         null
+        ],
+        [
+         15.0,
+         null
+        ],
+        [
+         16.0,
+         null
+        ],
+        [
+         17.0,
+         null
+        ],
+        [
+         18.0,
+         null
+        ],
+        [
+         19.0,
+         null
+        ]
+       ]
+      },
+      "Calc": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$9",
+       "formula2": [
+        [
+         "=Inputs!A1*2",
+         "",
+         "=Hidden!A1+1",
+         "",
+         ""
+        ],
+        [
+         "=SUM(Inputs!A1:A10)",
+         "999",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "=B2*3",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "7",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ],
+        [
+         "",
+         "",
+         "",
+         "3",
+         "3"
+        ]
+       ],
+       "value": [
+        [
+         20.0,
+         null,
+         43.0,
+         null,
+         null
+        ],
+        [
+         145.0,
+         999.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         2997.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         7.0,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ],
+        [
+         null,
+         null,
+         null,
+         3.0,
+         3.0
+        ]
+       ]
+      },
+      "Errors": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$B$8",
+       "formula2": [
+        [
+         "=1/0",
+         "#N/A"
+        ],
+        [
+         "=NA()",
+         ""
+        ],
+        [
+         "=#REF!+1",
+         ""
+        ],
+        [
+         "=\"a\"+1",
+         ""
+        ],
+        [
+         "=@NOSUCHFUNCTION()",
+         ""
+        ],
+        [
+         "=SQRT(-1)",
+         ""
+        ],
+        [
+         "=SEQUENCE(2)",
+         ""
+        ],
+        [
+         "blocks the spill",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         {
+          "error": "#DIV/0!"
+         },
+         {
+          "error": "#N/A"
+         }
+        ],
+        [
+         {
+          "error": "#N/A"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#REF!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#VALUE!"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NAME?"
+         },
+         null
+        ],
+        [
+         {
+          "error": "#NUM!"
+         },
+         null
+        ],
+        [
+         -2146826243,
+         null
+        ],
+        [
+         "blocks the spill",
+         null
+        ]
+       ]
+      },
+      "Dyn": {
+       "visible": -1,
+       "protected": false,
+       "used_range": "$A$1:$E$10",
+       "formula2": [
+        [
+         "=SEQUENCE(5)",
+         "",
+         "=SORT(Inputs!A1:A10,,-1)",
+         "",
+         "=SUM(A1#)"
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ],
+        [
+         "",
+         "",
+         "",
+         "",
+         ""
+        ]
+       ],
+       "value": [
+        [
+         1.0,
+         null,
+         19.0,
+         null,
+         15.0
+        ],
+        [
+         2.0,
+         null,
+         18.0,
+         null,
+         null
+        ],
+        [
+         3.0,
+         null,
+         17.0,
+         null,
+         null
+        ],
+        [
+         4.0,
+         null,
+         16.0,
+         null,
+         null
+        ],
+        [
+         5.0,
+         null,
+         15.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         14.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         13.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         12.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         11.0,
+         null,
+         null
+        ],
+        [
+         null,
+         null,
+         10.0,
+         null,
+         null
+        ]
+       ]
+      },
+      "Hidden": {
+       "visible": 0,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "42"
+        ]
+       ],
+       "value": [
+        [
+         42.0
+        ]
+       ]
+      },
+      "VeryHidden": {
+       "visible": 2,
+       "protected": false,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "=Inputs!A1"
+        ]
+       ],
+       "value": [
+        [
+         10.0
+        ]
+       ]
+      },
+      "Protected": {
+       "visible": -1,
+       "protected": true,
+       "used_range": "$A$1",
+       "formula2": [
+        [
+         "<formula not readable>"
+        ]
+       ],
+       "value": [
+        [
+         110.0
+        ]
+       ]
+      }
+     },
+     "api_fallbacks": [
+      "Workbook.Saved",
+      "Range.Areas (multi-area selection)",
+      "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+      "Worksheet.ProtectContents",
+      "Range.HasSpill / SpillingToRange"
+     ],
+     "spill": {
+      "Dyn!A1_has_spill": true,
+      "Dyn!A1_spill": "$A$1:$A$5"
+     }
+    },
+    "ok": true,
+    "timings": {
+     "attach_ms": 801.2352999649011,
+     "read_small_ms": 125.53159997332841,
+     "bulk": {
+      "1k": {
+       "ms": 7.397999987006187,
+       "cells": 1000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        1010.0
+       ]
+      },
+      "10k": {
+       "ms": 27.267999947071075,
+       "cells": 10000,
+       "first": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        11.0
+       ],
+       "last": [
+        "=Inputs!$A$1*ROW()+COLUMN()",
+        10010.0
+       ]
+      }
+     },
+     "process_ms": 1022.0535999978893
+    },
+    "wall_ms": 1133.113499963656,
+    "command": "\"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\.venv\\Scripts\\python.exe\" \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\e2_reader.py\" --backend xlwings --hwnd 396202 --pid 30676 --workbook \"E2_FixtureA.xlsx\" --out \"C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\results\\raw\\xlwings_vba_4.json\""
+   }
+  ]
+ },
+ "naive": {
+  "backend": "naive",
+  "args": {
+   "hwnd": 396202,
+   "pid": 30676,
+   "workbook": "E2_FixtureA.xlsx"
+  },
+  "naive": {
+   "attached_pid": 11752,
+   "attached_hwnd": 3147376,
+   "workbook_count": 2,
+   "target_present": false
+  },
+  "ok": true,
+  "timings": {
+   "process_ms": 622.2295999759808
+  },
+  "wall_ms": 701.8527000327595,
+  "exit_code": 0
+ },
+ "decoy_read": {
+  "pywin32": {
+   "backend": "pywin32",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "data": {
+    "name": "E2_FixtureA.xlsx",
+    "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\y\\E2_FixtureA.xlsx",
+    "saved": false,
+    "selection": {
+     "sheet": "Inputs",
+     "areas": [
+      "$A$1"
+     ]
+    },
+    "sheets": {
+     "Inputs": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$B$10",
+      "formula2": [
+       [
+        "77",
+        "label"
+       ],
+       [
+        "78",
+        ""
+       ],
+       [
+        "79",
+        ""
+       ],
+       [
+        "80",
+        ""
+       ],
+       [
+        "81",
+        ""
+       ],
+       [
+        "82",
+        ""
+       ],
+       [
+        "83",
+        ""
+       ],
+       [
+        "84",
+        ""
+       ],
+       [
+        "85",
+        ""
+       ],
+       [
+        "86",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        77.0,
+        "label"
+       ],
+       [
+        78.0,
+        null
+       ],
+       [
+        79.0,
+        null
+       ],
+       [
+        80.0,
+        null
+       ],
+       [
+        81.0,
+        null
+       ],
+       [
+        82.0,
+        null
+       ],
+       [
+        83.0,
+        null
+       ],
+       [
+        84.0,
+        null
+       ],
+       [
+        85.0,
+        null
+       ],
+       [
+        86.0,
+        null
+       ]
+      ]
+     },
+     "Calc": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$E$9",
+      "formula2": [
+       [
+        "=Inputs!A1*2",
+        "",
+        "=Hidden!A1+1",
+        "",
+        ""
+       ],
+       [
+        "=SUM(Inputs!A1:A10)",
+        "5",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "=B2*2",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "7",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "7",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ]
+      ],
+      "value": [
+       [
+        154.0,
+        null,
+        43.0,
+        null,
+        null
+       ],
+       [
+        815.0,
+        5.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        10.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        7.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        7.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ]
+      ]
+     },
+     "Errors": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$B$8",
+      "formula2": [
+       [
+        "=1/0",
+        "#N/A"
+       ],
+       [
+        "=NA()",
+        ""
+       ],
+       [
+        "=#REF!+1",
+        ""
+       ],
+       [
+        "=\"a\"+1",
+        ""
+       ],
+       [
+        "=@NOSUCHFUNCTION()",
+        ""
+       ],
+       [
+        "=SQRT(-1)",
+        ""
+       ],
+       [
+        "=SEQUENCE(2)",
+        ""
+       ],
+       [
+        "blocks the spill",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        {
+         "error": "#DIV/0!"
+        },
+        "#N/A"
+       ],
+       [
+        {
+         "error": "#N/A"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#REF!"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#VALUE!"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#NAME?"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#NUM!"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#SPILL!"
+        },
+        null
+       ],
+       [
+        "blocks the spill",
+        null
+       ]
+      ]
+     },
+     "Dyn": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$E$10",
+      "formula2": [
+       [
+        "=SEQUENCE(5)",
+        "",
+        "=SORT(Inputs!A1:A10,,-1)",
+        "",
+        "=SUM(A1#)"
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        1.0,
+        null,
+        86.0,
+        null,
+        15.0
+       ],
+       [
+        2.0,
+        null,
+        85.0,
+        null,
+        null
+       ],
+       [
+        3.0,
+        null,
+        84.0,
+        null,
+        null
+       ],
+       [
+        4.0,
+        null,
+        83.0,
+        null,
+        null
+       ],
+       [
+        5.0,
+        null,
+        82.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        81.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        80.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        79.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        78.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        77.0,
+        null,
+        null
+       ]
+      ]
+     },
+     "Hidden": {
+      "visible": 0,
+      "protected": false,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "42"
+       ]
+      ],
+      "value": [
+       [
+        42.0
+       ]
+      ]
+     },
+     "VeryHidden": {
+      "visible": 2,
+      "protected": false,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "=Inputs!A1"
+       ]
+      ],
+      "value": [
+       [
+        77.0
+       ]
+      ]
+     },
+     "Protected": {
+      "visible": -1,
+      "protected": true,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "<formula not readable>"
+       ]
+      ],
+      "value": [
+       [
+        177.0
+       ]
+      ]
+     }
+    },
+    "api_fallbacks": [],
+    "spill": {
+     "Dyn!A1_has_spill": true,
+     "Dyn!A1_spill": "$A$1:$A$5"
+    }
+   },
+   "ok": true,
+   "timings": {
+    "attach_ms": 627.5123999803327,
+    "read_small_ms": 86.25669998582453,
+    "bulk": {
+     "1k": {
+      "ms": 4.011199984233826,
+      "cells": 1000,
+      "first": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       78.0
+      ],
+      "last": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       7710.0
+      ]
+     },
+     "10k": {
+      "ms": 19.979699980467558,
+      "cells": 10000,
+      "first": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       78.0
+      ],
+      "last": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       77010.0
+      ]
+     }
+    },
+    "process_ms": 774.3222000426613
+   },
+   "wall_ms": 855.2302999887615,
+   "exit_code": 0
+  },
+  "xlwings": {
+   "backend": "xlwings",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "data": {
+    "name": "E2_FixtureA.xlsx",
+    "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\y\\E2_FixtureA.xlsx",
+    "saved": false,
+    "selection": {
+     "sheet": "Inputs",
+     "areas": [
+      "$A$1"
+     ]
+    },
+    "sheets": {
+     "Inputs": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$B$10",
+      "formula2": [
+       [
+        "77",
+        "label"
+       ],
+       [
+        "78",
+        ""
+       ],
+       [
+        "79",
+        ""
+       ],
+       [
+        "80",
+        ""
+       ],
+       [
+        "81",
+        ""
+       ],
+       [
+        "82",
+        ""
+       ],
+       [
+        "83",
+        ""
+       ],
+       [
+        "84",
+        ""
+       ],
+       [
+        "85",
+        ""
+       ],
+       [
+        "86",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        77.0,
+        "label"
+       ],
+       [
+        78.0,
+        null
+       ],
+       [
+        79.0,
+        null
+       ],
+       [
+        80.0,
+        null
+       ],
+       [
+        81.0,
+        null
+       ],
+       [
+        82.0,
+        null
+       ],
+       [
+        83.0,
+        null
+       ],
+       [
+        84.0,
+        null
+       ],
+       [
+        85.0,
+        null
+       ],
+       [
+        86.0,
+        null
+       ]
+      ]
+     },
+     "Calc": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$E$9",
+      "formula2": [
+       [
+        "=Inputs!A1*2",
+        "",
+        "=Hidden!A1+1",
+        "",
+        ""
+       ],
+       [
+        "=SUM(Inputs!A1:A10)",
+        "5",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "=B2*2",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "7",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "7",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ],
+       [
+        "",
+        "",
+        "",
+        "3",
+        "3"
+       ]
+      ],
+      "value": [
+       [
+        154.0,
+        null,
+        43.0,
+        null,
+        null
+       ],
+       [
+        815.0,
+        5.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        10.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        7.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        7.0,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        null,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ],
+       [
+        null,
+        null,
+        null,
+        3.0,
+        3.0
+       ]
+      ]
+     },
+     "Errors": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$B$8",
+      "formula2": [
+       [
+        "=1/0",
+        "#N/A"
+       ],
+       [
+        "=NA()",
+        ""
+       ],
+       [
+        "=#REF!+1",
+        ""
+       ],
+       [
+        "=\"a\"+1",
+        ""
+       ],
+       [
+        "=@NOSUCHFUNCTION()",
+        ""
+       ],
+       [
+        "=SQRT(-1)",
+        ""
+       ],
+       [
+        "=SEQUENCE(2)",
+        ""
+       ],
+       [
+        "blocks the spill",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        {
+         "error": "#DIV/0!"
+        },
+        {
+         "error": "#N/A"
+        }
+       ],
+       [
+        {
+         "error": "#N/A"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#REF!"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#VALUE!"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#NAME?"
+        },
+        null
+       ],
+       [
+        {
+         "error": "#NUM!"
+        },
+        null
+       ],
+       [
+        -2146826243,
+        null
+       ],
+       [
+        "blocks the spill",
+        null
+       ]
+      ]
+     },
+     "Dyn": {
+      "visible": -1,
+      "protected": false,
+      "used_range": "$A$1:$E$10",
+      "formula2": [
+       [
+        "=SEQUENCE(5)",
+        "",
+        "=SORT(Inputs!A1:A10,,-1)",
+        "",
+        "=SUM(A1#)"
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ],
+       [
+        "",
+        "",
+        "",
+        "",
+        ""
+       ]
+      ],
+      "value": [
+       [
+        1.0,
+        null,
+        86.0,
+        null,
+        15.0
+       ],
+       [
+        2.0,
+        null,
+        85.0,
+        null,
+        null
+       ],
+       [
+        3.0,
+        null,
+        84.0,
+        null,
+        null
+       ],
+       [
+        4.0,
+        null,
+        83.0,
+        null,
+        null
+       ],
+       [
+        5.0,
+        null,
+        82.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        81.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        80.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        79.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        78.0,
+        null,
+        null
+       ],
+       [
+        null,
+        null,
+        77.0,
+        null,
+        null
+       ]
+      ]
+     },
+     "Hidden": {
+      "visible": 0,
+      "protected": false,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "42"
+       ]
+      ],
+      "value": [
+       [
+        42.0
+       ]
+      ]
+     },
+     "VeryHidden": {
+      "visible": 2,
+      "protected": false,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "=Inputs!A1"
+       ]
+      ],
+      "value": [
+       [
+        77.0
+       ]
+      ]
+     },
+     "Protected": {
+      "visible": -1,
+      "protected": true,
+      "used_range": "$A$1",
+      "formula2": [
+       [
+        "<formula not readable>"
+       ]
+      ],
+      "value": [
+       [
+        177.0
+       ]
+      ]
+     }
+    },
+    "api_fallbacks": [
+     "Workbook.Saved",
+     "Range.Areas (multi-area selection)",
+     "Worksheet.Visible (xlwings .visible is bool; cannot tell hidden from very hidden)",
+     "Worksheet.ProtectContents",
+     "Range.HasSpill / SpillingToRange"
+    ],
+    "spill": {
+     "Dyn!A1_has_spill": true,
+     "Dyn!A1_spill": "$A$1:$A$5"
+    }
+   },
+   "ok": true,
+   "timings": {
+    "attach_ms": 826.6855999827385,
+    "read_small_ms": 107.98899998189881,
+    "bulk": {
+     "1k": {
+      "ms": 7.279000012204051,
+      "cells": 1000,
+      "first": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       78.0
+      ],
+      "last": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       7710.0
+      ]
+     },
+     "10k": {
+      "ms": 26.208600029349327,
+      "cells": 10000,
+      "first": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       78.0
+      ],
+      "last": [
+       "=Inputs!$A$1*ROW()+COLUMN()",
+       77010.0
+      ]
+     }
+    },
+    "process_ms": 1025.8192000328563
+   },
+   "wall_ms": 1467.8521000314504,
+   "exit_code": 0
+  }
+ },
+ "failures": {
+  "pywin32: workbook not open": {
+   "backend": "pywin32",
+   "args": {
+    "hwnd": 396202,
+    "pid": 30676,
+    "workbook": "Missing.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "workbook 'Missing.xlsx' is not open in the target Excel instance",
+   "timings": {
+    "attach_ms": 607.5335000059567,
+    "process_ms": 640.7405000063591
+   },
+   "wall_ms": 719.8387000244111,
+   "exit_code": 2
+  },
+  "pywin32: window/pid mismatch": {
+   "backend": "pywin32",
+   "args": {
+    "hwnd": 396202,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "window 396202 belongs to process 30676, not 28816",
+   "timings": {
+    "process_ms": 93.26360002160072
+   },
+   "wall_ms": 161.16020001936704,
+   "exit_code": 2
+  },
+  "xlwings: workbook not open": {
+   "backend": "xlwings",
+   "args": {
+    "hwnd": 396202,
+    "pid": 30676,
+    "workbook": "Missing.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "workbook 'Missing.xlsx' is not open in the target Excel instance",
+   "timings": {
+    "attach_ms": 808.8389000040479,
+    "process_ms": 856.5047000302002
+   },
+   "wall_ms": 1274.6330000227317,
+   "exit_code": 2
+  },
+  "xlwings: window/pid mismatch": {
+   "backend": "xlwings",
+   "args": {
+    "hwnd": 396202,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "window 396202 belongs to process 30676, not 28816",
+   "timings": {
+    "process_ms": 868.6958000180312
+   },
+   "wall_ms": 1301.6670999932103,
+   "exit_code": 2
+  },
+  "pywin32: target workbook closed": {
+   "backend": "pywin32",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "workbook 'E2_FixtureA.xlsx' is not open in the target Excel instance",
+   "timings": {
+    "attach_ms": 611.0915999743156,
+    "process_ms": 636.9445999735035
+   },
+   "wall_ms": 723.2046999852173,
+   "exit_code": 2
+  },
+  "xlwings: target workbook closed": {
+   "backend": "xlwings",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "workbook 'E2_FixtureA.xlsx' is not open in the target Excel instance",
+   "timings": {
+    "attach_ms": 806.8136999499984,
+    "process_ms": 844.6933000232093
+   },
+   "wall_ms": 1274.7982000000775,
+   "exit_code": 2
+  },
+  "pywin32: Excel instance closed": {
+   "backend": "pywin32",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "window 527408 does not exist",
+   "timings": {
+    "process_ms": 93.76810002140701
+   },
+   "wall_ms": 170.87939998600632,
+   "exit_code": 2
+  },
+  "xlwings: Excel instance closed": {
+   "backend": "xlwings",
+   "args": {
+    "hwnd": 527408,
+    "pid": 28816,
+    "workbook": "E2_FixtureA.xlsx"
+   },
+   "ok": false,
+   "error_type": "HandoffError",
+   "error": "window 527408 does not exist",
+   "timings": {
+    "process_ms": 820.4187999945134
+   },
+   "wall_ms": 1241.8366000056267,
+   "exit_code": 2
+  }
+ },
+ "read_only": {
+  "target": [],
+  "decoy": []
+ },
+ "instances": {
+  "x": {
+   "hwnd": 396202,
+   "pid": 30676
+  },
+  "y": {
+   "hwnd": 527408,
+   "pid": 28816
+  }
+ },
+ "y_process_exited": true
+}

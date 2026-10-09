@@ -1,0 +1,564 @@
+{
+ "backend": "pywin32",
+ "args": {
+  "hwnd": 396202,
+  "pid": 30676,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "data": {
+  "name": "E2_FixtureA.xlsx",
+  "full_name": "C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e2\\work\\x\\E2_FixtureA.xlsx",
+  "saved": false,
+  "selection": {
+   "sheet": "Calc",
+   "areas": [
+    "$B$2:$B$5",
+    "$D$7:$E$9"
+   ]
+  },
+  "sheets": {
+   "Inputs": {
+    "visible": -1,
+    "protected": false,
+    "used_range": "$A$1:$B$10",
+    "formula2": [
+     [
+      "10",
+      "label"
+     ],
+     [
+      "11",
+      ""
+     ],
+     [
+      "12",
+      ""
+     ],
+     [
+      "13",
+      ""
+     ],
+     [
+      "14",
+      ""
+     ],
+     [
+      "15",
+      ""
+     ],
+     [
+      "16",
+      ""
+     ],
+     [
+      "17",
+      ""
+     ],
+     [
+      "18",
+      ""
+     ],
+     [
+      "19",
+      ""
+     ]
+    ],
+    "value": [
+     [
+      10.0,
+      "label"
+     ],
+     [
+      11.0,
+      null
+     ],
+     [
+      12.0,
+      null
+     ],
+     [
+      13.0,
+      null
+     ],
+     [
+      14.0,
+      null
+     ],
+     [
+      15.0,
+      null
+     ],
+     [
+      16.0,
+      null
+     ],
+     [
+      17.0,
+      null
+     ],
+     [
+      18.0,
+      null
+     ],
+     [
+      19.0,
+      null
+     ]
+    ]
+   },
+   "Calc": {
+    "visible": -1,
+    "protected": false,
+    "used_range": "$A$1:$E$9",
+    "formula2": [
+     [
+      "=Inputs!A1*2",
+      "",
+      "=Hidden!A1+1",
+      "",
+      ""
+     ],
+     [
+      "=SUM(Inputs!A1:A10)",
+      "999",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "=B2*3",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "7",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "7",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "3",
+      "3"
+     ],
+     [
+      "",
+      "",
+      "",
+      "3",
+      "3"
+     ],
+     [
+      "",
+      "",
+      "",
+      "3",
+      "3"
+     ]
+    ],
+    "value": [
+     [
+      20.0,
+      null,
+      43.0,
+      null,
+      null
+     ],
+     [
+      145.0,
+      999.0,
+      null,
+      null,
+      null
+     ],
+     [
+      null,
+      2997.0,
+      null,
+      null,
+      null
+     ],
+     [
+      null,
+      7.0,
+      null,
+      null,
+      null
+     ],
+     [
+      null,
+      7.0,
+      null,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      null,
+      3.0,
+      3.0
+     ],
+     [
+      null,
+      null,
+      null,
+      3.0,
+      3.0
+     ],
+     [
+      null,
+      null,
+      null,
+      3.0,
+      3.0
+     ]
+    ]
+   },
+   "Errors": {
+    "visible": -1,
+    "protected": false,
+    "used_range": "$A$1:$B$8",
+    "formula2": [
+     [
+      "=1/0",
+      "#N/A"
+     ],
+     [
+      "=NA()",
+      ""
+     ],
+     [
+      "=#REF!+1",
+      ""
+     ],
+     [
+      "=\"a\"+1",
+      ""
+     ],
+     [
+      "=@NOSUCHFUNCTION()",
+      ""
+     ],
+     [
+      "=SQRT(-1)",
+      ""
+     ],
+     [
+      "=SEQUENCE(2)",
+      ""
+     ],
+     [
+      "blocks the spill",
+      ""
+     ]
+    ],
+    "value": [
+     [
+      {
+       "error": "#DIV/0!"
+      },
+      "#N/A"
+     ],
+     [
+      {
+       "error": "#N/A"
+      },
+      null
+     ],
+     [
+      {
+       "error": "#REF!"
+      },
+      null
+     ],
+     [
+      {
+       "error": "#VALUE!"
+      },
+      null
+     ],
+     [
+      {
+       "error": "#NAME?"
+      },
+      null
+     ],
+     [
+      {
+       "error": "#NUM!"
+      },
+      null
+     ],
+     [
+      {
+       "error": "#SPILL!"
+      },
+      null
+     ],
+     [
+      "blocks the spill",
+      null
+     ]
+    ]
+   },
+   "Dyn": {
+    "visible": -1,
+    "protected": false,
+    "used_range": "$A$1:$E$10",
+    "formula2": [
+     [
+      "=SEQUENCE(5)",
+      "",
+      "=SORT(Inputs!A1:A10,,-1)",
+      "",
+      "=SUM(A1#)"
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ],
+     [
+      "",
+      "",
+      "",
+      "",
+      ""
+     ]
+    ],
+    "value": [
+     [
+      1.0,
+      null,
+      19.0,
+      null,
+      15.0
+     ],
+     [
+      2.0,
+      null,
+      18.0,
+      null,
+      null
+     ],
+     [
+      3.0,
+      null,
+      17.0,
+      null,
+      null
+     ],
+     [
+      4.0,
+      null,
+      16.0,
+      null,
+      null
+     ],
+     [
+      5.0,
+      null,
+      15.0,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      14.0,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      13.0,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      12.0,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      11.0,
+      null,
+      null
+     ],
+     [
+      null,
+      null,
+      10.0,
+      null,
+      null
+     ]
+    ]
+   },
+   "Hidden": {
+    "visible": 0,
+    "protected": false,
+    "used_range": "$A$1",
+    "formula2": [
+     [
+      "42"
+     ]
+    ],
+    "value": [
+     [
+      42.0
+     ]
+    ]
+   },
+   "VeryHidden": {
+    "visible": 2,
+    "protected": false,
+    "used_range": "$A$1",
+    "formula2": [
+     [
+      "=Inputs!A1"
+     ]
+    ],
+    "value": [
+     [
+      10.0
+     ]
+    ]
+   },
+   "Protected": {
+    "visible": -1,
+    "protected": true,
+    "used_range": "$A$1",
+    "formula2": [
+     [
+      "<formula not readable>"
+     ]
+    ],
+    "value": [
+     [
+      110.0
+     ]
+    ]
+   }
+  },
+  "api_fallbacks": [],
+  "spill": {
+   "Dyn!A1_has_spill": true,
+   "Dyn!A1_spill": "$A$1:$A$5"
+  }
+ },
+ "ok": true,
+ "timings": {
+  "attach_ms": 626.3727999757975,
+  "read_small_ms": 90.851399989333,
+  "bulk": {
+   "1k": {
+    "ms": 4.412600013893098,
+    "cells": 1000,
+    "first": [
+     "=Inputs!$A$1*ROW()+COLUMN()",
+     11.0
+    ],
+    "last": [
+     "=Inputs!$A$1*ROW()+COLUMN()",
+     1010.0
+    ]
+   },
+   "10k": {
+    "ms": 19.455400004517287,
+    "cells": 10000,
+    "first": [
+     "=Inputs!$A$1*ROW()+COLUMN()",
+     11.0
+    ],
+    "last": [
+     "=Inputs!$A$1*ROW()+COLUMN()",
+     10010.0
+    ]
+   }
+  },
+  "process_ms": 783.577400026843
+ }
+}

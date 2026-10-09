@@ -1,0 +1,18 @@
+{
+ "backend": "naive",
+ "args": {
+  "hwnd": 396202,
+  "pid": 30676,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "naive": {
+  "attached_pid": 11752,
+  "attached_hwnd": 3147376,
+  "workbook_count": 2,
+  "target_present": false
+ },
+ "ok": true,
+ "timings": {
+  "process_ms": 622.2295999759808
+ }
+}

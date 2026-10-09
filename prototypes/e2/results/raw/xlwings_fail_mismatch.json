@@ -1,0 +1,14 @@
+{
+ "backend": "xlwings",
+ "args": {
+  "hwnd": 396202,
+  "pid": 28816,
+  "workbook": "E2_FixtureA.xlsx"
+ },
+ "ok": false,
+ "error_type": "HandoffError",
+ "error": "window 396202 belongs to process 30676, not 28816",
+ "timings": {
+  "process_ms": 868.6958000180312
+ }
+}
