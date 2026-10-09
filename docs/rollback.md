@@ -15,11 +15,14 @@ How to return Excel to its pre-project state. Baseline captured 2026-10-09, befo
 
 Excel add-ins loaded at baseline: Arixcel Explorer only (`OPEN = /R "...\Arixcel Explorer\ArixcelExplorer.xlam"`).
 
-## Removing PyXLL
+## Removing the project add-in
 
-1. Close Excel.
-2. From the project folder: `uv run pyxll uninstall`
-3. Restart Excel and check File → Options → Add-ins that PyXLL is gone and Arixcel is still listed.
+PyXLL was ruled out on 2026-10-09 before it registered anything with Excel (verified: no PyXLL registry entries; only Arixcel in the `OPEN` keys).
+
+To remove the project's `.xlam` once it exists:
+1. Excel → File → Options → Add-ins → Manage: Excel Add-ins → Go → untick it.
+2. Close Excel and delete the `.xlam` from its install folder.
+3. Restart Excel and check Arixcel is still listed.
 
 ## If Excel settings are damaged
 
