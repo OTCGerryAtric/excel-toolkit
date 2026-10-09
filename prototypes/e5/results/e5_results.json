@@ -1,0 +1,526 @@
+{
+ "rows": [
+  {
+   "scenario": "S1",
+   "label": "same-sheet cells",
+   "formula": "=F1+G1",
+   "truth": [
+    "Calc!F1",
+    "Calc!G1"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F1:G1"
+    ],
+    "verdict": "resolved",
+    "ms": 2.27119994815439
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F1",
+     "Calc!G1"
+    ],
+    "verdict": "resolved",
+    "ms": 24.22000002115965,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F1",
+     "Calc!G1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Calc!F1": "rel",
+     "Calc!G1": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.15710003208369017
+   }
+  },
+  {
+   "scenario": "S2",
+   "label": "cross-sheet cell",
+   "formula": "=Inputs!A1*2",
+   "truth": [
+    "Inputs!A1"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing Inputs!A1",
+    "ms": 0.31810003565624356
+   },
+   "com_arrows": {
+    "found": [
+     "Inputs!A1"
+    ],
+    "verdict": "resolved",
+    "ms": 26.78140002535656,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Inputs!A1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Inputs!A1": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.16659998800605536
+   }
+  },
+  {
+   "scenario": "S3",
+   "label": "range",
+   "formula": "=SUM(F2:F101)",
+   "truth": [
+    "Calc!F2:F101"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F2:F101"
+    ],
+    "verdict": "resolved",
+    "ms": 1.728000002913177
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F2:F101"
+    ],
+    "verdict": "resolved",
+    "ms": 17.20599998952821,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F2:F101"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Calc!F2:F101": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.13920001219958067
+   }
+  },
+  {
+   "scenario": "S4",
+   "label": "absolute + relative",
+   "formula": "=$F$1+G2",
+   "truth": [
+    "Calc!F1",
+    "Calc!G2"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F1",
+     "Calc!G2"
+    ],
+    "verdict": "resolved",
+    "ms": 1.7050000024028122
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F1",
+     "Calc!G2"
+    ],
+    "verdict": "resolved",
+    "ms": 24.366900033783168,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F1",
+     "Calc!G2"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Calc!F1": "abs",
+     "Calc!G2": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.07589999586343765
+   }
+  },
+  {
+   "scenario": "S5",
+   "label": "table structured reference",
+   "formula": "=SUM(Sales[Revenue])",
+   "truth": [
+    "Data!B2:B6"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing Data!B2, Data!B3, Data!B4, Data!B5, Data!B6",
+    "ms": 0.26139995316043496
+   },
+   "com_arrows": {
+    "found": [
+     "Data!B2:B6"
+    ],
+    "verdict": "resolved",
+    "ms": 30.678900016937405,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Data!B2:B6"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {},
+    "verdict": "resolved",
+    "ms": 0.1509999856352806
+   }
+  },
+  {
+   "scenario": "S6",
+   "label": "defined name",
+   "formula": "=MyDefinedName*2",
+   "truth": [
+    "Inputs!B1"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing Inputs!B1",
+    "ms": 0.48180000158026814
+   },
+   "com_arrows": {
+    "found": [
+     "Inputs!B1"
+    ],
+    "verdict": "resolved",
+    "ms": 30.717000016011298,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Inputs!B1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {},
+    "verdict": "resolved",
+    "ms": 0.10800000745803118
+   }
+  },
+  {
+   "scenario": "S7",
+   "label": "INDIRECT",
+   "formula": "=INDIRECT(H1)",
+   "truth": [
+    "Calc!H1",
+    "Inputs!A2"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!H1"
+    ],
+    "verdict": "WRONG, silently \u2014 missing Inputs!A2",
+    "ms": 1.7023999826051295
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!H1"
+    ],
+    "verdict": "WRONG, silently \u2014 missing Inputs!A2",
+    "ms": 18.062899995129555,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!H1"
+    ],
+    "status": "indeterminate",
+    "notes": [
+     "INDIRECT: target is text built at run time"
+    ],
+    "anchoring": {
+     "Calc!H1": "rel"
+    },
+    "verdict": "indeterminate (flagged); missing Inputs!A2",
+    "ms": 0.07989996811375022
+   }
+  },
+  {
+   "scenario": "S8",
+   "label": "OFFSET",
+   "formula": "=OFFSET(F1,0,1)",
+   "truth": [
+    "Calc!F1",
+    "Calc!G1"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F1"
+    ],
+    "verdict": "WRONG, silently \u2014 missing Calc!G1",
+    "ms": 1.5779000241309404
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F1"
+    ],
+    "verdict": "WRONG, silently \u2014 missing Calc!G1",
+    "ms": 17.661499965470284,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F1"
+    ],
+    "status": "partial",
+    "notes": [
+     "OFFSET: anchor known, actual target depends on its arguments at run time"
+    ],
+    "anchoring": {
+     "Calc!F1": "rel"
+    },
+    "verdict": "partial (flagged); missing Calc!G1",
+    "ms": 0.0914999982342124
+   }
+  },
+  {
+   "scenario": "S9",
+   "label": "spill reference",
+   "formula": "=SUM(D1#)",
+   "truth": [
+    "Calc!D1:D5"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!D1:D5"
+    ],
+    "verdict": "resolved",
+    "ms": 2.304699970409274
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!D1:D5"
+    ],
+    "verdict": "resolved",
+    "ms": 15.560299973003566,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!D1#"
+    ],
+    "status": "partial",
+    "notes": [
+     "spill reference D1#: anchor known, extent only known at run time"
+    ],
+    "anchoring": {},
+    "verdict": "partial (flagged)",
+    "ms": 0.08210004307329655
+   }
+  },
+  {
+   "scenario": "S10",
+   "label": "external workbook",
+   "formula": "='C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e5\\fixtures\\[E5_External.xlsx]Sheet1'!$A$1",
+   "truth": [
+    "[E5_External.xlsx]Sheet1!A1"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing [E5_External.xlsx]Sheet1!A1",
+    "ms": 0.32410002313554287
+   },
+   "com_arrows": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing [E5_External.xlsx]Sheet1!A1",
+    "ms": 12.360699998680502,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "[E5_External.xlsx]Sheet1!A1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "[E5_External.xlsx]Sheet1!A1": "abs"
+    },
+    "verdict": "resolved",
+    "ms": 0.14750001719221473
+   }
+  },
+  {
+   "scenario": "S11",
+   "label": "LET local name",
+   "formula": "=LET(x,F1,x*G1)",
+   "truth": [
+    "Calc!F1",
+    "Calc!G1"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F1:G1"
+    ],
+    "verdict": "resolved",
+    "ms": 1.8205000087618828
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F1",
+     "Calc!G1"
+    ],
+    "verdict": "resolved",
+    "ms": 23.045799985993654,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F1",
+     "Calc!G1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Calc!F1": "rel",
+     "Calc!G1": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.08480000542476773
+   }
+  },
+  {
+   "scenario": "S12",
+   "label": "3D reference",
+   "formula": "=SUM(Inputs:Data!A1)",
+   "truth": [
+    "Calc!A1",
+    "Data!A1",
+    "Inputs!A1"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing Calc!A1, Data!A1, Inputs!A1",
+    "ms": 0.2581999870017171
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!A1",
+     "Data!A1",
+     "Inputs!A1"
+    ],
+    "verdict": "resolved",
+    "ms": 53.61380003159866,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!A1",
+     "Data!A1",
+     "Inputs!A1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "Inputs!A1": "rel",
+     "Calc!A1": "rel",
+     "Data!A1": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.08480000542476773
+   }
+  },
+  {
+   "scenario": "S13",
+   "label": "whole column",
+   "formula": "=SUM(F:F)",
+   "truth": [
+    "Calc!F:F"
+   ],
+   "com_direct": {
+    "found": [
+     "Calc!F:F"
+    ],
+    "verdict": "resolved",
+    "ms": 2.115099981892854
+   },
+   "com_arrows": {
+    "found": [
+     "Calc!F:F"
+    ],
+    "verdict": "resolved",
+    "ms": 17.130599997472018,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "Calc!F:F"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {},
+    "verdict": "resolved",
+    "ms": 0.07160002132877707
+   }
+  },
+  {
+   "scenario": "S14",
+   "label": "quoted sheet name",
+   "formula": "='My Sheet'!A1+1",
+   "truth": [
+    "My Sheet!A1"
+   ],
+   "com_direct": {
+    "found": [],
+    "verdict": "WRONG, silently \u2014 missing My Sheet!A1",
+    "ms": 0.26379997143521905
+   },
+   "com_arrows": {
+    "found": [
+     "My Sheet!A1"
+    ],
+    "verdict": "resolved",
+    "ms": 31.286299985367805,
+    "notes": [],
+    "workbooks_opened": 0
+   },
+   "python": {
+    "found": [
+     "My Sheet!A1"
+    ],
+    "status": "resolved",
+    "notes": [],
+    "anchoring": {
+     "My Sheet!A1": "rel"
+    },
+    "verdict": "resolved",
+    "ms": 0.14070002362132072
+   }
+  }
+ ],
+ "s4_r1c1": "=R1C6+R[-2]C[5]",
+ "content_unchanged": true,
+ "ui_before": [
+  "Calc",
+  "$A$1"
+ ],
+ "ui_after_restore": [
+  "Calc",
+  "$A$1"
+ ],
+ "other_workbooks_open_at_end": []
+}

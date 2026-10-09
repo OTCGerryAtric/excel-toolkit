@@ -1,8 +1,8 @@
 # ADR-001: Excel integration architecture
 
-- **Status:** Accepted for Phase 0 — provisional until gate G0 (E5–E6 still to run).
+- **Status:** Accepted for Phase 0 — provisional until gate G0 (E6 still to run).
 - **Date:** 2026-10-09
-- **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e4.md`
+- **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e5.md`
 
 ## Context
 
@@ -34,6 +34,7 @@ The audit engine must report each check as complete, partial or indeterminate. K
 
 - Hidden formulas on protected sheets: `Formula2` raises an error, so those cells are **indeterminate**, never clean.
 - Excel busy (dialog open, cell being edited): reads fail; the result is "not checked", not "no issues".
+- Dependencies (E5): Excel COM tracing is never reported as complete on its own (it silently misses INDIRECT, OFFSET and external targets). Static parser is primary; INDIRECT → indeterminate, OFFSET → partial, spill → partial until `SpillingToRange` is read, unparseable → indeterminate. Full table in `docs/validation/phase0-e5.md`.
 
 ## Rejected
 
@@ -50,6 +51,7 @@ The audit engine must report each check as complete, partial or indeterminate. K
 | Component | Licence | Use |
 |---|---|---|
 | Python 3.12 | PSF | Runtime |
+| openpyxl | MIT | Formula tokenizer (E5 prototype) |
 | pywin32 | PSF | Excel COM access |
 
 Full licence register, including the bundling and installer tools, to be completed in E6.
@@ -63,4 +65,4 @@ Full licence register, including the bundling and installer tools, to be complet
 
 ## Open until G0
 
-E5 (Excel's own precedent tracing), E6 (clean install on a colleague's PC, licence register).
+E6 (clean install on a colleague's PC, licence register).
