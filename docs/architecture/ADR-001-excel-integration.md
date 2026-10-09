@@ -1,6 +1,6 @@
 # ADR-001: Excel integration architecture
 
-- **Status:** Accepted for Phase 0 — provisional until gate G0 (E3–E6 still to run).
+- **Status:** Accepted for Phase 0 — provisional until gate G0 (E5–E6 still to run).
 - **Date:** 2026-10-09
 - **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e4.md`
 
