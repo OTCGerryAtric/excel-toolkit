@@ -2,7 +2,7 @@
 
 - **Status:** Accepted for Phase 0 — provisional until gate G0 (E3–E6 still to run).
 - **Date:** 2026-10-09
-- **Evidence:** `docs/validation/phase0-e1.md`, `docs/validation/phase0-e2.md`
+- **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e4.md`
 
 ## Context
 
@@ -17,7 +17,8 @@ Internal Excel add-in for the owner and 6–20 colleagues, all on Windows deskto
 3. **Explicit handoff from VBA to Python:** Excel main window handle + process id + workbook name, all passed by the caller. Python checks the window belongs to that process, attaches through a workbook window, and checks the attached Application is in that process.
    - **Never** locate the user's Excel with `GetActiveObject` / `Dispatch("Excel.Application")`. E2 showed it attaches to whichever instance registered first — the wrong one in the test.
 4. **Independent Python engine** (`src/excel_toolkit`), with no COM imports outside the adapter layer.
-5. **Hotkey commands stay in VBA.** A Python handoff costs ~0.9 s (start-up and imports), acceptable for audits, not for instant commands. A persistent Python process is **not** adopted; E4 evaluates it separately.
+5. **Hotkey commands stay in VBA.** A Python handoff costs ~0.9 s (start-up and imports), acceptable for audits, not for instant commands.
+6. **Proposed (E4, awaiting review): hybrid execution.** A read-only persistent worker, started on demand and exiting when idle, serves interactive audit requests (~50–200 ms warm); the same engine runs one-shot as fallback and for batch reports. Requests carry an id and an explicit workbook (never `ActiveWorkbook`); results return to VBA by callback and are rejected on any identity mismatch. Short-lived COM connections per request.
 
 ## Coverage rules carried forward (from E2)
 
@@ -54,4 +55,4 @@ Full licence register, including the bundling and installer tools, to be complet
 
 ## Open until G0
 
-E3 (reversibility and resilience), E4 (latency, persistent process, returning results to VBA), E5 (Excel's own precedent tracing), E6 (clean install on a colleague's PC, licence register).
+E5 (Excel's own precedent tracing), E6 (clean install on a colleague's PC, licence register).

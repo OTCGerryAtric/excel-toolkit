@@ -1,0 +1,295 @@
+{
+ "tests": [
+  {
+   "test": "oneshot: 10 classify requests (100 findings) answered correctly",
+   "passed": true,
+   "detail": "first 820 ms (worker started: False); median 817 ms, p95 834 ms; first finding Bulk!A1=formula"
+  },
+  {
+   "test": "worker: 10 classify requests (100 findings) answered correctly",
+   "passed": true,
+   "detail": "first 822 ms (worker started: True); median 47 ms, p95 52 ms; first finding Bulk!A1=formula"
+  },
+  {
+   "test": "Finding kinds classified (formula, constant in formula, number, text, formula error, boolean)",
+   "passed": true,
+   "detail": "Mixed!A1=formula ... Mixed!A6=boolean, count 6"
+  },
+  {
+   "test": "oneshot: classify 100 cells returned to VBA",
+   "passed": true,
+   "detail": "median 821 ms"
+  },
+  {
+   "test": "oneshot: classify 1,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 800 ms"
+  },
+  {
+   "test": "oneshot: classify 10,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 849 ms"
+  },
+  {
+   "test": "oneshot: read 1 cells returned to VBA",
+   "passed": true,
+   "detail": "median 821 ms"
+  },
+  {
+   "test": "oneshot: read 1,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 801 ms"
+  },
+  {
+   "test": "oneshot: read 10,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 818 ms"
+  },
+  {
+   "test": "oneshot: read 100,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 1001 ms"
+  },
+  {
+   "test": "worker: classify 100 cells returned to VBA",
+   "passed": true,
+   "detail": "median 173 ms"
+  },
+  {
+   "test": "worker: classify 1,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 194 ms"
+  },
+  {
+   "test": "worker: classify 10,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 389 ms"
+  },
+  {
+   "test": "worker: read 1 cells returned to VBA",
+   "passed": true,
+   "detail": "median 176 ms"
+  },
+  {
+   "test": "worker: read 1,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 180 ms"
+  },
+  {
+   "test": "worker: read 10,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 216 ms"
+  },
+  {
+   "test": "worker: read 100,000 cells returned to VBA",
+   "passed": true,
+   "detail": "median 690 ms"
+  },
+  {
+   "test": "Interleaved requests across 2 processes and 3 workbooks (two share a name): every result came from the right workbook",
+   "passed": true,
+   "detail": "69 requests; wrong: []"
+  },
+  {
+   "test": "VBA rejects a result for an unknown request and one with another process's identity",
+   "passed": true,
+   "detail": "'rejected: unknown request'; 'rejected: identity mismatch'"
+  },
+  {
+   "test": "Worker killed mid-request: VBA watchdog reports a clear failure",
+   "passed": true,
+   "detail": "0.6 s: failed - the Python worker stopped before answering"
+  },
+  {
+   "test": "Next request restarts the worker and succeeds",
+   "passed": true,
+   "detail": "869 ms, worker started: True, new pid 26704 (old 1676)"
+  },
+  {
+   "test": "Excel closes normally after the worker served it (worker holds no stale COM references)",
+   "passed": true,
+   "detail": "Y process 30464 exited: True"
+  },
+  {
+   "test": "Request for a closed Excel: worker answers with a clear error and keeps running",
+   "passed": true,
+   "detail": "IdentityError: Excel process 30464 is not running; verdict: not delivered: IdentityError: Excel process 30464 is not running"
+  },
+  {
+   "test": "Worker still serves the other Excel afterwards",
+   "passed": true,
+   "detail": "180 ms"
+  },
+  {
+   "test": "Excel killed while the worker was serving it: worker survives and serves the next request",
+   "passed": true,
+   "detail": "worker log for the killed Excel: [('failed', 'ExcelGone: Excel closed or stopped responding during the operation.', 'not delivered: IdentityError: Excel process 20260 is not running')]"
+  },
+  {
+   "test": "Audit requests left the target workbook unchanged",
+   "passed": true,
+   "detail": "full snapshot compared"
+  },
+  {
+   "test": "Idle worker resource use measured",
+   "passed": true,
+   "detail": "working set 77 MB, private 60 MB, CPU over 10 s idle 0.000 s"
+  },
+  {
+   "test": "Write timings on a scratch workbook (formats and values, 1 to 100k cells)",
+   "passed": true,
+   "detail": "{\"1\": {\"python_number_format_ms\": 23.187899962067604, \"vba_number_format_ms\": 0.5986000178381801, \"python_write_values_ms\": 4.172600049059838}, \"1k\": {\"python_number_format_ms\": 7.679899979848415, \"vba_number_format_ms\": 1.492300012614578, \"python_write_values_ms\": 24.412100028712302}, \"10k\": {\"python_number_format_ms\": 29.1088999947533, \"vba_number_format_ms\": 5.919600022025406, \"python_write_values_ms\": 23.473699984606355}, \"100k\": {\"python_number_format_ms\": 24.200899992138147, \"vba_number_format_ms\": 12.415000004693866, \"python_write_values_ms\": 80.8864000136964}}"
+  }
+ ],
+ "timings": {
+  "oneshot": {
+   "first_ms": 820.056,
+   "first_started_worker": false,
+   "warm": {
+    "n": 10,
+    "median": 816.7085,
+    "p95": 833.765,
+    "min": 791.824,
+    "max": 833.765
+   }
+  },
+  "worker": {
+   "first_ms": 821.714,
+   "first_started_worker": true,
+   "warm": {
+    "n": 9,
+    "median": 47.047,
+    "p95": 51.953,
+    "min": 45.01,
+    "max": 51.953
+   }
+  }
+ },
+ "sizes": {
+  "oneshot classify 100": {
+   "n": 3,
+   "median": 821.453,
+   "p95": 826.296,
+   "min": 810.946,
+   "max": 826.296
+  },
+  "oneshot classify 1000": {
+   "n": 3,
+   "median": 800.247,
+   "p95": 839.281,
+   "min": 791.968,
+   "max": 839.281
+  },
+  "oneshot classify 10000": {
+   "n": 3,
+   "median": 848.632,
+   "p95": 856.735,
+   "min": 842.001,
+   "max": 856.735
+  },
+  "oneshot read 1": {
+   "n": 3,
+   "median": 820.788,
+   "p95": 821.331,
+   "min": 800.787,
+   "max": 821.331
+  },
+  "oneshot read 1000": {
+   "n": 3,
+   "median": 801.366,
+   "p95": 806.289,
+   "min": 786.63,
+   "max": 806.289
+  },
+  "oneshot read 10000": {
+   "n": 3,
+   "median": 817.541,
+   "p95": 830.391,
+   "min": 811.324,
+   "max": 830.391
+  },
+  "oneshot read 100000": {
+   "n": 3,
+   "median": 1000.569,
+   "p95": 1010.244,
+   "min": 984.829,
+   "max": 1010.244
+  },
+  "worker classify 100": {
+   "n": 3,
+   "median": 173.366,
+   "p95": 197.873,
+   "min": 170.121,
+   "max": 197.873
+  },
+  "worker classify 1000": {
+   "n": 3,
+   "median": 194.03,
+   "p95": 197.471,
+   "min": 182.415,
+   "max": 197.471
+  },
+  "worker classify 10000": {
+   "n": 3,
+   "median": 388.611,
+   "p95": 406.862,
+   "min": 384.84,
+   "max": 406.862
+  },
+  "worker read 1": {
+   "n": 3,
+   "median": 176.382,
+   "p95": 176.994,
+   "min": 152.064,
+   "max": 176.994
+  },
+  "worker read 1000": {
+   "n": 3,
+   "median": 179.926,
+   "p95": 186.094,
+   "min": 164.359,
+   "max": 186.094
+  },
+  "worker read 10000": {
+   "n": 3,
+   "median": 216.389,
+   "p95": 230.322,
+   "min": 212.966,
+   "max": 230.322
+  },
+  "worker read 100000": {
+   "n": 3,
+   "median": 689.869,
+   "p95": 705.543,
+   "min": 675.384,
+   "max": 705.543
+  }
+ },
+ "writes": {
+  "1": {
+   "python_number_format_ms": 23.187899962067604,
+   "vba_number_format_ms": 0.5986000178381801,
+   "python_write_values_ms": 4.172600049059838
+  },
+  "1k": {
+   "python_number_format_ms": 7.679899979848415,
+   "vba_number_format_ms": 1.492300012614578,
+   "python_write_values_ms": 24.412100028712302
+  },
+  "10k": {
+   "python_number_format_ms": 29.1088999947533,
+   "vba_number_format_ms": 5.919600022025406,
+   "python_write_values_ms": 23.473699984606355
+  },
+  "100k": {
+   "python_number_format_ms": 24.200899992138147,
+   "vba_number_format_ms": 12.415000004693866,
+   "python_write_values_ms": 80.8864000136964
+  }
+ },
+ "idle": {
+  "working_set_mb": 76.726272,
+  "private_mb": 59.715584,
+  "cpu_seconds_over_10s_idle": 0.0
+ }
+}
