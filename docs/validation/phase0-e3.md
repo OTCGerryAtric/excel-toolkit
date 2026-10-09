@@ -2,7 +2,7 @@
 
 Date: 2026-10-09. Machine: owner's PC (Excel M365 x64 16.0.20326.20142, Python 3.12.10, pywin32 312).
 
-**Status: automated part complete; two manual checks outstanding** (`prototypes/e3/manual_checks.py`).
+**Status: complete.** Automated checks plus two manual checks by the owner (`prototypes/e3/manual_checks.py`, results in `prototypes/e3/results/e3_manual.json`).
 
 ## Scope
 
@@ -93,6 +93,19 @@ Nothing can be restored in that case: the unsaved workbook state is lost with Ex
 
 `OnUndo` is documented for user-initiated undo; when the macro itself is run via `Application.Run` from automation, the registration may not take effect. This does **not** prove a real Ctrl+Z fails. **Manual check:** press Ctrl+Shift+J then Ctrl+Z in a test Excel.
 
+## Manual checks (owner, 2026-10-09)
+
+In a separate test Excel with a scratch workbook and the E3 add-in loaded:
+
+| Check | Result |
+|---|---|
+| Ctrl+Shift+J (hotkey via `Application.OnKey`) changed the format | Pass — also closes the outstanding E1 hotkey check |
+| **Real Ctrl+Z** after the toggle: Excel offered "Undo number format" and restored `0.00` | **Pass** |
+| Cell edit mode (typing in F2, not committed): read attempt | **ExcelBusy after exactly 5.0 s** with the clear message |
+| After Escape: read attempt | Succeeded at once |
+
+So: Excel Ctrl+Z integration via `OnUndo` **works for a real keypress**; it only fails when Undo is triggered programmatically. And cell edit mode is a real busy state that the bounded retry handles as designed.
+
 ## Coverage statuses carried forward (for the audit engine)
 
 | Situation | Status to report |
@@ -113,4 +126,4 @@ Nothing can be restored in that case: the unsaved workbook state is lost with Ex
 
 ## Outcome
 
-Automated E3 passed. Bulk and destructive safeguards (journal, conflict-checked undo, rollback, confirmation) work and meet the agreed policy. Excel Ctrl+Z integration and real busy behaviour await the two manual checks. Stopping before E4.
+E3 passed. Bulk and destructive safeguards (journal, conflict-checked undo, rollback, confirmation) meet the agreed policy. Formatting toggles can offer a real one-step Ctrl+Z via `OnUndo`. Real busy state (cell edit mode) fails cleanly after the 5 s bounded wait. Stopping before E4.

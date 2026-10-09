@@ -1,0 +1,22 @@
+{
+ "ctrl_z_after_toggle": {
+  "format_now": "0.00",
+  "restored_to_0.00": true,
+  "user_says": "y"
+ },
+ "edit_mode": {
+  "outcome": "ExcelBusy: Excel stayed busy for 5 s - a dialog may be open or a cell is being edited. Finish or cancel it in Excel and try again.",
+  "seconds": 5.0
+ },
+ "after_escape": {
+  "outcome": "read succeeded",
+  "value": [
+   [
+    [
+     "1234.5",
+     1234.5
+    ]
+   ]
+  ]
+ }
+}

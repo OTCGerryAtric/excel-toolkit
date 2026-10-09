@@ -12,6 +12,7 @@ import time
 from pathlib import Path
 
 import win32com.client
+import win32gui
 import win32process
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -40,12 +41,27 @@ def main() -> None:
         sheet.Range("B2:D6").NumberFormat = "0.00"
         excel.Workbooks.Open(str(XLAM))
         excel.Run("E3Commands.xlam!E3_Init")
+        excel.UserControl = True
+        excel.Visible = True
+        book.Windows(1).Visible = True
         book.Activate()
         sheet.Range("B2:D6").Select()
-        pid = win32process.GetWindowThreadProcessId(int(excel.Hwnd))[1]
+        excel.WindowState = -4137  # xlMaximized
+        hwnd = int(excel.Hwnd)
+        win32gui.ShowWindow(hwnd, 3)  # SW_SHOWMAXIMIZED
+        try:
+            win32gui.SetForegroundWindow(hwnd)
+        except Exception:  # noqa: BLE001 - Windows may refuse focus changes; the window is still shown
+            pass
+        time.sleep(1)
+        if not win32gui.IsWindowVisible(hwnd):
+            sys.exit("The test Excel window did not become visible. Nothing was changed; please tell Claude.")
+        pid = win32process.GetWindowThreadProcessId(hwnd)[1]
+        print(f"Test Excel is open (process {pid}, window title '{win32gui.GetWindowText(hwnd)}').")
+        print("If you can't see it, check the taskbar or Alt+Tab for a window titled 'Book1 - Excel'.")
         identity = Identity.from_handoff(f"{int(excel.Hwnd)}|{pid}|{book.Name}|{book.FullName}")
 
-        print("A new Excel window has opened with a scratch workbook (cells B2:D6 selected, format 0.00).")
+        print("The test workbook has cells B2:D6 selected, formatted 0.00.")
         ask("CHECK 1 - Ctrl+Z after a toggle.\n"
             "In that NEW Excel window: press Ctrl+Shift+J once (format changes to #,##0),\n"
             "then press Ctrl+Z.\nThen come back here and press Enter.")
