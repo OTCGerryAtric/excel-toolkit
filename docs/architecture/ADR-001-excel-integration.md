@@ -18,7 +18,15 @@ Internal Excel add-in for the owner and 6–20 colleagues, all on Windows deskto
    - **Never** locate the user's Excel with `GetActiveObject` / `Dispatch("Excel.Application")`. E2 showed it attaches to whichever instance registered first — the wrong one in the test.
 4. **Independent Python engine** (`src/excel_toolkit`), with no COM imports outside the adapter layer.
 5. **Hotkey commands stay in VBA.** A Python handoff costs ~0.9 s (start-up and imports), acceptable for audits, not for instant commands.
-6. **Proposed (E4, awaiting review): hybrid execution.** A read-only persistent worker, started on demand and exiting when idle, serves interactive audit requests (~50–200 ms warm); the same engine runs one-shot as fallback and for batch reports. Requests carry an id and an explicit workbook (never `ActiveWorkbook`); results return to VBA by callback and are rejected on any identity mismatch. Short-lived COM connections per request.
+6. **Hybrid execution (accepted for the Phase 0 architecture, E4 review 2026-10-09).** A read-only persistent worker, started on demand and exiting when idle, serves interactive audit requests (~50–200 ms warm); the same engine runs one-shot as fallback and for batch reports. Requests carry an id and an explicit workbook (never `ActiveWorkbook`); results return to VBA by callback and are rejected on any identity mismatch. Short-lived COM connections per request.
+
+### Production requirements carried from the E4 review
+
+1. **Busy-safe delivery.** Results that finish while Excel is busy are queued and delivered when Excel is available, correlated to their request and workbook, never blocking the UI, never selecting or changing anything on arrival. Investigate VBA-controlled polling in preference to unsolicited Python callbacks into Excel.
+2. **Secure local channel.** Named pipe restricted to the current Windows user by an explicit security descriptor (a random name is not access control); no network listener; bounded message sizes and execution times; strict request/response validation; no code execution through the protocol; abandoned workers and endpoints cleaned up.
+3. **Stale requests** are cancelled or discarded when their workbook closes or its identity changes.
+4. **One-shot fallback** stays an independently usable path; an audit must not depend on the worker being healthy.
+5. **Open performance investigation:** the unexplained 3–4× Excel slowdown seen in E4. Retest in E6 with fresh Excel processes and on a colleague's PC, comparing memory, responsiveness and latency before and after heavy audit workloads.
 
 ## Coverage rules carried forward (from E2)
 
