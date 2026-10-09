@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local backups (binary, personal)
+baseline/*.bak
+
+# Machine-specific: registry exports, PyXLL licence/config
+baseline/registry/
+*.lic
+pyxll.cfg
+*.log
+

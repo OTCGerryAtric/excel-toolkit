@@ -1,0 +1,499 @@
+olevba 0.60.2 on Python 3.12.10 - http://decalage.info/python/oletools
+===============================================================================
+FILE: C:\Users\GerryPidgeon\MasterCodingFolder\Python\Personal\ExcelAddIn\baseline\PERSONAL.XLSB.bak
+Type: OpenXML
+WARNING  For now, VBA stomping cannot be detected for files in memory
+-------------------------------------------------------------------------------
+VBA MACRO Module1.bas 
+in file: xl/vbaProject.bin - OLE stream: 'VBA/Module1'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Sub Number_Format_Toggle()
+Attribute Number_Format_Toggle.VB_ProcData.VB_Invoke_Func = "I\n14"
+If Selection.NumberFormat = "#,##0_-;[Red](#,##0)_-;-_-" Then
+   Selection.NumberFormat = "#,##0.0_-;[Red](#,##0.0)_-;-_-"
+      Else
+       If Selection.NumberFormat = "#,##0.0_-;[Red](#,##0.0)_-;-_-" Then
+           Selection.NumberFormat = "#,##0.00_-;[Red](#,##0.00)_-;-_-"
+          Else
+           Selection.NumberFormat = "#,##0_-;[Red](#,##0)_-;-_-"
+       End If
+End If
+End Sub
+Sub Currency_Format_Toggle()
+Attribute Currency_Format_Toggle.VB_ProcData.VB_Invoke_Func = "O\n14"
+If Selection.NumberFormat = "£#,##0_-;[Red](£#,##0)_-;-_-" Then
+   Selection.NumberFormat = "£#,##0.0_-;[Red](£#,##0.0)_-;-_-"
+      Else
+       If Selection.NumberFormat = "£#,##0.0_-;[Red](£#,##0.0)_-;-_-" Then
+           Selection.NumberFormat = "£#,##0.00_-;[Red](£#,##0.00)_-;-_-"
+          Else
+           Selection.NumberFormat = "£#,##0_-;[Red](£#,##0)_-;-_-"
+       End If
+End If
+End Sub
+Sub Percentage_Format_Toggle()
+Attribute Percentage_Format_Toggle.VB_ProcData.VB_Invoke_Func = "P\n14"
+If Selection.NumberFormat = "0%_-;[Red](0%)_-;-_-" Then
+   Selection.NumberFormat = "0.0%_-;[Red](0.0%)_-;-_-"
+      Else
+       If Selection.NumberFormat = "0.0%_-;[Red](0.0%)_-;-_-" Then
+           Selection.NumberFormat = "0.00%_-;[Red](0.00%)_-;-_-"
+          Else
+           If Selection.NumberFormat = "0.00%_-;[Red](0.00%)_-;-_-" Then
+              Selection.NumberFormat = "0.000%_-;[Red](0.000%)_-;-_-"
+                  Else
+                       Selection.NumberFormat = "0%_-;[Red](0%)_-;-_-"
+           End If
+       End If
+End If
+End Sub
+Sub Month_Date_Format()
+Attribute Month_Date_Format.VB_ProcData.VB_Invoke_Func = "M\n14"
+If Selection.NumberFormat = "dd-mmm-yy" Then
+  Selection.NumberFormat = "mmm-yy"
+      Else
+       Selection.NumberFormat = "dd-mmm-yy"
+End If
+End Sub
+Sub Row_Height_Toggle()
+Attribute Row_Height_Toggle.VB_ProcData.VB_Invoke_Func = "R\n14"
+If Selection.RowHeight = 15 Then
+  Selection.RowHeight = 4.5
+      Else
+       Selection.RowHeight = 15
+End If
+End Sub
+Sub Column_Width_Toggle()
+Attribute Column_Width_Toggle.VB_ProcData.VB_Invoke_Func = "C\n14"
+If Selection.ColumnWidth = 2 Then
+  Selection.ColumnWidth = 8.43
+      Else
+       If Selection.ColumnWidth = 8.43 Then
+          Selection.ColumnWidth = 12
+          Else
+           Selection.ColumnWidth = 2
+       End If
+End If
+End Sub
+Sub Yellow_Cell_Toggle()
+Attribute Yellow_Cell_Toggle.VB_ProcData.VB_Invoke_Func = "Q\n14"
+'Use for text inputs
+If Selection.Interior.Color = RGB(255, 255, 210) Then
+   Selection.Interior.Color = RGB(255, 255, 255)
+       Else
+       Selection.Interior.Color = RGB(255, 255, 210)
+End If
+End Sub
+Sub Green_Cell_Toggle()
+Attribute Green_Cell_Toggle.VB_ProcData.VB_Invoke_Func = "E\n14"
+If Selection.Interior.Color = RGB(145, 245, 190) Then
+   Selection.Interior.Color = RGB(255, 255, 255)
+       Else
+       Selection.Interior.Color = RGB(145, 245, 190)
+End If
+End Sub
+Sub Light_Blue_Cell_Toggle()
+Attribute Light_Blue_Cell_Toggle.VB_ProcData.VB_Invoke_Func = "W\n14"
+'Use for text inputs
+If Selection.Interior.Color = RGB(221, 235, 247) Then
+   Selection.Interior.Color = RGB(255, 255, 255)
+       Else
+       Selection.Interior.Color = RGB(221, 235, 247)
+End If
+End Sub
+Sub Grey_Cell_Toggle()
+Attribute Grey_Cell_Toggle.VB_ProcData.VB_Invoke_Func = "Z\n14"
+'Use for text inputs
+If Selection.Interior.Color = RGB(242, 242, 242) Then
+   Selection.Interior.Color = RGB(255, 255, 255)
+       Else
+       Selection.Interior.Color = RGB(242, 242, 242)
+End If
+End Sub
+Sub Paste_As_Values()
+Attribute Paste_As_Values.VB_ProcData.VB_Invoke_Func = "V\n14"
+  Selection.Copy
+   Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+   Application.CutCopyMode = False
+End Sub
+Sub Best_Fit_Column_Width()
+Attribute Best_Fit_Column_Width.VB_ProcData.VB_Invoke_Func = "K\n14"
+Dim CColWidth As Integer
+CColWidth = Round(ActiveCell.ColumnWidth + 5) / 5
+Selection.ColumnWidth = CColWidth * 5
+End Sub
+Sub Grey_Ouline()
+Attribute Grey_Ouline.VB_ProcData.VB_Invoke_Func = "G\n14"
+    If Selection.Borders(xlEdgeTop).LineStyle = xlNone Then
+    With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ThemeColor = 1
+        .TintAndShade = -0.249946592608417
+        .Weight = xlThin
+    End With
+    Else
+    Selection.Borders(xlEdgeLeft).LineStyle = xlNone
+    Selection.Borders(xlEdgeTop).LineStyle = xlNone
+    Selection.Borders(xlEdgeBottom).LineStyle = xlNone
+    Selection.Borders(xlEdgeRight).LineStyle = xlNone
+    Selection.Borders(xlInsideVertical).LineStyle = xlNone
+    Selection.Borders(xlInsideHorizontal).LineStyle = xlNone
+    End If
+End Sub
+Sub Clear_Sheet_Formula_References()
+Attribute Clear_Sheet_Formula_References.VB_ProcData.VB_Invoke_Func = "F\n14"
+SheetName = ActiveSheet.Name
+SpaceCount = InStr(1, SheetName, " ")
+If SpaceCount = 0 Then
+ReplaceName = ActiveSheet.Name & "!"
+Cells.Replace What:=ReplaceName, Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+Else
+ReplaceName = "'" & ActiveSheet.Name & "'!"
+Cells.Replace What:=ReplaceName, Replacement:="", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+        ReplaceFormat:=False
+End If
+End Sub
+Sub Delete_Names()
+Attribute Delete_Names.VB_ProcData.VB_Invoke_Func = "N\n14"
+    On Error Resume Next
+    For Each nm In ActiveWorkbook.Names
+        nm.Delete
+    Next
+    On Error GoTo 0
+End Sub
+Sub Find_Constants()
+Attribute Find_Constants.VB_ProcData.VB_Invoke_Func = "C\n14"
+    On Error Resume Next
+    Selection.SpecialCells(xlCellTypeConstants, 1).Select
+End Sub
+
+-------------------------------------------------------------------------------
+VBA MACRO ThisWorkbook.cls 
+in file: xl/vbaProject.bin - OLE stream: 'VBA/ThisWorkbook'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+(empty macro)
+-------------------------------------------------------------------------------
+VBA MACRO Sheet1.cls 
+in file: xl/vbaProject.bin - OLE stream: 'VBA/Sheet1'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+(empty macro)
+-------------------------------------------------------------------------------
+VBA MACRO Module2.bas 
+in file: xl/vbaProject.bin - OLE stream: 'VBA/Module2'
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+Option Explicit
+
+Public Sub ReportExternalLinks()
+Attribute ReportExternalLinks.VB_ProcData.VB_Invoke_Func = "X\n14"
+
+    Dim targetWorkbook As Workbook
+    Dim reportSheet As Worksheet
+    Dim worksheetItem As Worksheet
+    Dim formulaCells As Range
+    Dim cellItem As Range
+    Dim nameItem As Name
+    Dim chartItem As ChartObject
+    Dim chartSheetItem As Chart
+    Dim seriesItem As Series
+    Dim linkSources As Variant
+    Dim linkItem As Variant
+    Dim nextRow As Long
+    Dim resultsFound As Long
+
+    Set targetWorkbook = ActiveWorkbook
+
+    If targetWorkbook Is Nothing Then
+        MsgBox "No workbook is currently active.", vbExclamation
+        Exit Sub
+    End If
+
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+
+    On Error GoTo ErrorHandler
+
+    'Create or clear the report sheet.
+    On Error Resume Next
+    Set reportSheet = targetWorkbook.Worksheets("External Links Report")
+    On Error GoTo ErrorHandler
+
+    If reportSheet Is Nothing Then
+        Set reportSheet = targetWorkbook.Worksheets.Add( _
+            After:=targetWorkbook.Worksheets(targetWorkbook.Worksheets.Count))
+        reportSheet.Name = "External Links Report"
+    Else
+        reportSheet.Cells.Clear
+    End If
+
+    reportSheet.Range("A1:E1").Value = Array( _
+        "Location Type", _
+        "Sheet / Scope", _
+        "Location", _
+        "External Link", _
+        "Formula / Definition")
+
+    nextRow = 2
+
+    'Excel's registered external workbook links.
+    linkSources = targetWorkbook.linkSources(Type:=xlLinkTypeExcelLinks)
+
+    If IsArray(linkSources) Then
+        For Each linkItem In linkSources
+            AddExternalLinkResult _
+                reportSheet, _
+                nextRow, _
+                "Registered Link", _
+                "Workbook", _
+                "", _
+                CStr(linkItem), _
+                ""
+
+            resultsFound = resultsFound + 1
+        Next linkItem
+    End If
+
+    'External references in cell formulas.
+    For Each worksheetItem In targetWorkbook.Worksheets
+
+        If worksheetItem.Name <> reportSheet.Name Then
+
+            Set formulaCells = Nothing
+
+            On Error Resume Next
+            Set formulaCells = worksheetItem.UsedRange.SpecialCells( _
+                xlCellTypeFormulas)
+            On Error GoTo ErrorHandler
+
+            If Not formulaCells Is Nothing Then
+                For Each cellItem In formulaCells.Cells
+                    If IsExternalReference(CStr(cellItem.Formula)) Then
+                        AddExternalLinkResult _
+                            reportSheet, _
+                            nextRow, _
+                            "Cell Formula", _
+                            worksheetItem.Name, _
+                            cellItem.Address(False, False), _
+                            ExtractExternalWorkbook(CStr(cellItem.Formula)), _
+                            CStr(cellItem.Formula)
+
+                        resultsFound = resultsFound + 1
+                    End If
+                Next cellItem
+            End If
+
+        End If
+
+    Next worksheetItem
+
+    'Workbook-level and worksheet-level named ranges.
+    For Each nameItem In targetWorkbook.Names
+
+        If IsExternalReference(CStr(nameItem.RefersTo)) Then
+            AddExternalLinkResult _
+                reportSheet, _
+                nextRow, _
+                "Named Range", _
+                GetNameScope(nameItem), _
+                nameItem.Name, _
+                ExtractExternalWorkbook(CStr(nameItem.RefersTo)), _
+                CStr(nameItem.RefersTo)
+
+            resultsFound = resultsFound + 1
+        End If
+
+    Next nameItem
+
+    'External references in embedded charts.
+    For Each worksheetItem In targetWorkbook.Worksheets
+
+        If worksheetItem.Name <> reportSheet.Name Then
+
+            For Each chartItem In worksheetItem.ChartObjects
+
+                For Each seriesItem In chartItem.Chart.SeriesCollection
+
+                    If IsExternalReference(CStr(seriesItem.Formula)) Then
+                        AddExternalLinkResult _
+                            reportSheet, _
+                            nextRow, _
+                            "Chart Series", _
+                            worksheetItem.Name, _
+                            chartItem.Name, _
+                            ExtractExternalWorkbook( _
+                                CStr(seriesItem.Formula)), _
+                            CStr(seriesItem.Formula)
+
+                        resultsFound = resultsFound + 1
+                    End If
+
+                Next seriesItem
+
+            Next chartItem
+
+        End If
+
+    Next worksheetItem
+
+    'External references in standalone chart sheets.
+    For Each chartSheetItem In targetWorkbook.Charts
+
+        For Each seriesItem In chartSheetItem.SeriesCollection
+
+            If IsExternalReference(CStr(seriesItem.Formula)) Then
+                AddExternalLinkResult _
+                    reportSheet, _
+                    nextRow, _
+                    "Chart Series", _
+                    chartSheetItem.Name, _
+                    seriesItem.Name, _
+                    ExtractExternalWorkbook(CStr(seriesItem.Formula)), _
+                    CStr(seriesItem.Formula)
+
+                resultsFound = resultsFound + 1
+            End If
+
+        Next seriesItem
+
+    Next chartSheetItem
+
+    'Format the report.
+    With reportSheet
+
+        .Rows(1).Font.Bold = True
+        .Rows(1).Interior.Color = RGB(217, 225, 242)
+        .Range("A1:E1").AutoFilter
+
+        .Columns("A:D").AutoFit
+        .Columns("E").ColumnWidth = 70
+        .Columns("E").WrapText = True
+
+        .Range("A1:E" & Application.Max(nextRow - 1, 1)).VerticalAlignment = _
+            xlTop
+
+        .Activate
+        .Range("A2").Select
+
+    End With
+
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+
+    MsgBox resultsFound & " external-link references found.", vbInformation
+    Exit Sub
+
+ErrorHandler:
+
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+
+    MsgBox "The external-links report could not be completed." & vbCrLf & _
+           vbCrLf & _
+           "Error " & Err.Number & ": " & Err.Description, _
+           vbExclamation
+
+End Sub
+
+Private Function IsExternalReference( _
+    ByVal formulaText As String) As Boolean
+
+    Dim regularExpression As Object
+
+    Set regularExpression = CreateObject("VBScript.RegExp")
+
+    With regularExpression
+        .Pattern = "\[[^\]]+\.(xlsx|xlsm|xlsb|xls|xlam|xla|csv)\]"
+        .IgnoreCase = True
+        .Global = False
+    End With
+
+    IsExternalReference = regularExpression.Test(formulaText)
+
+End Function
+
+Private Function ExtractExternalWorkbook( _
+    ByVal formulaText As String) As String
+
+    Dim regularExpression As Object
+    Dim matches As Object
+
+    Set regularExpression = CreateObject("VBScript.RegExp")
+
+    With regularExpression
+        .Pattern = "\[[^\]]+\.(xlsx|xlsm|xlsb|xls|xlam|xla|csv)\]"
+        .IgnoreCase = True
+        .Global = False
+    End With
+
+    Set matches = regularExpression.Execute(formulaText)
+
+    If matches.Count > 0 Then
+        ExtractExternalWorkbook = matches(0).Value
+    Else
+        ExtractExternalWorkbook = ""
+    End If
+
+End Function
+
+Private Function GetNameScope(ByVal nameItem As Name) As String
+
+    If TypeName(nameItem.Parent) = "Worksheet" Then
+        GetNameScope = nameItem.Parent.Name
+    Else
+        GetNameScope = "Workbook"
+    End If
+
+End Function
+
+Private Sub AddExternalLinkResult( _
+    ByVal reportSheet As Worksheet, _
+    ByRef nextRow As Long, _
+    ByVal locationType As String, _
+    ByVal scopeName As String, _
+    ByVal locationName As String, _
+    ByVal externalLink As String, _
+    ByVal formulaText As String)
+
+    reportSheet.Cells(nextRow, 1).Value = locationType
+    reportSheet.Cells(nextRow, 2).Value = scopeName
+    reportSheet.Cells(nextRow, 3).Value = locationName
+    reportSheet.Cells(nextRow, 4).Value = externalLink
+    reportSheet.Cells(nextRow, 5).Value = formulaText
+
+    nextRow = nextRow + 1
+
+End Sub
+
+
