@@ -86,8 +86,8 @@ Source extracted to `baseline/vba/PERSONAL_XLSB_olevba.txt`. Shortcuts are set v
 | Revised Phase 0 plan | **Approved** 2026-10-09 |
 | Baseline captured, rollback documented | Done — `docs/rollback.md` |
 | git + uv project | Done (`740fb1e`) |
-| PyXLL removed from project; no Excel registration | Done (pyproject clean, registry verified). `.venv` cleanup pending — `pyxll.exe` locked by the cancelled installer. |
-| E1 `.xlam` hotkey format cycle on a test key, timed against the VBA original | Not started |
+| PyXLL removed from project; no Excel registration | Done (pyproject clean, `.venv` clean, registry verified, no installer process) |
+| E1 `.xlam` hotkey format cycle on a test key, timed against the VBA original | **Passed** 2026-10-09 — 21/21 equivalence checks; ~1 ms, same as VBA. See `docs/validation/phase0-e1.md`. Manual Ctrl+Shift+J keypress check outstanding. |
 | E2 Python reads the live workbook (correct Excel instance, unsaved edits, multi-area, other sheets) — via pywin32 **and** via free xlwings | Not started |
 | E3 Reversibility by command category (toggle / bulk / destructive), incl. `Application.OnUndo` from VBA and intervening-edit detection | Not started |
 | E4 Bridge latency (VBA → Python → result) and read/write timing for 1, 1k, 10k, 100k cells | Not started |
@@ -100,6 +100,7 @@ Source extracted to `baseline/vba/PERSONAL_XLSB_olevba.txt`. Shortcuts are set v
 ## Open items / dependencies
 
 - Colleague machine for E6.
+- "Trust access to the VBA project object model" was already on (`AccessVBOM = 1`) before the project started. The scripted `.xlam` build relies on it (dev machine only). Owner to decide whether to keep it on.
 - Colleague Excel builds/bitness — unverified.
 - Python runtime bundling approach (e.g. embeddable Python or uv-managed standalone Python) — choose and confirm licences in Phase 0.
 

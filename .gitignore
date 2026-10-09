@@ -18,3 +18,7 @@ baseline/registry/
 pyxll.cfg
 *.log
 
+# Prototype build outputs
+prototypes/**/build/
+prototypes/**/*.xlam
+
