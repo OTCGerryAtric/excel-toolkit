@@ -79,53 +79,53 @@ def test_unsaved_edit_is_detected_via_snapshot():
     assert flagged == {"D2"}
 
 
-# --- snapshot-conversion logic from a FAKE COM worksheet (no real Excel) -----------------
+# --- bulk snapshot-conversion from a FAKE COM worksheet (no real Excel) -------------------
 
-class _FakeCount:
-    def __init__(self, n): self.Count = n
-
-
-class _FakeRange:
-    def __init__(self, row, col, nrows, ncols):
-        self.Row, self.Column = row, col
-        self.Rows, self.Columns = _FakeCount(nrows), _FakeCount(ncols)
-
-
-class _FakeCell:
-    def __init__(self, value):
-        if isinstance(value, str) and value.startswith("="):
-            self.HasFormula, self.Formula, self.Value = True, value, None
-        else:
-            self.HasFormula, self.Formula, self.Value = False, value, value
+class _FakeUsedRange:
+    """UsedRange with a bulk .Formula (scalar | 1-D | 2-D), like pywin32 returns."""
+    def __init__(self, row, col, formula):
+        self.Row, self.Column, self.Formula = row, col, formula
 
 
 class _FakeComWorksheet:
-    """Mimics the handful of COM members snapshot_from_com uses."""
-
-    def __init__(self, cells: dict, name: str):
-        self._cells = {k if isinstance(k, tuple) else _a1(k): v for k, v in cells.items()}
-        self.Name = name
-        rows = [r for r, _c in self._cells]
-        cols = [c for _r, c in self._cells]
-        self._top, self._left = min(rows), min(cols)
-        self.UsedRange = _FakeRange(self._top, self._left,
-                                    max(rows) - self._top + 1, max(cols) - self._left + 1)
-
-    def Cells(self, row, col):
-        return _FakeCell(self._cells.get((row, col)))
+    def __init__(self, name, row, col, formula):
+        self.Name, self.UsedRange = name, _FakeUsedRange(row, col, formula)
 
 
-def _a1(coord):
-    from openpyxl.utils.cell import coordinate_to_tuple
-    return coordinate_to_tuple(coord)
-
-
-def test_snapshot_from_fake_com_matches_in_memory():
-    cells = {"B1": 1, "C1": 1, "D1": 1, "E1": 1,
-             "B2": "=B1*2", "C2": "=C1*2", "D2": "=D1*3", "E2": "=E1*2"}  # D2 anomaly
-    com_snapshot = snapshot_from_com(_FakeComWorksheet(cells, "Live"))
-    reference = InMemoryWorksheet(cells, "Live")
-    a, b = scan_worksheet(com_snapshot), scan_worksheet(reference)
+def test_snapshot_from_fake_com_bulk_matches_in_memory():
+    # one bulk 2-D .Formula read: row 1 constants, row 2 formulas with a D2 anomaly
+    formula = (
+        (1, 1, 1, 1),
+        ("=B1*2", "=C1*2", "=D1*3", "=E1*2"),
+    )
+    com = _FakeComWorksheet("Live", 1, 2, formula)      # top-left B1
+    reference = InMemoryWorksheet(
+        {"B1": 1, "C1": 1, "D1": 1, "E1": 1,
+         "B2": "=B1*2", "C2": "=C1*2", "D2": "=D1*3", "E2": "=E1*2"}, "Live")
+    a, b = scan_worksheet(snapshot_from_com(com)), scan_worksheet(reference)
     _assert_reports_equal(a, b)
     assert {f.coord for f in a.findings} == {"D2"}
     assert a.sheet == "Live"
+
+
+def test_snapshot_from_com_single_cell_scalar():
+    # a single-cell UsedRange returns a scalar, not a 2-D array
+    snap = snapshot_from_com(_FakeComWorksheet("S", 5, 3, "=A1+1"))
+    assert snap.max_row == 5 and snap.max_col == 3
+    assert snap.value_at(5, 3) == "=A1+1"
+
+
+def test_snapshot_from_com_handles_constants_blanks_errors_dates():
+    import datetime
+    err = object()  # stand-in for an Excel error / unexpected COM type
+    formula = (
+        ("=A1", 42, None),
+        ("text", err, datetime.datetime(2026, 1, 31)),
+    )
+    snap = snapshot_from_com(_FakeComWorksheet("S", 1, 1, formula))
+    assert snap.value_at(1, 1) == "=A1"                 # formula kept
+    assert snap.value_at(1, 2) == 42                    # number constant
+    assert snap.value_at(1, 3) is None                  # blank omitted
+    assert snap.value_at(2, 1) == "text"                # text constant
+    assert snap.value_at(2, 2) == str(err)              # error -> string (boundary)
+    assert snap.value_at(2, 3) == datetime.datetime(2026, 1, 31)  # date kept

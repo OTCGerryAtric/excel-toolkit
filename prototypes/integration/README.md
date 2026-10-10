@@ -22,18 +22,33 @@ fake-COM conversion, and an unsaved-edit scenario).
 ## Files
 
 - `ExcelToolkitAudit.bas` — minimal VBA: `Toolkit_AuditFormulas` (one command), a results
-  list in a *separate* workbook (audited book untouched), and `Toolkit_GotoFinding`
-  (jump to a cell). Source only; not imported/compiled/installed.
-- `audit_live.py` — Python entry point sketch: attach (reuse E2 handoff) → `snapshot_from_com`
-  → `scan_worksheet` → emit findings. Only the snapshot+scan steps run offline (tested);
-  the live COM attach is left `NotImplementedError` on purpose.
+  list in a *separate* workbook (audited book untouched), and `Toolkit_GotoFinding`, which
+  navigates to the cell **in the original audited workbook** (resolved via the object model,
+  so apostrophes/spaces in names are safe), never the results workbook. Source only.
+- `audit_live.py` — Python entry point sketch: parse handoff → attach (reuse E2) →
+  `snapshot_from_com` → `scan_worksheet` → `findings_to_json`. Only the snapshot/scan/JSON
+  steps run offline (tested); the live COM attach is left `NotImplementedError` on purpose.
+
+## Identity contract (handoff)
+
+`hwnd | workbookName | workbookFullPath | worksheetName`. The **PID is not supplied** — Python
+derives it from the window handle, as E2's tested attachment does. The eventual
+implementation **reuses E2's attachment logic**, not a new instance-finding method.
+
+## Findings transport
+
+Structured **JSON** (array of objects: `workbook, workbook_path, sheet, cell, kind,
+confidence, conflict, expected_by_axis, message`) — robust to tabs, newlines and unusual
+names, unlike delimited text. Each record keeps the audited workbook identity for navigation.
 
 ## Unresolved live-Excel assumptions (confirm on the authorised machine)
 
-- `Range.Formula` (US A1 syntax, `,` separators — what the tokenizer expects), not
-  `FormulaLocal`; `Cell.HasFormula` to split formulas from constants.
-- `UsedRange` for bounds (can over-report); merged cells, array/dynamic-array (`Formula2`,
-  spill) formulas not special-cased yet.
-- Attaching to the correct instance via the E2 handoff; reading unsaved edits live.
-- Delivering findings back to VBA (stdout lines vs a worker channel) and not modifying the
-  audited workbook.
+- `UsedRange.Formula` read in **one bulk COM call** (US A1 syntax, `,` separators — what the
+  tokenizer expects), not `FormulaLocal`; a string starting `=` is a formula, other values
+  are constants; Excel errors / odd COM types coerce to strings (treated as boundaries).
+  Handles the scalar return for a single-cell range.
+- `UsedRange` bounds can over-report; merged cells and array/dynamic-array (`Formula2`,
+  spill) formulas are not special-cased yet.
+- Attaching to the correct instance/worksheet via the E2 handoff; reading unsaved edits live.
+- Returning the JSON to VBA (stdout vs a worker channel vs a temp file) and parsing it there
+  with a bundled JSON parser; never modifying the audited workbook.

@@ -101,32 +101,61 @@ def as_source(obj) -> WorksheetSource:
     return OpenpyxlWorksheet(obj)
 
 
+def _as_grid(data) -> list[list]:
+    """Normalise what ``Range.Formula`` returns into a list of rows.
+
+    Excel/pywin32 returns a 2-D tuple-of-tuples for a multi-cell range, but a **scalar** for
+    a single cell (and a 1-D tuple can appear for a single row/column), so we normalise all
+    three shapes."""
+    if data is None:
+        return []
+    if isinstance(data, (list, tuple)):
+        if len(data) and isinstance(data[0], (list, tuple)):
+            return [list(row) for row in data]          # 2-D
+        return [list(data)]                              # 1-D -> one row
+    return [[data]]                                      # scalar -> single cell
+
+
+def _coerce_com_value(raw):
+    """Map a cell value from a bulk ``.Formula`` read to what the detector expects.
+
+    Formula strings keep their leading ``=``; text/number/bool/date pass through; blanks
+    become ``None``; anything else (e.g. an Excel error value or an unexpected COM type)
+    becomes its string form, which the detector treats as a (non-formula) constant/boundary.
+    """
+    import datetime as _dt
+    if raw is None or raw == "":
+        return None
+    if isinstance(raw, (str, bool, int, float, _dt.datetime, _dt.date)):
+        return raw
+    return str(raw)
+
+
 def snapshot_from_com(com_ws) -> InMemoryWorksheet:
     """Build an InMemoryWorksheet from a live Excel COM worksheet object.
 
-    This is the snapshot-conversion logic for the eventual Excel integration. It is tested
-    only against a FAKE COM object offline; it is NOT run against real Excel here.
+    Reads the used range's formulas in **one bulk COM call** (``UsedRange.Formula``) rather
+    than tens of thousands of per-cell property accesses. Snapshot-conversion logic only;
+    tested against a FAKE COM object offline, NOT run against real Excel here.
 
     Unresolved live-Excel assumptions (to confirm on the authorised test machine):
       * uses ``Range.Formula`` (always US A1 syntax with ',' separators, which the openpyxl
-        tokenizer expects) — NOT ``FormulaLocal``;
-      * ``Cell.HasFormula`` distinguishes formulas from constants;
-      * ``UsedRange`` gives the bounds (``.Row``/``.Column`` top-left, ``.Rows.Count`` /
-        ``.Columns.Count``); it can over-report and does not special-case merged cells or
-        array/dynamic-array formulas (``Formula2`` / spill) — those remain future work;
+        tokenizer expects) — NOT ``FormulaLocal``; dynamic-array/spill (``Formula2``) is
+        future work;
+      * a formula is any string starting with ``=``; other values are constants; Excel error
+        values / unexpected COM types are coerced to strings (treated as boundaries);
+      * ``UsedRange`` gives the bounds and top-left (``.Row``/``.Column``); it can over-report
+        and does not special-case merged cells;
+      * ``.Formula`` returns a scalar for a single-cell range (handled by ``_as_grid``);
       * 1-based indexing and ``Worksheet.Name`` for identity.
     """
     used = com_ws.UsedRange
     top, left = used.Row, used.Column
-    n_rows, n_cols = used.Rows.Count, used.Columns.Count
+    grid = _as_grid(used.Formula)
     cells: dict[tuple[int, int], object] = {}
-    for r in range(top, top + n_rows):
-        for c in range(left, left + n_cols):
-            cell = com_ws.Cells(r, c)
-            if cell.HasFormula:
-                cells[(r, c)] = cell.Formula
-            else:
-                value = cell.Value
-                if value is not None:
-                    cells[(r, c)] = value
+    for i, row in enumerate(grid):
+        for j, raw in enumerate(row):
+            value = _coerce_com_value(raw)
+            if value is not None:
+                cells[(top + i, left + j)] = value
     return InMemoryWorksheet(cells, title=com_ws.Name)
