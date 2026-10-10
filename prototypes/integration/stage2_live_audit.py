@@ -8,8 +8,11 @@ Preconditions (all required before running):
   * run with the scratch venv that has pywin32 + openpyxl.
 
 First execution is READ-ONLY: it attaches, verifies identity, reads live formulas, runs the
-detector, and checks integrity. It does NOT create a results workbook or navigate - that is
-a separate step (show_and_navigate, defined but intentionally not called).
+detector, validates single-column/single-cell COM conversion, and **asserts** the expected
+evidence (saved {D4}; live {D3, D4}; unsaved-only delta {D3}; workbook unchanged in memory
+and on disk) - failing loudly if any is wrong, so it can never announce success on a wrong
+result. It does NOT create a results workbook or navigate - that is a separate step
+(show_and_navigate, defined but intentionally not called).
 
 STOP IMMEDIATELY (no retry) if endpoint protection intervenes, a process is unexpectedly
 terminated, files disappear, or access-denied errors recur; capture time + any threat id.
@@ -32,10 +35,18 @@ import excel_link  # E2/E6 tested attachment: Identity, attach, call, IdentityEr
 from openpyxl import load_workbook
 
 from excel_toolkit.formula_audit import scan_worksheet, snapshot_from_com
+from excel_toolkit.formula_audit.worksheet_source import _as_grid
 
 TARGET_PATH = ROOT / "prototypes" / "integration" / "demo_workbook.xlsx"
 TARGET_NAME = TARGET_PATH.name
 SHEET = "Demo"
+
+# Expected evidence (the run FAILS if any differs).
+EXPECTED_SAVED = {"D4"}             # planted anomaly in the saved file
+EXPECTED_LIVE = {"D3", "D4"}        # with the unsaved D3 edit applied
+EXPECTED_DELTA = {"D3"}             # introduced only by the unsaved edit
+# Column K roll-forward, to validate single-column COM conversion lands vertically in K3:K6.
+EXPECTED_K = {3: "=K2+$A$10", 4: "=K3+$A$10", 5: "=K4+$A$10", 6: "=K5+$A$10"}
 
 
 def _sha256(path: Path) -> str:
@@ -101,21 +112,48 @@ def read_only_audit():
     print("COM .Formula shapes:", shape_report(app, ws))
 
     before = capture_state(app, ws)
-    live = scan_worksheet(snapshot_from_com_via(app, ws))      # live, incl. unsaved edits
+
+    # Single-column and single-cell COM reads -> validate _as_grid orientation + coordinates.
+    col_grid = _as_grid(excel_link.call(app, lambda: ws.Range("K2:K6").Formula))
+    cell_grid = _as_grid(excel_link.call(app, lambda: ws.Range("K2").Formula))
+
+    snap = snapshot_from_com_via(app, ws)                      # live, incl. unsaved edits
+    live = scan_worksheet(snap)
     saved = scan_worksheet(load_workbook(TARGET_PATH)[SHEET])  # saved file on disk
     after = capture_state(app, ws)
 
-    live_f = sorted(f.coord for f in live.findings)
-    saved_f = sorted(f.coord for f in saved.findings)
-    delta = sorted(set(live_f) - set(saved_f))
+    live_f = {f.coord for f in live.findings}
+    saved_f = {f.coord for f in saved.findings}
+    delta = live_f - saved_f
 
-    print(f"saved-file findings : {saved_f}")
-    print(f"live findings       : {live_f}")
-    print(f"unsaved-only (delta): {delta}   <- introduced by the unsaved edit")
-    print(f"dependency coverage : {live.dependency_coverage:.0%}  pattern: {live.pattern_coverage:.0%}")
-    print(f"in-memory integrity : {'UNCHANGED' if before == after else 'CHANGED (!)'}")
-    print(f"saved-file integrity: {'UNCHANGED' if saved_hash_before == _sha256(TARGET_PATH) else 'CHANGED (!)'}")
-    print("READ-ONLY run complete. Results workbook + navigation NOT performed (separate step).")
+    # Single-column K2:K6 must come back as 5 rows x 1 col (NOT transposed to one row),
+    # with the roll-forward formulas landing in K3:K6 (rows 1..4 of the block).
+    col_vertical = len(col_grid) == 5 and all(len(r) == 1 for r in col_grid)
+    col_formulas_ok = col_vertical and all(col_grid[i][0] == EXPECTED_K[i + 2] for i in range(1, 5))
+    cell_ok = len(cell_grid) == 1 and len(cell_grid[0]) == 1  # single cell -> 1x1
+    # Used-range snapshot must also position column K (col 11) correctly.
+    snap_k_ok = all(snap.value_at(r, 11) == f for r, f in EXPECTED_K.items())
+
+    checks = [
+        ("saved-file findings == {D4}", saved_f == EXPECTED_SAVED, sorted(saved_f)),
+        ("live findings == {D3,D4}", live_f == EXPECTED_LIVE, sorted(live_f)),
+        ("unsaved-only delta == {D3}", delta == EXPECTED_DELTA, sorted(delta)),
+        ("in-memory contents unchanged", before == after, "unchanged" if before == after else "CHANGED"),
+        ("saved file unchanged", saved_hash_before == _sha256(TARGET_PATH), "unchanged"),
+        ("single-column K2:K6 vertical (no transpose)", col_vertical, f"{len(col_grid)} rows"),
+        ("single-column K3:K6 formulas correctly positioned", col_formulas_ok, col_grid),
+        ("single-cell K2 -> 1x1", cell_ok, cell_grid),
+        ("used-range snapshot positions column K", snap_k_ok,
+         {r: snap.value_at(r, 11) for r in EXPECTED_K}),
+    ]
+    for name, ok, detail in checks:
+        print(f"  [{'PASS' if ok else 'FAIL'}] {name}: {detail}")
+    print(f"  dependency coverage : {live.dependency_coverage:.0%}  pattern: {live.pattern_coverage:.0%}")
+
+    if not all(ok for _n, ok, _d in checks):
+        raise SystemExit("STAGE 2 READ-ONLY: FAIL — expected live-Excel evidence not met "
+                         "(check that D3 was edited to =C3*(1+$A$11) and NOT saved).")
+    print("STAGE 2 READ-ONLY: PASS. Results workbook + navigation NOT performed (separate step).")
     return app, book
 
 
