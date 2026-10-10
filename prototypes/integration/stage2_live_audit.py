@@ -134,6 +134,7 @@ def read_only_audit():
     # Used-range snapshot must also position column K (col 11) correctly.
     snap_k_ok = all(snap.value_at(r, 11) == f for r, f in EXPECTED_K.items())
 
+    saved_cov = scan_worksheet(load_workbook(TARGET_PATH)[SHEET]).pattern_coverage
     checks = [
         ("saved-file findings == {D4}", saved_f == EXPECTED_SAVED, sorted(saved_f)),
         ("live findings == {D3,D4}", live_f == EXPECTED_LIVE, sorted(live_f)),
@@ -145,6 +146,8 @@ def read_only_audit():
         ("single-cell K2 -> 1x1", cell_ok, cell_grid),
         ("used-range snapshot positions column K", snap_k_ok,
          {r: snap.value_at(r, 11) for r in EXPECTED_K}),
+        ("saved/live pattern-coverage parity", live.pattern_coverage == saved_cov,
+         (round(saved_cov, 3), round(live.pattern_coverage, 3))),
     ]
     for name, ok, detail in checks:
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}: {detail}")
@@ -153,8 +156,8 @@ def read_only_audit():
     if not all(ok for _n, ok, _d in checks):
         raise SystemExit("STAGE 2 READ-ONLY: FAIL — expected live-Excel evidence not met "
                          "(check that D3 was edited to =C3*(1+$A$11) and NOT saved).")
-    print("STAGE 2 READ-ONLY: PASS. Results workbook + navigation NOT performed (separate step).")
-    return app, book
+    print("STAGE 2 READ-ONLY: PASS.")
+    return app, book, ws, live, before
 
 
 def snapshot_from_com_via(app, ws):
@@ -162,11 +165,40 @@ def snapshot_from_com_via(app, ws):
     return excel_link.call(app, lambda: snapshot_from_com(ws))
 
 
-def show_and_navigate(app, book, live_findings):  # pragma: no cover - SEPARATE step, not called
-    """Step 2 (only after read-only passes): show findings in a NEW workbook and navigate to
-    the first finding's cell in the ORIGINAL audited workbook. Left uncalled by design."""
-    raise NotImplementedError("run only after the read-only checks pass and are reviewed")
+def show_and_navigate(app, book, ws, live, before):
+    """Display findings in a NEW results workbook (audited workbook never modified) and
+    navigate to the first finding's cell in the ORIGINAL audited workbook."""
+    audited_name = excel_link.call(app, lambda: book.Name)
+    results = excel_link.call(app, lambda: app.Workbooks.Add())
+    rws = excel_link.call(app, lambda: results.Worksheets(1))
+    headers = ["Workbook", "Sheet", "Cell", "Confidence", "Potential inconsistency (review)"]
+    for c, h in enumerate(headers, start=1):
+        excel_link.call(app, lambda c=c, h=h: rws.Cells(1, c).__setattr__("Value", h))
+    for i, f in enumerate(live.findings, start=2):
+        row = [audited_name, live.sheet, f.coord, f.confidence, f.message]
+        for c, val in enumerate(row, start=1):
+            excel_link.call(app, lambda c=c, val=val, i=i: rws.Cells(i, c).__setattr__("Value", val))
+
+    # Navigate to the first finding's cell IN THE ORIGINAL audited workbook (object model).
+    first = live.findings[0]
+    target = excel_link.call(app, lambda: book.Worksheets(live.sheet).Range(first.coord))
+    excel_link.call(app, lambda: app.Goto(target, True))
+    print(f"results workbook created ({len(live.findings)} findings); navigated to "
+          f"{audited_name}!{live.sheet}!{first.coord}")
+
+    # The audited workbook's formulas AND values must be unchanged by display + navigation.
+    after_nav = capture_state(app, ws)
+    if before != after_nav:
+        raise SystemExit("STAGE 2: FAIL — audited workbook changed during display/navigation.")
+    print("audited workbook unchanged after display + navigation (PASS). Results workbook left"
+          " open and unsaved.")
+
+
+def run(full: bool = False):
+    app, book, ws, live, before = read_only_audit()
+    if full:
+        show_and_navigate(app, book, ws, live, before)
 
 
 if __name__ == "__main__":  # pragma: no cover - do not run until authorised
-    read_only_audit()
+    run(full=(len(sys.argv) > 1 and sys.argv[1] == "full"))

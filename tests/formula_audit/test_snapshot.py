@@ -80,25 +80,30 @@ def test_unsaved_edit_is_detected_via_snapshot():
 
 
 # --- bulk snapshot-conversion from a FAKE COM worksheet (no real Excel) -------------------
+# The fake mirrors Excel/pywin32: .Formula returns '=' text for formulas but the *string*
+# form of a constant (e.g. "100" for the number 100), while .Value returns the typed value.
 
 class _FakeUsedRange:
-    """UsedRange with a bulk .Formula (scalar | 1-D | 2-D), like pywin32 returns."""
-    def __init__(self, row, col, formula):
-        self.Row, self.Column, self.Formula = row, col, formula
+    def __init__(self, row, col, formula, value):
+        self.Row, self.Column, self.Formula, self.Value = row, col, formula, value
 
 
 class _FakeComWorksheet:
-    def __init__(self, name, row, col, formula):
-        self.Name, self.UsedRange = name, _FakeUsedRange(row, col, formula)
+    def __init__(self, name, row, col, formula, value):
+        self.Name, self.UsedRange = name, _FakeUsedRange(row, col, formula, value)
 
 
 def test_snapshot_from_fake_com_bulk_matches_in_memory():
-    # one bulk 2-D .Formula read: row 1 constants, row 2 formulas with a D2 anomaly
+    # row 1 numeric constants (Excel returns them as strings in .Formula), row 2 formulas.
     formula = (
-        (1, 1, 1, 1),
+        ("1", "1", "1", "1"),
         ("=B1*2", "=C1*2", "=D1*3", "=E1*2"),
     )
-    com = _FakeComWorksheet("Live", 1, 2, formula)      # top-left B1
+    value = (
+        (1, 1, 1, 1),
+        (2, 2, 3, 2),           # computed values (ignored for formula cells)
+    )
+    com = _FakeComWorksheet("Live", 1, 2, formula, value)      # top-left B1
     reference = InMemoryWorksheet(
         {"B1": 1, "C1": 1, "D1": 1, "E1": 1,
          "B2": "=B1*2", "C2": "=C1*2", "D2": "=D1*3", "E2": "=E1*2"}, "Live")
@@ -106,26 +111,37 @@ def test_snapshot_from_fake_com_bulk_matches_in_memory():
     _assert_reports_equal(a, b)
     assert {f.coord for f in a.findings} == {"D2"}
     assert a.sheet == "Live"
+    assert snapshot_from_com(com).value_at(1, 2) == 1          # numeric const stays numeric
 
 
 def test_snapshot_from_com_single_cell_scalar():
-    # a single-cell UsedRange returns a scalar, not a 2-D array
-    snap = snapshot_from_com(_FakeComWorksheet("S", 5, 3, "=A1+1"))
-    assert snap.max_row == 5 and snap.max_col == 3
-    assert snap.value_at(5, 3) == "=A1+1"
+    # single-cell range returns scalars, not 2-D arrays (formula and constant)
+    snap_f = snapshot_from_com(_FakeComWorksheet("S", 5, 3, "=A1+1", 0))
+    assert snap_f.max_row == 5 and snap_f.max_col == 3 and snap_f.value_at(5, 3) == "=A1+1"
+    snap_c = snapshot_from_com(_FakeComWorksheet("S", 5, 3, "100", 100))
+    assert snap_c.value_at(5, 3) == 100                        # single-cell numeric const
 
 
-def test_snapshot_from_com_handles_constants_blanks_errors_dates():
+def test_snapshot_preserves_types_number_text_date_bool_error():
     import datetime
     err = object()  # stand-in for an Excel error / unexpected COM type
     formula = (
-        ("=A1", 42, None),
-        ("text", err, datetime.datetime(2026, 1, 31)),
+        ("=A1", "42",  "txt"),
+        ("100", "100", None),
+        ("x",   "x",   "x"),
     )
-    snap = snapshot_from_com(_FakeComWorksheet("S", 1, 1, formula))
-    assert snap.value_at(1, 1) == "=A1"                 # formula kept
-    assert snap.value_at(1, 2) == 42                    # number constant
-    assert snap.value_at(1, 3) is None                  # blank omitted
-    assert snap.value_at(2, 1) == "text"                # text constant
-    assert snap.value_at(2, 2) == str(err)              # error -> string (boundary)
-    assert snap.value_at(2, 3) == datetime.datetime(2026, 1, 31)  # date kept
+    value = (
+        (0,            42,    "txt"),
+        ("100",        100,   None),
+        (datetime.datetime(2026, 1, 31), True, err),
+    )
+    snap = snapshot_from_com(_FakeComWorksheet("S", 1, 1, formula, value))
+    assert snap.value_at(1, 1) == "=A1"                        # formula kept
+    assert snap.value_at(1, 2) == 42                           # number constant
+    assert snap.value_at(1, 3) == "txt"                        # text constant
+    assert snap.value_at(2, 1) == "100" and isinstance(snap.value_at(2, 1), str)  # TEXT "100" stays text
+    assert snap.value_at(2, 2) == 100 and not isinstance(snap.value_at(2, 2), str)  # NUMBER 100 stays numeric
+    assert snap.value_at(2, 3) is None                         # blank omitted
+    assert snap.value_at(3, 1) == datetime.datetime(2026, 1, 31)  # date kept
+    assert snap.value_at(3, 2) is True                         # bool kept
+    assert snap.value_at(3, 3) == str(err)                     # error -> string (boundary)

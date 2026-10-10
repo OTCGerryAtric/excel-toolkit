@@ -116,46 +116,64 @@ def _as_grid(data) -> list[list]:
     return [[data]]                                      # scalar -> single cell
 
 
-def _coerce_com_value(raw):
-    """Map a cell value from a bulk ``.Formula`` read to what the detector expects.
+def _coerce_constant(value):
+    """Normalise a constant cell's **typed** ``.Value`` for the detector.
 
-    Formula strings keep their leading ``=``; text/number/bool/date pass through; blanks
-    become ``None``; anything else (e.g. an Excel error value or an unexpected COM type)
-    becomes its string form, which the detector treats as a (non-formula) constant/boundary.
+    Preserves real types — number, text, bool, date pass through unchanged — so a numeric
+    cell stays numeric and a *text* cell that happens to contain ``"100"`` stays text. Blanks
+    become ``None``; Excel error values / unexpected COM types become their string form,
+    which the detector treats as a (non-formula) boundary.
     """
     import datetime as _dt
-    if raw is None or raw == "":
+    if value is None or value == "":
         return None
-    if isinstance(raw, (str, bool, int, float, _dt.datetime, _dt.date)):
-        return raw
-    return str(raw)
+    if isinstance(value, (str, bool, int, float, _dt.datetime, _dt.date)):
+        return value
+    return str(value)
+
+
+def _cell_from(formula, value):
+    """Decide a cell's content from its paired ``.Formula`` and ``.Value`` entries.
+
+    A formula is identified by its ``.Formula`` text starting with ``=`` (kept verbatim).
+    Everything else is a constant and takes its **typed** ``.Value`` — crucially NOT the
+    ``.Formula`` text, which Excel returns as a string even for numbers (that was what
+    misclassified numeric constants as text boundaries in the first live run).
+    """
+    if isinstance(formula, str) and formula.startswith("="):
+        return formula
+    return _coerce_constant(value)
 
 
 def snapshot_from_com(com_ws) -> InMemoryWorksheet:
     """Build an InMemoryWorksheet from a live Excel COM worksheet object.
 
-    Reads the used range's formulas in **one bulk COM call** (``UsedRange.Formula``) rather
-    than tens of thousands of per-cell property accesses. Snapshot-conversion logic only;
-    tested against a FAKE COM object offline, NOT run against real Excel here.
+    Reads the used range in **two bulk COM calls** — ``UsedRange.Formula`` (formula text)
+    and ``UsedRange.Value`` (typed constant values) — rather than tens of thousands of
+    per-cell accesses, then combines them per ``_cell_from`` so formulas keep their text and
+    constants keep their real type. Snapshot-conversion logic only; tested against a FAKE COM
+    object offline, NOT run against real Excel here.
 
     Unresolved live-Excel assumptions (to confirm on the authorised test machine):
-      * uses ``Range.Formula`` (always US A1 syntax with ',' separators, which the openpyxl
-        tokenizer expects) — NOT ``FormulaLocal``; dynamic-array/spill (``Formula2``) is
-        future work;
-      * a formula is any string starting with ``=``; other values are constants; Excel error
-        values / unexpected COM types are coerced to strings (treated as boundaries);
-      * ``UsedRange`` gives the bounds and top-left (``.Row``/``.Column``); it can over-report
-        and does not special-case merged cells;
-      * ``.Formula`` returns a scalar for a single-cell range (handled by ``_as_grid``);
-      * 1-based indexing and ``Worksheet.Name`` for identity.
+      * ``.Formula`` is always US A1 syntax with ',' separators (what the tokenizer expects),
+        NOT ``.FormulaLocal``; dynamic-array/spill (``Formula2``) is future work;
+      * a cell is a formula iff its ``.Formula`` starts with ``=``; otherwise its ``.Value``
+        gives the typed constant (number/text/bool/date); errors/unexpected types → string;
+      * ``.Formula`` and ``.Value`` share the used range's shape and 1-based top-left
+        (``UsedRange.Row``/``.Column``); ``UsedRange`` can over-report and ignores merged cells;
+      * both return a scalar for a single-cell range (handled by ``_as_grid``);
+      * ``Worksheet.Name`` gives identity.
     """
     used = com_ws.UsedRange
     top, left = used.Row, used.Column
-    grid = _as_grid(used.Formula)
+    formulas = _as_grid(used.Formula)
+    values = _as_grid(used.Value)
     cells: dict[tuple[int, int], object] = {}
-    for i, row in enumerate(grid):
-        for j, raw in enumerate(row):
-            value = _coerce_com_value(raw)
-            if value is not None:
-                cells[(top + i, left + j)] = value
+    for i, frow in enumerate(formulas):
+        vrow = values[i] if i < len(values) else []
+        for j, f in enumerate(frow):
+            v = vrow[j] if j < len(vrow) else None
+            cell = _cell_from(f, v)
+            if cell is not None:
+                cells[(top + i, left + j)] = cell
     return InMemoryWorksheet(cells, title=com_ws.Name)
