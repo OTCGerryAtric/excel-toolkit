@@ -1,0 +1,138 @@
+{
+ "tests": [
+  {
+   "test": "Downloaded package carries Mark of the Web into the extracted files",
+   "passed": true,
+   "detail": "xlam marked: True"
+  },
+  {
+   "test": "Evidence: an add-in still carrying Mark of the Web is listed by Excel but not opened, so its macros never run",
+   "passed": true,
+   "detail": "listed as add-in: ['ExcelToolkit.xlam']; actually open: ['ArixcelExplorer.xlam', 'PERSONAL.XLSB']; calling it: macros blocked: Sorry, we couldn\u2019t find C:\\Users\\GerryPidgeon\\Documents\\ExcelToolkit.xlam. Is it possible that it was mo"
+  },
+  {
+   "test": "Tampered package: installer refuses, nothing changed",
+   "passed": true,
+   "detail": [
+    "Excel Toolkit was not installed: package file damaged or altered: ExcelToolkit.xlam",
+    "Nothing was changed.",
+    "Details: C:\\Users\\GerryPidgeon\\AppData\\Local\\ExcelToolkit\\install.log"
+   ]
+  },
+  {
+   "test": "Excel running: installer refuses with instructions, nothing changed",
+   "passed": true,
+   "detail": [
+    "Excel Toolkit was not installed: Excel is running. Please close every Excel window (save your work first) and run the installer again.",
+    "Nothing was changed.",
+    "Details: C:\\Users\\GerryPidgeon\\AppData\\Local\\ExcelToolkit\\install.log"
+   ]
+  },
+  {
+   "test": "Install 0.1.0 (standard user, no admin): succeeds",
+   "passed": true,
+   "detail": [
+    "Excel Toolkit 0.1.0 installed. Start Excel to use it (Ctrl+Shift+J audits the selection)."
+   ]
+  },
+  {
+   "test": "Installed files verified and unblocked (no Mark of the Web left)",
+   "passed": true,
+   "detail": "29 files installed; still marked: none"
+  },
+  {
+   "test": "Only one Excel registry value added; other add-ins untouched",
+   "passed": true,
+   "detail": {
+    "OPEN1": "/R \"C:\\Users\\GerryPidgeon\\AppData\\Local\\ExcelToolkit\\versions\\0.1.0\\ExcelToolkit.xlam\""
+   }
+  },
+  {
+   "test": "PERSONAL.XLSB unchanged by install",
+   "passed": true,
+   "detail": "hash compared"
+  },
+  {
+   "test": "first run: add-in loads at Excel start-up (Auto_Open ran), version 0.1.0, audit returns",
+   "passed": true,
+   "detail": "version=0.1.0|auto_open=True; result {'status': 'ok', 'count': '100', 'ms': '801.354', 'route': 'worker', 'error': ''}"
+  },
+  {
+   "test": "first run: PERSONAL.XLSB and Arixcel still open alongside the toolkit",
+   "passed": true,
+   "detail": [
+    "ExcelToolkit.xlam",
+    "ArixcelExplorer.xlam",
+    "PERSONAL.XLSB"
+   ]
+  },
+  {
+   "test": "Installed build: worker killed mid-request, result still arrives via one-shot",
+   "passed": true,
+   "detail": "ok|10000|106.846|10||worker|first run.xlsx"
+  },
+  {
+   "test": "Upgrade to 0.2.0: succeeds, same registry value updated, previous version kept for rollback",
+   "passed": true,
+   "detail": "versions ['0.1.0', '0.2.0']"
+  },
+  {
+   "test": "after upgrade: add-in loads at Excel start-up (Auto_Open ran), version 0.2.0, audit returns",
+   "passed": true,
+   "detail": "version=0.2.0|auto_open=True; result {'status': 'ok', 'count': '100', 'ms': '774.951', 'route': 'worker', 'error': ''}"
+  },
+  {
+   "test": "after upgrade: PERSONAL.XLSB and Arixcel still open alongside the toolkit",
+   "passed": true,
+   "detail": [
+    "ExcelToolkit.xlam",
+    "ArixcelExplorer.xlam",
+    "PERSONAL.XLSB"
+   ]
+  },
+  {
+   "test": "Rollback: succeeds",
+   "passed": true,
+   "detail": [
+    "Excel Toolkit rolled back to version 0.1.0. Start Excel to use it."
+   ]
+  },
+  {
+   "test": "after rollback: add-in loads at Excel start-up (Auto_Open ran), version 0.1.0, audit returns",
+   "passed": true,
+   "detail": "version=0.1.0|auto_open=True; result {'status': 'ok', 'count': '100', 'ms': '812.820', 'route': 'worker', 'error': ''}"
+  },
+  {
+   "test": "after rollback: PERSONAL.XLSB and Arixcel still open alongside the toolkit",
+   "passed": true,
+   "detail": [
+    "ExcelToolkit.xlam",
+    "ArixcelExplorer.xlam",
+    "PERSONAL.XLSB"
+   ]
+  },
+  {
+   "test": "Uninstall: Excel registry values exactly back to baseline, files and engine gone",
+   "passed": true,
+   "detail": {
+    "open_now": {
+     "OPEN": "/R \"C:\\Users\\GerryPidgeon\\AppData\\Local\\Arixcel Explorer\\ArixcelExplorer.xlam\""
+    },
+    "root_exists": false,
+    "engines": []
+   }
+  },
+  {
+   "test": "PERSONAL.XLSB unchanged after the whole cycle",
+   "passed": true,
+   "detail": "hash compared"
+  }
+ ],
+ "baseline": {
+  "open": {
+   "OPEN": "/R \"C:\\Users\\GerryPidgeon\\AppData\\Local\\Arixcel Explorer\\ArixcelExplorer.xlam\""
+  },
+  "personal": "a4f5900d6ea53df6bfc30f383e781fa9d7591b6d1c82b29655e87431bb81eb7d",
+  "root_exists": false
+ }
+}

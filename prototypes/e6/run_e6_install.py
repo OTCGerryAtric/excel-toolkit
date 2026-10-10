@@ -123,40 +123,55 @@ class UserExcel:
         self.process = subprocess.Popen([excel_exe, str(workbook)])
         self.pid = self.process.pid
         self.name = workbook.name
-        deadline = time.monotonic() + 60
+        # A normal start loads PERSONAL.XLSB and other add-ins first; the test workbook can take a while.
+        # Attach through any main window of this process that has a workbook window, then wait for ours.
+        deadline = time.monotonic() + 180
         self.identity = None
         while time.monotonic() < deadline and self.identity is None:
             time.sleep(0.5)
             for pid in excel_pids() - before:
                 self.pid = pid
-            hwnd = self._main_window()
-            if hwnd:
+            for hwnd in self._main_windows():
                 try:
-                    self.identity = Identity.from_handoff(f"{hwnd}|{self.pid}|{self.name}|{workbook}")
-                    self.app, self.book = attach(self.identity, timeout=2)
+                    identity = Identity.from_handoff(f"{hwnd}|{self.pid}|{self.name}|{workbook}")
+                    self.app, self.book = attach(identity, timeout=2)
+                    self.identity = identity
+                    break
                 except (IdentityError, ExcelBusy):
-                    self.identity = None
+                    continue
         if self.identity is None:
-            raise RuntimeError("Excel did not open the test workbook within 60 s")
+            raise RuntimeError("Excel did not open the test workbook within 180 s")
+        self.startup_seconds = round(180 - (deadline - time.monotonic()), 1)
         time.sleep(3)  # let startup add-ins finish loading
 
-    def _main_window(self) -> int:
+    def _main_windows(self) -> list[int]:
         found = []
 
         def visit(hwnd, _):
-            if win32gui.GetClassName(hwnd) == "XLMAIN" and win32process.GetWindowThreadProcessId(hwnd)[1] == self.pid \
-                    and self.name in win32gui.GetWindowText(hwnd):
+            if win32gui.GetClassName(hwnd) == "XLMAIN" and win32process.GetWindowThreadProcessId(hwnd)[1] == self.pid:
                 found.append(hwnd)
             return True
 
         win32gui.EnumWindows(visit, None)
-        return found[0] if found else 0
+        return found
 
     def run(self, macro: str, *args):
         return call(self.app, lambda: self.app.Run(macro, *args), timeout=10)
 
     def loaded(self) -> list[str]:
         return call(self.app, lambda: [b.Name for b in self.app.Workbooks] + [a.Name for a in self.app.AddIns if a.Installed])
+
+    def open_workbooks(self) -> list[str]:
+        """Workbooks actually open, including add-ins (an add-in can be listed but not opened)."""
+        def names():
+            out = []
+            for name in ("ExcelToolkit.xlam", "ArixcelExplorer.xlam", "PERSONAL.XLSB"):
+                try:
+                    out.append(self.app.Workbooks(name).Name)
+                except pywintypes.com_error:
+                    pass
+            return out
+        return call(self.app, names)
 
     def request(self, mode: str, address: str) -> dict:
         request_id = self.run("ExcelToolkit.xlam!Toolkit_Request", mode, "classify", "Bulk", address, self.name)
@@ -195,8 +210,8 @@ def first_run(label: str, expected_version: str) -> None:
                f"version={expected_version}" in status and "auto_open=True" in status and str(ROOT) in status
                and result["status"] == "ok" and result["count"] == "100",
                f"{status.split('|engine=')[0]}; result {result}")
-        record(f"{label}: PERSONAL.XLSB and the other add-ins still load alongside", "PERSONAL.XLSB" in loaded
-               and any("Arixcel" in name for name in loaded), loaded)
+        opened = excel.open_workbooks()
+        record(f"{label}: PERSONAL.XLSB and Arixcel still open alongside the toolkit", set(opened) == {"ExcelToolkit.xlam", "ArixcelExplorer.xlam", "PERSONAL.XLSB"}, opened)
         if label == "first run":
             request_id = excel.run("ExcelToolkit.xlam!Toolkit_Request", "auto", "classify", "Bulk", "A1:J1000", excel.name)
             time.sleep(0.05)
@@ -256,11 +271,13 @@ def main() -> None:
                 outcome = f"macros RAN: {excel.run('ExcelToolkit.xlam!Toolkit_Status')}"
             except Exception as error:  # noqa: BLE001
                 outcome = f"macros blocked: {getattr(error, 'excepinfo', None) and error.excepinfo[2] or error}"
-            loaded = excel.loaded()
+            listed = [n for n in excel.loaded() if "Toolkit" in n]
+            opened = excel.open_workbooks()
         finally:
             excel.close()
-        record("Evidence: an add-in still carrying Mark of the Web does not run its macros", outcome.startswith("macros blocked"),
-               f"{outcome[:160]}; loaded: {[n for n in loaded if 'Toolkit' in n]}")
+        record("Evidence: an add-in still carrying Mark of the Web is listed by Excel but not opened, so its macros never run",
+               outcome.startswith("macros blocked") and "ExcelToolkit.xlam" not in opened,
+               f"listed as add-in: {listed}; actually open: {opened}; calling it: {outcome[:120]}")
     finally:
         set_open(free_name, None)
 
@@ -284,10 +301,12 @@ def main() -> None:
     # 4. Install 0.1.0 from the marked download
     code, output = run_installer(packages["0.1.0"], "install.cmd")
     installed = ROOT / "versions" / "0.1.0"
-    still_marked = [str(p.relative_to(installed)) for p in installed.rglob("*") if p.is_file() and has_motw(p)]
+    installed_files = [p for p in installed.rglob("*") if p.is_file()] if installed.exists() else []
+    still_marked = [str(p.relative_to(installed)) for p in installed_files if has_motw(p)]
     added = {k: v for k, v in open_values().items() if k not in baseline["open"] or baseline["open"][k] != v}
     record("Install 0.1.0 (standard user, no admin): succeeds", code == 0, output.splitlines()[-1:])
-    record("Installed files verified and unblocked (no Mark of the Web left)", not still_marked, still_marked[:5] or "none marked")
+    record("Installed files verified and unblocked (no Mark of the Web left)", installed_files and not still_marked,
+           f"{len(installed_files)} files installed; still marked: {still_marked[:5] or 'none'}")
     record("Only one Excel registry value added; other add-ins untouched",
            len(added) == 1 and all(open_values().get(k) == v for k, v in baseline["open"].items()), added)
     record("PERSONAL.XLSB unchanged by install", sha256(PERSONAL) == baseline["personal"], "hash compared")

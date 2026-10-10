@@ -70,6 +70,10 @@ function Stop-Worker {
     } | ForEach-Object { Stop-Process -Id $_.Id -Force; Write-Log "stopped stray engine $($_.Id)" }
 }
 
+trap {
+    Stop-Install "unexpected error: $($_.Exception.Message)" 'The installation did not complete. Run it again, or run uninstall.cmd to remove any partial install.'
+}
+
 # ---------- Preflight ----------
 Write-Log "---- install started from $Package (rollback=$Rollback)"
 if (Get-Process -Name EXCEL -ErrorAction SilentlyContinue) {

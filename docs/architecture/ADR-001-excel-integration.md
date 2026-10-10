@@ -1,8 +1,8 @@
 # ADR-001: Excel integration architecture
 
-- **Status:** Accepted for Phase 0 — provisional until gate G0 (E6 still to run).
-- **Date:** 2026-10-09
-- **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e5.md`
+- **Status:** Accepted for Phase 0 — provisional until gate G0. E6 run 2026-10-10: runtime/packaging work, but the **deployment method is rejected** (see below); G0 not met.
+- **Date:** 2026-10-09 (updated 2026-10-10)
+- **Evidence:** `docs/validation/phase0-e1.md` to `phase0-e6.md`; incident `docs/incidents/2026-10-10-edr-file-deletion.md`
 
 ## Context
 
@@ -63,6 +63,33 @@ Full licence register, including the bundling and installer tools, to be complet
 - Excel's native undo is cleared by any macro or COM change; reversibility needs our own mechanisms (E3).
 - Colleagues need a bundled Python runtime; install route to be proven in E6.
 
+## E6 deployment: original approach rejected (2026-10-10)
+
+The E6 prototype packaged the engine with **PyInstaller** (self-extracting one-dir exe) and installed it with a
+**PowerShell script** that bypassed execution policy, **stripped the Mark of the Web** from the downloaded files,
+and wrote an Excel **auto-start** entry for the unsigned exe. Functionally it passed (runtime 11/11, install
+lifecycle 19/19), but on the owner's machine **the EDR classified the process tree as `windows.penetration`,
+killed it and quarantined the executable/script files** — deleting project and `.venv` files and `claude.exe`.
+See `docs/incidents/2026-10-10-edr-file-deletion.md` (confirmed: the EDR; hypothesis: which specific
+behaviour triggered the rule — console not available locally).
+
+**Why it is no longer acceptable:** the install behaviours above are indistinguishable from an Office-persistence
+attack, and colleague machines are expected to run the same policy, so the method does not meet the G0 bar
+("install on a clean PC without … global macro-security changes") in practice. The packaged functional results are
+kept as evidence but do not clear E6.
+
+**Replacement direction** (design/investigation only, not yet built): conventional per-user install — `.xlam` in a
+**Trusted Location** (no MOTW stripping), engine run from a **normally-installed** Python (embeddable or uv
+standalone, no PyInstaller), **code-signed** first-party code, no execution-policy bypass or process-killing at
+install. Reference point: Arixcel Explorer (signed VSTO, same HKCU `OPEN` key) coexists with the EDR — though
+signing/VSTO are necessary-and-indicated, **not proven sufficient**. Full analysis and the signing/IT decision:
+`docs/architecture/deployment-decision.md`.
+
 ## Open until G0
 
-E6 (clean install on a colleague's PC, licence register).
+- Redesigned deployment proven on a clean machine (replaces the rejected E6 installer), ideally with IT visibility.
+- Code-signing / deployment-trust decision: self-signed (dev) vs **company CA** (rollout); public paid certs
+  excluded by the zero-paid-licence rule.
+- Licence register (started in E6: Python PSF, pywin32 PSF, openpyxl MIT; PyInstaller to be dropped).
+- The open performance question is **resolved**: the E4 slowdown was Windows power-throttling of the hidden worker;
+  the worker now opts out (E6 runtime, stable ~40–45 ms under load).
