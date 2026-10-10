@@ -31,6 +31,7 @@ from openpyxl.utils.cell import coordinate_to_tuple, get_column_letter
 
 from .detector import dominant_pattern, flanked_outliers, minority_blocks
 from .normalize import RESOLVED, normalize_cell_value
+from .worksheet_source import as_source
 
 
 def _member_kind(value) -> str | None:
@@ -87,6 +88,7 @@ class WorksheetFinding:
 
 @dataclass
 class WorksheetReport:
+    sheet: str = ""
     total_formulas: int = 0
     resolved: int = 0
     unsupported: int = 0
@@ -104,38 +106,30 @@ class WorksheetReport:
         return self.analysed_formulas / self.total_formulas if self.total_formulas else 0.0
 
 
-def _lines(ws):
-    """Yield ('row'|'column', [(coord, value), ...]) for every row then every column.
-
-    Reads from ``ws._cells`` with ``.get`` so unpopulated positions come back as ``None``
-    without instantiating ``Cell`` objects (openpyxl's ``ws.cell()`` and ``iter_rows`` both
-    create cells via ``_get_cell``; we must not mutate the workbook while scanning it).
-    """
-    cells = ws._cells  # {(row, col): Cell}; .get never creates a cell
-    max_row, max_col = ws.max_row, ws.max_column
-
-    def value_at(r: int, c: int):
-        cell = cells.get((r, c))
-        return cell.value if cell is not None else None
-
+def _lines(source):
+    """Yield ('row'|'column', [(coord, value), ...]) for every row then every column of a
+    WorksheetSource. ``source.value_at`` is non-mutating by contract."""
+    max_row, max_col = source.max_row, source.max_col
     for r in range(1, max_row + 1):
-        yield "row", [(f"{get_column_letter(c)}{r}", value_at(r, c))
+        yield "row", [(f"{get_column_letter(c)}{r}", source.value_at(r, c))
                       for c in range(1, max_col + 1)]
     for c in range(1, max_col + 1):
         letter = get_column_letter(c)
-        yield "column", [(f"{letter}{r}", value_at(r, c))
+        yield "column", [(f"{letter}{r}", source.value_at(r, c))
                          for r in range(1, max_row + 1)]
 
 
 def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
-    """Scan a worksheet for high-confidence flanked-singleton formula inconsistencies.
+    """Scan a worksheet for high-confidence singleton and block formula inconsistencies.
 
-    Reads only (never writes, never materialises empty cells). Findings are deduplicated
-    by cell and returned in deterministic top-to-bottom, left-to-right order, each carrying
-    the axes that flagged it and — when the row and column scans disagree on the expected
-    pattern — an explicit conflict with both expectations preserved.
+    ``ws`` may be an openpyxl worksheet (auto-wrapped) or any WorksheetSource (e.g. a live
+    Excel COM snapshot). Reads only (never writes, never materialises empty cells). Findings
+    are deduplicated by cell and returned in deterministic top-to-bottom, left-to-right
+    order, each carrying the axes that flagged it and — when the row and column scans
+    disagree on the expected pattern — an explicit conflict with both expectations preserved.
     """
-    report = WorksheetReport()
+    source = as_source(ws)
+    report = WorksheetReport(sheet=source.title)
     normal_cache: dict[str, object] = {}
     analysed: set[str] = set()          # comparable formulas (pattern resolved, in a series)
     resolved_coords: set[str] = set()
@@ -149,7 +143,7 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
             normal_cache[coord] = nr
         return nr
 
-    for axis, line in _lines(ws):
+    for axis, line in _lines(source):
         coords = [c for c, _v in line]
         values = [v for _c, v in line]
 

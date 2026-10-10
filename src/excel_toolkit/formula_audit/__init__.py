@@ -46,6 +46,13 @@ from .worksheet import (
     scan_worksheet,
     segment_line,
 )
+from .worksheet_source import (
+    InMemoryWorksheet,
+    OpenpyxlWorksheet,
+    WorksheetSource,
+    as_source,
+    snapshot_from_com,
+)
 
 __all__ = [
     "CellFormula", "Finding", "SeriesReport", "scan_series",
@@ -54,5 +61,6 @@ __all__ = [
     "NormalResult", "normalize_formula", "normalize_cell_value",
     "RESOLVED", "PARTIAL", "UNSUPPORTED", "CONST",
     "WorksheetFinding", "WorksheetReport", "scan_worksheet", "segment_line",
+    "WorksheetSource", "OpenpyxlWorksheet", "InMemoryWorksheet", "as_source", "snapshot_from_com",
     "SUPPORTED_OPENPYXL", "openpyxl_supported",
 ]

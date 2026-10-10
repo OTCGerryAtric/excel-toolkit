@@ -113,10 +113,33 @@ was deleted but self-restored via the 16:48 auto-update to 2.1.296 — no reinst
 `C:\Users\GerryPidgeon\IncidentEvidence\2026-10-10-ExcelAddIn\`. Do **not** re-run the flagged prototype. Full
 record and the four confirmed/unverified distinctions: `docs/incidents/2026-10-10-edr-file-deletion.md`.
 
+## Detector progress and the integration gap (2026-10-11)
+
+The offline formula-inconsistency detector is built and hardened — **Gates 1–3 + two
+review-driven hardening passes, 52 passing tests** (singleton, worksheet-wide, and
+conservative two-cell block detection; 100% precision on the synthetic corpus). Commits
+`1225821` → `e8e565d` → `a5204fa` → `c2b97ad` → `1f6f74c`.
+
+**The decisive remaining gap (review, 2026-10-11): the detector has never run *inside*
+Excel.** The pieces each work in Excel (E1 hotkeys, E2 live COM read, E3 reversibility,
+E4 worker) and the detector works offline on `.xlsx` files via openpyxl — but nothing
+connects them: no ribbon/shortcut trigger, no path feeding the **live, unsaved** workbook
+into the new engine, no in-Excel results navigation. openpyxl reads *saved* files; the real
+product must read the in-memory workbook (E2 proved this is possible but it's not wired to
+the detector).
+
+**Next priority (supersedes Gate 4 and a larger corpus): a minimal end-to-end Excel
+demonstration** — (1) open a test workbook, (2) trigger an audit from a simple command,
+(3) analyse the formulas currently in Excel incl. unsaved changes, (4) show findings and
+navigate to the suspect cell. **Must NOT be attempted on this managed laptop** (Excel
+automation + external Python execution remain blocked post-E6); requires a **separately
+authorised test environment**. Gate 4 detection features and the larger independently-
+labelled corpus are **deferred** until the E2E experience is demonstrated.
+
 ## Architecture & plan (APPROVED 2026-10-10; `docs/architecture/deployment-decision.md`)
 
-Architecture and development direction **approved**; no further architecture documents needed — next milestone is
-working formula-analysis functionality with automated tests. Deployment stays blocked (G0).
+Architecture and development direction **approved**; no further architecture documents needed.
+Deployment stays blocked (G0).
 
 **VBA `.xlam` + Python is the preferred working baseline** (decision 2026-10-10). Excel-DNA (`.xll`) + Python is a
 credible **alternative to investigate**, not an equal commitment; a full C# rewrite is a contingency. The **Python
