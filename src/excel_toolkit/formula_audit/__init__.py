@@ -9,6 +9,8 @@ from .detector import (
     CellFormula,
     Finding,
     SeriesReport,
+    dominant_pattern,
+    flanked_outliers,
     scan_series,
     series_from_column,
     series_from_row,
@@ -22,10 +24,17 @@ from .normalize import (
     normalize_cell_value,
     normalize_formula,
 )
+from .worksheet import (
+    WorksheetFinding,
+    WorksheetReport,
+    scan_worksheet,
+    segment_line,
+)
 
 __all__ = [
     "CellFormula", "Finding", "SeriesReport", "scan_series",
-    "series_from_row", "series_from_column",
+    "series_from_row", "series_from_column", "dominant_pattern", "flanked_outliers",
     "NormalResult", "normalize_formula", "normalize_cell_value",
     "RESOLVED", "PARTIAL", "UNSUPPORTED", "CONST",
+    "WorksheetFinding", "WorksheetReport", "scan_worksheet", "segment_line",
 ]
