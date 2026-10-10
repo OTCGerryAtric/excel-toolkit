@@ -1,14 +1,21 @@
-"""Detect a formula that breaks the pattern established by its neighbours.
+"""Detect formulas that break the pattern established by their neighbours.
 
-Conservative, high-confidence rule (unchanged since Gate 1): a cell is flagged only when
-it is an **interior singleton** whose normalised pattern differs from a **dominant**
-pattern that its immediate left and right neighbours both share. Edge cells and
-block boundaries (e.g. actuals → forecast, year-end totals) are never flagged.
+Two conservative, high-confidence rules (both emit only ``high`` confidence — there are no
+medium/low tiers and no automatic correction):
 
-Two axes are reported and kept separate:
-- **coverage** (per cell): could the formula's references be resolved? resolved / partial
-  / unsupported — dependency-resolution coverage.
-- **confidence** (per finding): only ``high`` is emitted here (flanked interior singleton).
+1. **Singleton** (since Gate 1): a lone interior cell whose normalised pattern differs
+   from a dominant pattern that both neighbours share — and whose pattern occurs **once**
+   in the series (a recurring difference is structural, not an error).
+
+2. **Block** (Gate 3): a **short** run (2..``max_block``) of consecutive cells that all
+   share one non-dominant pattern, bounded on **both** sides by a **strongly established**
+   dominant pattern, where that minority pattern occurs **only** in this run. Multi-cell
+   anomalies require stronger evidence than singletons (``min_dominant`` ≥ 4 and the
+   dominant must be at least twice the run length). Longer runs, recurring patterns, and
+   two-regime boundaries (e.g. financial-year changes) are suppressed as ambiguous.
+
+Coverage (resolved/partial/unsupported) is dependency-resolution coverage, reported
+separately from pattern confidence.
 """
 
 from __future__ import annotations
@@ -22,6 +29,14 @@ FLANKED_MESSAGE = (
     "Formula differs from the consistent pattern of the formulas on both sides. "
     "Potential inconsistency — review whether the difference is intentional."
 )
+BLOCK_MESSAGE = (
+    "Short run of consecutive formulas that differ from the strongly established pattern "
+    "on both sides. Potential inconsistency — review whether the difference is intentional."
+)
+
+# Gate-3 block thresholds (conservative).
+MAX_BLOCK = 2          # only short minority runs (pairs) are considered
+MIN_BLOCK_DOMINANT = 4  # the flanking dominant must be strongly established
 
 
 @dataclass(frozen=True)
@@ -35,8 +50,10 @@ class Finding:
     coord: str
     observed: str
     expected: str
-    confidence: str  # "high" in this increment
+    confidence: str          # always "high" in this detector
     message: str
+    kind: str = "singleton"  # "singleton" | "block"
+    block: tuple = ()        # for block findings: the coords of the whole run
 
 
 @dataclass
@@ -64,26 +81,52 @@ def dominant_pattern(patterns: list[str | None]) -> tuple[str | None, int]:
 
 
 def flanked_outliers(coords: list[str], patterns: list[str | None], dominant: str) -> list[Finding]:
-    """Interior cells whose pattern differs from ``dominant`` while both neighbours match it.
-
-    Shared by single-series and worksheet scanning so the rule is identical everywhere.
-    """
+    """Interior singletons: pattern differs from ``dominant``, both neighbours match it, and
+    the pattern occurs exactly once in the series (so recurring variations are not flagged)."""
+    counts = Counter(p for p in patterns if p is not None)
     findings = []
     for i in range(1, len(coords) - 1):  # interior only; never the first or last cell
         p = patterns[i]
         if p is None or p == dominant:
             continue
-        if patterns[i - 1] == dominant and patterns[i + 1] == dominant:
-            findings.append(Finding(coords[i], p, dominant, "high", FLANKED_MESSAGE))
+        if patterns[i - 1] == dominant and patterns[i + 1] == dominant and counts[p] == 1:
+            findings.append(Finding(coords[i], p, dominant, "high", FLANKED_MESSAGE, kind="singleton"))
+    return findings
+
+
+def minority_blocks(coords: list[str], patterns: list[str | None], dominant: str,
+                    *, max_block: int = MAX_BLOCK, min_dominant: int = MIN_BLOCK_DOMINANT) -> list[Finding]:
+    """Short consecutive minority runs bounded on both sides by a strong dominant pattern."""
+    counts = Counter(p for p in patterns if p is not None)
+    if counts.get(dominant, 0) < min_dominant:
+        return []
+    n = len(patterns)
+    findings: list[Finding] = []
+    i = 0
+    while i < n:
+        p = patterns[i]
+        if p is None or p == dominant:
+            i += 1
+            continue
+        j = i
+        while j < n and patterns[j] == p:  # maximal run of identical pattern p
+            j += 1
+        length = j - i
+        bounded = i - 1 >= 0 and patterns[i - 1] == dominant and j < n and patterns[j] == dominant
+        unique_run = counts[p] == length           # all occurrences of p are in this run
+        strong = counts[dominant] >= 2 * length
+        if 2 <= length <= max_block and bounded and unique_run and strong:
+            run = tuple(coords[i:j])
+            findings.extend(
+                Finding(coords[k], p, dominant, "high", BLOCK_MESSAGE, kind="block", block=run)
+                for k in range(i, j)
+            )
+        i = j
     return findings
 
 
 def scan_series(cells: list[CellFormula], *, min_group: int = 3) -> SeriesReport:
-    """Scan one ordered 1-D run of cells (a row or column span) for a lone outlier.
-
-    ``min_group``: the dominant pattern must appear at least this many times before any
-    outlier is flagged, so we never "flag the majority" in a tiny or noisy series.
-    """
+    """Scan one ordered 1-D run of cells (a row or column span) for singleton and block outliers."""
     report = SeriesReport(total=len(cells))
     normals: list[NormalResult] = [normalize_cell_value(c.raw, c.coord) for c in cells]
     for cell, nr in zip(cells, normals):
@@ -100,7 +143,8 @@ def scan_series(cells: list[CellFormula], *, min_group: int = 3) -> SeriesReport
     report.dominant, report.dominant_count = dominant_pattern(patterns)
     if report.dominant is not None and report.dominant_count >= min_group:
         coords = [c.coord for c in cells]
-        report.findings = flanked_outliers(coords, patterns, report.dominant)
+        report.findings = (flanked_outliers(coords, patterns, report.dominant)
+                           + minority_blocks(coords, patterns, report.dominant))
     return report
 
 

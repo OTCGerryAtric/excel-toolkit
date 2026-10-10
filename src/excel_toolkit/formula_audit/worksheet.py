@@ -29,7 +29,7 @@ from dataclasses import dataclass, field
 
 from openpyxl.utils.cell import coordinate_to_tuple, get_column_letter
 
-from .detector import dominant_pattern, flanked_outliers
+from .detector import dominant_pattern, flanked_outliers, minority_blocks
 from .normalize import RESOLVED, normalize_cell_value
 
 
@@ -79,6 +79,8 @@ class WorksheetFinding:
     expected: str                                # representative expected pattern (first axis)
     expected_by_axis: tuple[tuple[str, str], ...]  # ((axis, expected), ...) sorted by axis
     conflict: bool                               # row and column disagree on the expected pattern
+    kind: str                                    # "singleton" | "block"
+    block: tuple[str, ...]                        # for block findings: the coords of the run
     confidence: str
     message: str
 
@@ -174,9 +176,11 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
             for coord, pattern in zip(seg_coords, seg_patterns):
                 if pattern is not None:          # only genuinely comparable formulas
                     analysed.add(coord)
-            for f in flanked_outliers(seg_coords, seg_patterns, dom):
+            seg_findings = (flanked_outliers(seg_coords, seg_patterns, dom)
+                            + minority_blocks(seg_coords, seg_patterns, dom))
+            for f in seg_findings:
                 entry = merged.setdefault(f.coord, {"observed": f.observed, "by_axis": {}})
-                entry["by_axis"][axis] = f.expected
+                entry["by_axis"][axis] = {"expected": f.expected, "kind": f.kind, "block": f.block}
 
     report.total_formulas = len(formula_coords)
     report.analysed_formulas = len(analysed)
@@ -190,12 +194,21 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
         row, col = coordinate_to_tuple(coord)
         by_axis = entry["by_axis"]
         axes = tuple(sorted(by_axis))
-        expected_by_axis = tuple((a, by_axis[a]) for a in axes)
-        conflict = len(set(by_axis.values())) > 1
+        expected_by_axis = tuple((a, by_axis[a]["expected"]) for a in axes)
+        conflict = len({e for _a, e in expected_by_axis}) > 1
+        kind = "block" if any(by_axis[a]["kind"] == "block" for a in axes) else "singleton"
+        block = tuple(sorted({c for a in axes for c in by_axis[a]["block"]},
+                             key=coordinate_to_tuple))
         where = " and ".join(axes)
-        message = (f"Formula differs from the consistent pattern of its neighbours "
-                   f"({where}). Potential inconsistency — review whether the difference "
-                   f"is intentional.")
+        if kind == "block":
+            message = (f"Part of a short run of consecutive formulas ({', '.join(block)}) that "
+                       f"differ from the strongly established pattern of their neighbours "
+                       f"({where}). Potential inconsistency — review whether the difference is "
+                       f"intentional.")
+        else:
+            message = (f"Formula differs from the consistent pattern of its neighbours "
+                       f"({where}). Potential inconsistency — review whether the difference "
+                       f"is intentional.")
         if conflict:
             detail = "; ".join(f"{a} expects {e}" for a, e in expected_by_axis)
             message += (f" Note: the row and column scans disagree on the expected pattern "
@@ -203,7 +216,7 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
         report.findings.append(WorksheetFinding(
             coord=coord, row=row, col=col, axes=axes,
             observed=entry["observed"], expected=expected_by_axis[0][1],
-            expected_by_axis=expected_by_axis, conflict=conflict,
+            expected_by_axis=expected_by_axis, conflict=conflict, kind=kind, block=block,
             confidence="high", message=message,
         ))
     report.findings.sort(key=lambda f: (f.row, f.col))
