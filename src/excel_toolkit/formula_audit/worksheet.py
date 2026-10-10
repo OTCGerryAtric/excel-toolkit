@@ -80,7 +80,7 @@ class WorksheetFinding:
     expected_by_axis: tuple[tuple[str, str], ...]  # ((axis, expected), ...) sorted by axis
     conflict: bool                               # row and column disagree on the expected pattern
     kind: str                                    # "singleton" | "block"
-    block: tuple[str, ...]                        # for block findings: the coords of the run
+    block_by_axis: tuple[tuple[str, tuple[str, ...]], ...]  # ((axis, run_coords), ...) per block axis
     confidence: str
     message: str
 
@@ -196,15 +196,17 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
         axes = tuple(sorted(by_axis))
         expected_by_axis = tuple((a, by_axis[a]["expected"]) for a in axes)
         conflict = len({e for _a, e in expected_by_axis}) > 1
-        kind = "block" if any(by_axis[a]["kind"] == "block" for a in axes) else "singleton"
-        block = tuple(sorted({c for a in axes for c in by_axis[a]["block"]},
-                             key=coordinate_to_tuple))
+        # Keep each axis's block run separate — never union a horizontal and a vertical run
+        # into one apparent block (that could invent a 3-cell L-shape neither scan found).
+        block_by_axis = tuple((a, tuple(by_axis[a]["block"])) for a in axes
+                              if by_axis[a]["kind"] == "block")
+        kind = "block" if block_by_axis else "singleton"
         where = " and ".join(axes)
         if kind == "block":
-            message = (f"Part of a short run of consecutive formulas ({', '.join(block)}) that "
-                       f"differ from the strongly established pattern of their neighbours "
-                       f"({where}). Potential inconsistency — review whether the difference is "
-                       f"intentional.")
+            runs = "; ".join(f"{a}: {', '.join(run)}" for a, run in block_by_axis)
+            message = (f"Part of a short run of consecutive formulas ({runs}) that differ from "
+                       f"the strongly established pattern of their neighbours. Potential "
+                       f"inconsistency — review whether the difference is intentional.")
         else:
             message = (f"Formula differs from the consistent pattern of its neighbours "
                        f"({where}). Potential inconsistency — review whether the difference "
@@ -216,8 +218,8 @@ def scan_worksheet(ws, *, min_group: int = 3) -> WorksheetReport:
         report.findings.append(WorksheetFinding(
             coord=coord, row=row, col=col, axes=axes,
             observed=entry["observed"], expected=expected_by_axis[0][1],
-            expected_by_axis=expected_by_axis, conflict=conflict, kind=kind, block=block,
-            confidence="high", message=message,
+            expected_by_axis=expected_by_axis, conflict=conflict, kind=kind,
+            block_by_axis=block_by_axis, confidence="high", message=message,
         ))
     report.findings.sort(key=lambda f: (f.row, f.col))
     return report

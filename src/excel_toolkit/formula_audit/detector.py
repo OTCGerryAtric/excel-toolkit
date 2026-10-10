@@ -16,6 +16,15 @@ medium/low tiers and no automatic correction):
 
 Coverage (resolved/partial/unsupported) is dependency-resolution coverage, reported
 separately from pattern confidence.
+
+Known limitations (deliberate, for a conservative high-confidence tool):
+- The singleton rule requires the outlier's pattern to be **unique** in the series. This
+  suppresses legitimate recurring exceptions (e.g. quarter-end formulas) but also means a
+  **genuine error that happens to be repeated elsewhere in the same series is suppressed**
+  (a false negative) — repetition is treated as structural, not accidental.
+- Only short consecutive minority runs (length 2..MAX_BLOCK) are flagged; a genuine run of
+  3+ identical consecutive errors is suppressed as ambiguous (a false negative).
+- Only ``high`` confidence is emitted; there is no automatic correction.
 """
 
 from __future__ import annotations

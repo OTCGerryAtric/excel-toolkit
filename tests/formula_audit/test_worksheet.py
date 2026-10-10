@@ -20,10 +20,19 @@ def wb(tmp_path_factory):
 
 
 def _flagged_groups(report):
-    """Flagged cells grouped into blocks (singletons are size-1 groups)."""
+    """Flagged cells grouped into blocks, per detection axis (singletons are size-1 groups).
+
+    Each axis's block run is its own group; a cell that is a block in two axes yields two
+    separate runs, never a combined set.
+    """
     groups = set()
     for f in report.findings:
-        groups.add(frozenset(f.block) if (f.kind == "block" and f.block) else frozenset({f.coord}))
+        block_axes = {a for a, _run in f.block_by_axis}
+        for _a, run in f.block_by_axis:
+            groups.add(frozenset(run))
+        for a in f.axes:
+            if a not in block_axes:          # a singleton detection on this axis
+                groups.add(frozenset({f.coord}))
     return groups
 
 
@@ -50,15 +59,42 @@ def test_axes_recorded(wb):
 
 
 def test_block_findings_carry_evidence(wb):
-    for sheet, run in (("consecutive_block", {"D2", "E2"}), ("consec_vertical", {"B5", "B6"})):
+    for sheet, axis, run in (("consecutive_block", "row", {"D2", "E2"}),
+                             ("consec_vertical", "column", {"B5", "B6"})):
         report = scan_worksheet(wb[sheet])
         block_cells = {f.coord for f in report.findings if f.kind == "block"}
         assert block_cells == run
         for f in report.findings:
             if f.kind == "block":
-                assert set(f.block) == run          # evidence: the whole run preserved
+                by_axis = dict(f.block_by_axis)
+                assert set(by_axis) == {axis}           # single-axis block
+                assert set(by_axis[axis]) == run        # evidence: the whole run preserved
                 assert f.expected and f.observed and f.expected != f.observed
                 assert f.confidence == "high"
+
+
+def test_lshaped_cross_axis_blocks_kept_separate():
+    # C3 is part of a horizontal block (C3,D3) AND a vertical block (C3,C4). The two runs
+    # must stay distinct; no combined 3-cell L-shaped block may appear.
+    from openpyxl import Workbook
+    ws = Workbook().active
+    ws["Z1"] = 1
+    D, P = "=$Z$1+1", "=$Z$1*2"
+    # Row 3: A3 B3 [C3 D3] E3 F3  -> dominant D x4, minority block C3:D3
+    for cell, f in {"A3": D, "B3": D, "C3": P, "D3": P, "E3": D, "F3": D}.items():
+        ws[cell] = f
+    # Column C: C1 C2 [C3 C4] C5 C6 -> dominant D x4, minority block C3:C4
+    for cell, f in {"C1": D, "C2": D, "C4": P, "C5": D, "C6": D}.items():
+        ws[cell] = f
+    report = scan_worksheet(ws)
+    c3 = next(f for f in report.findings if f.coord == "C3")
+    by_axis = dict(c3.block_by_axis)
+    assert set(by_axis["row"]) == {"C3", "D3"}
+    assert set(by_axis["column"]) == {"C3", "C4"}
+    groups = _flagged_groups(report)
+    assert frozenset({"C3", "D3"}) in groups
+    assert frozenset({"C3", "C4"}) in groups
+    assert frozenset({"C3", "D3", "C4"}) not in groups   # no invented L-shaped block
 
 
 def test_triple_run_is_suppressed(wb):

@@ -22,7 +22,10 @@ from .detector import (
 )
 
 # The scanner relies on openpyxl 3.1.x behaviour (the ws._cells store used for
-# non-mutating reads, and the formula tokenizer). Pin/constrain here so a drift is caught.
+# non-mutating reads, and the formula tokenizer). This is a runtime check with a regression
+# test, not a packaged constraint: the main project's dependency files are intentionally
+# unchanged during the isolated-development phase, so ENFORCING a supported version in
+# production (pinning openpyxl in pyproject/uv.lock) remains OUTSTANDING.
 SUPPORTED_OPENPYXL = ("3.1",)
 
 
