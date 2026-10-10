@@ -35,3 +35,7 @@ prototypes/e4/fixtures/*.xlsx
 prototypes/e5/work/
 prototypes/e5/fixtures/*.xlsx
 
+prototypes/e6/build/
+prototypes/e6/dist/
+prototypes/e6/work/
+

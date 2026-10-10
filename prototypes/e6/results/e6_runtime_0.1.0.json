@@ -1,0 +1,140 @@
+{
+ "version": "0.1.0",
+ "tests": [
+  {
+   "test": "Packaged add-in finds its engine next to itself",
+   "passed": true,
+   "detail": "version=0.1.0|auto_open=False|engine=C:\\Users\\GerryPidgeon\\MasterCodingFolder\\Python\\Personal\\ExcelAddIn\\prototypes\\e6\\build\\ExcelToolkit-0.1.0\\payload\\engine\\ExcelToolkitEngine.exe|engine_exists=True|state=C:\\Users\\GerryPidgeon\\AppData\\Local\\ExcelToolkit\\state"
+  },
+  {
+   "test": "First request starts the packaged worker and returns a result",
+   "passed": true,
+   "detail": "881 ms, route worker"
+  },
+  {
+   "test": "Worker pipe access list contains only the current Windows user",
+   "passed": true,
+   "detail": "ACEs: ['AzureAD\\\\GerryPidgeon mask=0x001F01FF']"
+  },
+  {
+   "test": "Malformed, unexpected, unknown-operation, injected and oversized requests are refused (none executed)",
+   "passed": true,
+   "detail": [
+    "not JSON",
+    "unexpected fields ['code']",
+    "field 'op' is missing or invalid",
+    "field 'address' is missing or invalid",
+    "message larger than 16384 bytes"
+   ]
+  },
+  {
+   "test": "Request over the 1,000,000-cell limit is answered with a clear refusal",
+   "passed": true,
+   "detail": "InvalidRequest: request covers more than 1,000,000 cells"
+  },
+  {
+   "test": "Packaged build: 30 interleaved requests over 2 Excel processes / 3 workbooks (2 same-named) all routed correctly",
+   "passed": true,
+   "detail": "all correct"
+  },
+  {
+   "test": "Packaged one-shot path works on its own",
+   "passed": true,
+   "detail": "864 ms, route oneshot"
+  },
+  {
+   "test": "Worker killed mid-request: watchdog re-sends it one-shot and the user still gets the result",
+   "passed": true,
+   "detail": "ok, 10000 findings, route 'oneshot (worker stopped)', 1415 ms"
+  },
+  {
+   "test": "Another process holds the pipe name and swallows the request: it still completes via one-shot fallback",
+   "passed": true,
+   "detail": "route 'oneshot (worker stopped)', 949 ms"
+  },
+  {
+   "test": "Idle worker exits on its own and removes its pid file",
+   "passed": true,
+   "detail": "exit code 0, pid file present: False"
+  },
+  {
+   "test": "Performance retest on a fresh Excel (worker drains its COM message queue): 100-cell probe latency across heavy workloads",
+   "passed": true,
+   "detail": "fresh 44.5 ms, worst 45.4 ms; see phases"
+  }
+ ],
+ "perf": [
+  {
+   "phase": "fresh Excel, worker warm-up",
+   "requests": 10,
+   "median_ms": 45.4,
+   "probe_100_cells_ms": 44.5,
+   "trivial_com_call_ms": 0.129,
+   "working_set_mb": 284.7,
+   "private_mb": 208.9,
+   "handles": 1750,
+   "gdi": 296,
+   "user_objects": 205
+  },
+  {
+   "phase": "20 x worker classify 10,000",
+   "requests": 20,
+   "median_ms": 99.5,
+   "probe_100_cells_ms": 40.0,
+   "trivial_com_call_ms": 0.131,
+   "working_set_mb": 290.9,
+   "private_mb": 215.0,
+   "handles": 1753,
+   "gdi": 296,
+   "user_objects": 203
+  },
+  {
+   "phase": "20 x worker read 100,000",
+   "requests": 20,
+   "median_ms": 627.4,
+   "probe_100_cells_ms": 43.3,
+   "trivial_com_call_ms": 0.126,
+   "working_set_mb": 319.8,
+   "private_mb": 243.6,
+   "handles": 1762,
+   "gdi": 296,
+   "user_objects": 204
+  },
+  {
+   "phase": "10 x one-shot classify 10,000",
+   "requests": 10,
+   "median_ms": 855.3,
+   "probe_100_cells_ms": 45.4,
+   "trivial_com_call_ms": 0.106,
+   "working_set_mb": 293.7,
+   "private_mb": 213.2,
+   "handles": 1733,
+   "gdi": 296,
+   "user_objects": 196
+  },
+  {
+   "phase": "20 x worker classify 10,000 again",
+   "requests": 20,
+   "median_ms": 103.1,
+   "probe_100_cells_ms": 40.2,
+   "trivial_com_call_ms": 0.124,
+   "working_set_mb": 294.3,
+   "private_mb": 213.7,
+   "handles": 1728,
+   "gdi": 296,
+   "user_objects": 195
+  },
+  {
+   "phase": "after 30 s idle",
+   "requests": 0,
+   "median_ms": null,
+   "probe_100_cells_ms": 43.4,
+   "trivial_com_call_ms": 0.106,
+   "working_set_mb": 291.1,
+   "private_mb": 210.1,
+   "handles": 1722,
+   "gdi": 296,
+   "user_objects": 195
+  }
+ ]
+}

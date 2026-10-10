@@ -16,5 +16,6 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "openpyxl>=3.1.5",
+    "pyinstaller>=6.22.3",
     "pywin32>=312",
 ]
