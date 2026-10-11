@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Excel Toolkit ribbon (M2). Labels, tooltips and enabled state come from the VBA command
+<!-- Excel Toolkit ribbon (M3a). Labels, tooltips and enabled/pressed state come from the VBA command
      registry (TkMain) through callbacks, so the ribbon cannot drift from it. Built-in icons only. -->
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Tk_RibbonLoaded">
   <ribbon>
@@ -12,10 +12,32 @@
           <button id="tkUndo" size="large" imageMso="Undo" keytip="U"
                   getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
                   getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
-          <separator id="tkQuickToolsSeparator"/>
+        </group>
+        <group id="tkFormat" label="Format">
+          <menu id="tkNumberFormats" label="Number formats" size="large" imageMso="PercentStyle" keytip="N">
+            <button id="tkFmtNumber" keytip="I"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFmtCurrency" keytip="O"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFmtPercent" keytip="P"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFmtDate" keytip="M"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          </menu>
+        </group>
+        <group id="tkAuditGroup" label="Audit">
           <button id="tkAudit" size="large" imageMso="ErrorChecking" keytip="A"
                   getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
                   getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+        </group>
+        <group id="tkSettings" label="Settings">
+          <toggleButton id="tkShortcuts" size="large" imageMso="ControlToggleButton" keytip="K"
+                        getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                        getPressed="Tk_GetPressed" onAction="Tk_OnToggle"/>
         </group>
       </tab>
     </tabs>

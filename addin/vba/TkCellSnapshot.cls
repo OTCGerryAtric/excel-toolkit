@@ -336,6 +336,11 @@ Public Function RestoreFormulas(ByVal useHook As Boolean) As String
     RestoreFormulas = VerifyRestored()
 End Function
 
+' The undo-record interface used by TkUndo.
+Public Function Restore(ByVal useHook As Boolean) As String
+    Restore = RestoreFormulas(useHook)
+End Function
+
 ' Restores after a failed apply (no test hook).
 Public Function RollBack() As String
     RollBack = RestoreFormulas(False)

@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 ADDIN_VBA = sorted((ROOT / "addin" / "vba").iterdir())
 ALL_VBA = build_addin.VBA_SOURCES
 UI_NS = "{http://schemas.microsoft.com/office/2009/07/customui}"
-CALLBACK_ARITY = {"onLoad": 1, "onAction": 1, "getLabel": 2, "getScreentip": 2, "getSupertip": 2, "getEnabled": 2}
+CALLBACK_ARITY = {"onLoad": 1, "onAction": 1, "getLabel": 2, "getScreentip": 2, "getSupertip": 2, "getEnabled": 2,
+                  "getPressed": 2}
 
 
 def _text(path: Path) -> str:
@@ -45,10 +46,14 @@ def _code(path: Path) -> str:
     return "\n".join(lines)
 
 
+STANDARD_MODULES = [p for p in ALL_VBA if p.suffix == ".bas"]  # class members are scoped to their class
+
+
 def _public_procedures() -> dict[str, tuple[str, int, str]]:
-    """name -> (kind, parameter count, file) for every Public Sub/Function in the add-in project."""
+    """name -> (kind, parameter count, file) for every Public Sub/Function in the project's standard
+    modules - the global namespace that callbacks, OnKey/OnUndo and unqualified calls resolve against."""
     found = {}
-    for path in ALL_VBA:
+    for path in STANDARD_MODULES:
         for m in re.finditer(r"^Public (Sub|Function) (\w+)\(([^)]*)\)", _code(path), re.M):
             kind, name, params = m.groups()
             assert name not in found, f"{name} is defined twice ({found.get(name)} and {path.name}) - ambiguous name"
@@ -75,6 +80,8 @@ def test_every_ribbon_callback_is_a_public_sub_with_the_right_signature():
     used = set()
     for element in _ui().iter():
         for attribute, arity in CALLBACK_ARITY.items():
+            if attribute == "onAction" and element.tag == f"{UI_NS}toggleButton":
+                arity = 2  # toggleButton onAction(control, pressed)
             name = element.get(attribute)
             if name:
                 used.add(name)
@@ -84,21 +91,88 @@ def test_every_ribbon_callback_is_a_public_sub_with_the_right_signature():
     assert {"Tk_RibbonLoaded", "Tk_OnAction", "Tk_GetLabel", "Tk_GetEnabled"} <= used
 
 
-def test_ribbon_buttons_match_the_command_registry():
-    buttons = [b.get("id") for b in _ui().iter(f"{UI_NS}button")]
+def _controls(tags=("button", "toggleButton")):
+    return [e for e in _ui().iter() if e.tag in {f"{UI_NS}{tag}" for tag in tags}]
+
+
+def test_ribbon_controls_match_the_command_registry():
     main = _code(ROOT / "addin" / "vba" / "TkMain.bas")
+    controls = [c.get("id") for c in _controls()]
+    buttons = {c.get("id") for c in _controls(("button",))}
     registry_cases = set(re.findall(r'Case "(tk\w+)"\s*\n\s*Registry = Array', main))
-    listed = re.search(r"Tk_CommandIds = Array\(([^)]*)\)", main).group(1)
-    listed_ids = re.findall(r'"(\w+)"', listed)
+    listed_ids = re.findall(r'"(\w+)"', re.search(r"Tk_CommandIds = Array\(([^)]*)\)", main).group(1))
     on_action_cases = set(re.findall(r'Case "(tk\w+)": Tk_', main))
-    assert buttons == listed_ids == ["tkConvertToValues", "tkUndo", "tkAudit"]
-    assert set(buttons) == registry_cases == on_action_cases
+    assert sorted(controls) == sorted(listed_ids)
+    assert set(controls) == registry_cases
+    assert buttons == on_action_cases  # the toggle goes through Tk_OnToggle instead
+    assert "tkShortcuts" in controls and "tkShortcuts" not in buttons
 
 
-def test_every_button_has_a_built_in_icon_and_a_keytip():
-    for button in _ui().iter(f"{UI_NS}button"):
-        assert button.get("imageMso") and button.get("keytip"), button.get("id")
-        assert button.get("image") is None  # built-in Office icons only
+def test_every_control_has_a_keytip_and_top_level_controls_a_built_in_icon():
+    for group in _ui().iter(f"{UI_NS}group"):
+        for control in group:
+            assert control.get("image") is None  # built-in Office icons only
+            if control.tag != f"{UI_NS}separator":
+                assert control.get("imageMso") and control.get("keytip"), control.get("id")
+    for control in _controls():
+        assert control.get("keytip"), control.get("id")
+
+
+def test_shortcuts_are_off_by_default_and_bound_keys_have_handlers():
+    shortcuts = _code(ROOT / "addin" / "vba" / "TkShortcuts.bas")
+    assert re.search(r"^Private enabled As Boolean", shortcuts, re.M)  # VBA initialises it to False
+    assert "Tk_SetShortcuts True" not in "".join(_code(p) for p in ALL_VBA)  # never switched on by code
+    procedures = _public_procedures()
+    bindings = re.findall(r'Array\("(\^\+[A-Z])", "(\w+)"\)', shortcuts)
+    assert [key for key, _ in bindings] == ["^+I", "^+O", "^+P", "^+M"]
+    for _, handler in bindings:
+        assert procedures[handler][:2] == ("Sub", 0)
+    assert re.search(r"Public Sub Auto_Close\(\)\s*\n\s*If enabled Then Tk_SetShortcuts False", shortcuts)
+
+
+# ---------- Legacy equivalence (M3a) ----------
+
+LEGACY = ROOT / "baseline" / "vba" / "PERSONAL_XLSB_olevba.txt"
+
+
+def _legacy_transitions(macro: str) -> tuple[dict, str]:
+    """From the legacy If/Else chain: {condition format: next format} and the default (Else) format."""
+    text = LEGACY.read_text(encoding="utf-8")
+    body = text.split(f"Sub {macro}()", 1)[1].split("End Sub", 1)[0]
+    conditions = re.findall(r'If Selection\.NumberFormat = "([^"]*)" Then\s*\n\s*Selection\.NumberFormat = "([^"]*)"', body)
+    assigned = re.findall(r'Selection\.NumberFormat = "([^"]*)"\s*\n', body)
+    default = assigned[-1]  # the innermost Else
+    return dict(conditions), default
+
+
+def _toolkit_cycle(name: str) -> list[str]:
+    code = _code(ROOT / "addin" / "vba" / "TkFormat.bas")
+    block = code.split(f'Case "{name}"', 1)[1].split("Case ", 1)[0]
+    return [s.replace("{GBP}", "£") for s in re.findall(r'"([^"]*)"', block)]
+
+
+@pytest.mark.parametrize("macro,cycle", [("Number_Format_Toggle", "number"), ("Currency_Format_Toggle", "currency"),
+                                         ("Percentage_Format_Toggle", "percent"), ("Month_Date_Format", "date")])
+def test_format_cycles_reproduce_the_legacy_macros(macro, cycle):
+    """The toolkit rule (cycle[i] -> cycle[i+1] for i < last, anything else -> cycle[0]) applied to the
+    toolkit's data gives exactly the legacy macro's transitions and default."""
+    transitions, default = _legacy_transitions(macro)
+    formats = _toolkit_cycle(cycle)
+    assert formats[0] == default
+    assert transitions == {formats[i]: formats[i + 1] for i in range(len(formats) - 1)}
+
+
+UNDO_RECORD_INTERFACE = {"Description": 0, "CheckIdentity": 0, "FindConflict": 0, "Restore": 1}
+
+
+@pytest.mark.parametrize("name", ["TkCellSnapshot", "TkFormatSnapshot"])
+def test_snapshot_classes_provide_the_undo_record_interface(name):
+    """TkUndo holds records late-bound (As Object), so the compiler cannot check this - the test does."""
+    code = _code(ROOT / "addin" / "vba" / f"{name}.cls")
+    for method, arity in UNDO_RECORD_INTERFACE.items():
+        m = re.search(rf"^Public Function {method}\(([^)]*)\) As String", code, re.M)
+        assert m, f"{name} lacks Public Function {method}(...) As String"
+        assert (0 if not m.group(1).strip() else m.group(1).count(",") + 1) == arity, method
 
 
 # ---------- VBA project ----------
@@ -137,7 +211,7 @@ def test_module_level_names_are_unique_ignoring_case(path):
 
 def test_public_names_are_unique_across_the_project_ignoring_case():
     seen = {}
-    for path in ALL_VBA:
+    for path in STANDARD_MODULES:
         for line in _code(path).splitlines():
             m = re.match(r"Public (?:Sub|Function|Const) (\w+)", line)
             if m:

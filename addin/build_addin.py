@@ -37,11 +37,15 @@ VBA_SOURCES = [
     HERE / "vba" / "TkConvert.bas",
     HERE / "vba" / "TkUndo.bas",
     HERE / "vba" / "TkCellSnapshot.cls",
+    HERE / "vba" / "TkFormat.bas",
+    HERE / "vba" / "TkFormatSnapshot.cls",
+    HERE / "vba" / "TkShortcuts.bas",
     ROOT / "prototypes" / "integration" / "PhaseBBridge.bas",
     ROOT / "prototypes" / "integration" / "PhaseBResultsHook.cls",
 ]
 # VBComponent.Type: 1 = standard module, 2 = class module.
-EXPECTED_TYPES = {"TkMain": 1, "TkConvert": 1, "TkUndo": 1, "TkCellSnapshot": 2, "PhaseBBridge": 1, "PhaseBResultsHook": 2}
+EXPECTED_TYPES = {"TkMain": 1, "TkConvert": 1, "TkUndo": 1, "TkCellSnapshot": 2, "TkFormat": 1,
+                  "TkFormatSnapshot": 2, "TkShortcuts": 1, "PhaseBBridge": 1, "PhaseBResultsHook": 2}
 
 XL_OPEN_XML_ADDIN = 55
 UI_PART = "customUI/customUI14.xml"

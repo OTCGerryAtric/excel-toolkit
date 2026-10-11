@@ -7,14 +7,18 @@ Attribute VB_Name = "TkUndo"
 ' a verified restore. Excel withdraws the Ctrl+Z entry as soon as the user does anything
 ' undoable; the add-in cannot see that, so the button stays available while a record exists.
 ' Excel's earlier undo history is lost when any macro changes cells; it is not preserved.
+'
+' A record is any snapshot object providing: Description() As String, CheckIdentity() As String,
+' FindConflict() As String and Restore(ByVal useHook As Boolean) As String (TkCellSnapshot,
+' TkFormatSnapshot). The offline tests check every snapshot class provides them.
 Option Explicit
 
-Private current As TkCellSnapshot
+Private current As Object
 Private currentLabel As String
 Private unusable As Boolean           ' set after an incomplete restore; the record is kept for reporting only
 Private lastRestoreSeconds As Double
 
-Public Sub Tk_SetRecord(ByVal snap As TkCellSnapshot, ByVal label As String)
+Public Sub Tk_SetRecord(ByVal snap As Object, ByVal label As String)
     Set current = snap
     currentLabel = label
     unusable = False
@@ -29,7 +33,7 @@ Public Sub Tk_ClearRecord()
     Tk_RefreshRibbon
 End Sub
 
-Public Function Tk_RecordIs(ByVal snap As TkCellSnapshot) As Boolean
+Public Function Tk_RecordIs(ByVal snap As Object) As Boolean
     Tk_RecordIs = (current Is snap)
 End Function
 
@@ -41,6 +45,30 @@ Public Function Tk_RecordDescription() As String
     If current Is Nothing Then Exit Function
     Tk_RecordDescription = current.Description()
     If unusable Then Tk_RecordDescription = Tk_RecordDescription & " - unusable after an incomplete restore"
+End Function
+
+' Shared identity check for snapshot classes: "" when the workbook and sheet are still the ones
+' that were changed, else why not.
+Public Function Tk_CheckTargetIdentity(ByVal wb As Workbook, ByVal ws As Worksheet, _
+                                       ByVal wbFullName As String, ByVal wsName As String) As String
+    Dim nameNow As String
+    On Error GoTo WorkbookGone
+    nameNow = wb.FullName
+    On Error GoTo 0
+    If nameNow <> wbFullName Then
+        Tk_CheckTargetIdentity = "The workbook has been renamed or saved under another name since the change (it was " & wbFullName & ")."
+        Exit Function
+    End If
+    On Error GoTo SheetGone
+    nameNow = ws.Name
+    On Error GoTo 0
+    If nameNow <> wsName Then Tk_CheckTargetIdentity = "The sheet has been renamed since the change (it was '" & wsName & "')."
+    Exit Function
+WorkbookGone:
+    Tk_CheckTargetIdentity = "The workbook that was changed (" & wbFullName & ") is no longer open."
+    Exit Function
+SheetGone:
+    Tk_CheckTargetIdentity = "The sheet that was changed ('" & wsName & "') no longer exists."
 End Function
 
 Public Function Tk_LastRestoreSeconds() As Double
@@ -81,7 +109,7 @@ Public Function Tk_RestoreLast() As String
 
     t0 = Tk_Seconds()
     saved = Tk_QuietExcel()
-    reason = current.RestoreFormulas(True)
+    reason = current.Restore(True)
     Tk_RestoreExcel saved
     lastRestoreSeconds = Tk_Seconds() - t0
 
