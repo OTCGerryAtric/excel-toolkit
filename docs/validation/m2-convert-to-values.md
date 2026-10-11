@@ -28,13 +28,13 @@ Implementation choices to confirm live:
 
 ## Offline evidence
 
-`tests/addin/test_addin_offline.py` — 20 tests: ribbon callbacks resolve to Public VBA procedures with
+`tests/addin/test_addin_offline.py` — 26 tests: ribbon callbacks resolve to Public VBA procedures with
 the right signatures; ribbon buttons, registry and dispatch agree; built-in icons only; every cross-module
 call resolves; the Ctrl+Z handler exists with no arguments; sources are ASCII, CRLF, `Option Explicit`,
 correctly named, within VBA line/continuation limits; no clipboard, Shell, process launch, file output or
 registry use in the add-in modules; ribbon injection into a real Office package adds exactly one
 relationship, keeps every other part byte-identical, is idempotent, and refuses malformed XML.
-Full suite: **113 passed** (93 existing + 20).
+Module-level declarations precede the first procedure in every module (a placement VBA rejects at compile time). Full suite: **119 passed** (93 existing + 26).
 
 Not provable offline: that the VBA compiles and behaves correctly in Excel.
 
@@ -48,8 +48,8 @@ modified; stop at once if endpoint protection intervenes.
 2. **Scripted check:** `<scratch venv>/python addin/live/m2_live_check.py --perf` — types and exact
    restore, three areas, overlapping, no formulas, cell limit, filtered (refused; visible-only allowed),
    hidden column, merged, spill anchor / range / spilled cells, legacy array, data table, protected
-   (locked refused, unlocked allowed), forced failures on both write paths (rolled back), forced restore
-   failure (incomplete, record unusable), conflict (refused, then allowed after revert), record replaced,
+   (locked refused, unlocked allowed), forced failures on both write paths (rolled back), a forced failure after verified writes but before undo is
+   stored (rolled back, never reported as refused), forced restore failure (incomplete, record unusable), conflict (refused, then allowed after revert), record replaced,
    sheet renamed / Save As / workbook closed (refused), Excel state restored, timings at
    1 / 1,000 / 10,000 / 100,000 cells with undo timed separately, PERSONAL.XLSB unchanged.
 3. **Manual checklist** (in your Excel, File → Open `addin/build/ExcelToolkit.xlam`, disposable new workbook):

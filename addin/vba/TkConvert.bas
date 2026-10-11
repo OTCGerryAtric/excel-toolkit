@@ -12,7 +12,15 @@ Private Const DEFAULT_MAX_CELLS As Double = 100000   ' provisional safeguard, re
 Private maxCells As Double
 Private failAfterWrites As Long                       ' test hook: simulate a failure (0 = off)
 Private failAfterRestores As Long                     ' test hook: simulate a failed restore (0 = off)
+Private failAtRegister As Boolean                     ' test hook: fail after the verified writes, before undo is stored
 Private lastTimings As String
+
+' Stages decide how a failure is reported: before any write it is a refusal; during the writes
+' (or a failed verification) the cells are rolled back; after verified writes the cells ARE
+' converted, so it is never reported as "nothing changed".
+Private Const STAGE_CHECKING As Long = 0
+Private Const STAGE_WRITING As Long = 1
+Private Const STAGE_WRITTEN As Long = 2
 
 ' ---------- Settings and test hooks ----------
 
@@ -27,6 +35,10 @@ End Function
 Public Sub Tk_TestSetFailAfter(ByVal writes As Long, ByVal restores As Long)
     failAfterWrites = writes
     failAfterRestores = restores
+End Sub
+
+Public Sub Tk_TestSetFailAtRegister(ByVal fail As Boolean)
+    failAtRegister = fail
 End Sub
 
 Public Function Tk_TestFailAfterWrites() As Long
@@ -44,7 +56,7 @@ End Function
 ' ---------- Command ----------
 
 Public Function Tk_ConvertRange(ByVal target As Range) As String
-    Dim snap As TkCellSnapshot, reason As String, rollbackProblem As String, writing As Boolean
+    Dim snap As TkCellSnapshot, reason As String, rollbackProblem As String, stage As Long, errorText As String
     Dim t0 As Double, t1 As Double, t2 As Double, t3 As Double, t4 As Double, t5 As Double
     Dim saved As Variant
 
@@ -61,15 +73,16 @@ Public Function Tk_ConvertRange(ByVal target As Range) As String
 
     t2 = Tk_Seconds()
     saved = Tk_QuietExcel()
-    writing = True
+    stage = STAGE_WRITING
     snap.ApplyValues
     t3 = Tk_Seconds()
     reason = snap.VerifyConverted()
     If Len(reason) > 0 Then GoTo RollBack
-    writing = False
+    stage = STAGE_WRITTEN
     Tk_RestoreExcel saved
     t4 = Tk_Seconds()
 
+    If failAtRegister Then Err.Raise vbObjectError + 515, "TkConvert", "Simulated failure before undo registration (test hook)"
     Tk_SetRecord snap, "Convert to Values"      ' replaces any earlier record; registers Ctrl+Z
     t5 = Tk_Seconds()
     lastTimings = "cells=" & snap.FormulaCount & ";validate=" & Ms(t1 - t0) & ";capture=" & Ms(t2 - t1) & _
@@ -79,12 +92,26 @@ Public Function Tk_ConvertRange(ByVal target As Range) As String
     Exit Function
 
 Failed:
-    If Not writing Then
-        Tk_ConvertRange = "refused: Excel reported an error before anything was changed: " & Err.Description
+    errorText = Err.Description
+    Select Case stage
+    Case STAGE_CHECKING
+        Tk_ConvertRange = "refused: Excel reported an error before anything was changed: " & errorText
         Exit Function
-    End If
-    reason = "Excel reported an error while writing: " & Err.Description
-    Resume RollBack
+    Case STAGE_WRITING
+        reason = "Excel reported an error while writing: " & errorText
+        Resume RollBack
+    Case Else
+        Tk_RestoreExcel saved
+        If Tk_RecordIs(snap) Then
+            ' Converted and verified, and the undo record is stored; only Ctrl+Z is missing.
+            Tk_ConvertRange = "warning: The formulas were converted and checked, but Ctrl+Z could not be set up (" & _
+                errorText & "). Use Undo Toolkit Action to reverse it."
+            Exit Function
+        End If
+        ' Converted, but no undo record: put the formulas back rather than leave an irreversible change.
+        reason = "The formulas were converted, but the undo record could not be stored (" & errorText & ")."
+        Resume RollBack
+    End Select
 RollBack:
     On Error GoTo 0
     rollbackProblem = snap.RollBack()

@@ -212,13 +212,17 @@ class Check:
             self.record(f"selection: {name} refused, nothing changed",
                         outcome.startswith("refused:") and self.snapshot(ws, "A1:C15") == before, outcome=outcome)
 
+        ws.Range("B1:B3").Value2 = 7
         before = self.snapshot(ws, "B1:B3")
-        self.record("selection: no formulas -> nothing", self.convert(ws.Range("B1:B3")).startswith("nothing:"))
+        outcome = self.convert(ws.Range("B1:B3"))
+        self.record("selection: no formulas -> nothing, nothing changed",
+                    outcome.startswith("nothing:") and self.snapshot(ws, "B1:B3") == before, outcome=outcome)
 
         self.run("Tk_SetMaxCells", 10)
+        before = self.snapshot(ws, "A1:A11")
         outcome = self.convert(ws.Range("A1:A11"))
-        self.record("selection: over the cell limit refused, not truncated",
-                    outcome.startswith("refused:") and "11" in outcome and self.snapshot(ws, "A1:A11") == self.snapshot(ws, "A1:A11"),
+        self.record("selection: over the cell limit refused, not truncated, nothing changed",
+                    outcome.startswith("refused:") and "11" in outcome and self.snapshot(ws, "A1:A11") == before,
                     outcome=outcome)
         self.run("Tk_SetMaxCells", 0)
         wb.Close(SaveChanges=False)
@@ -306,6 +310,14 @@ class Check:
                     and self.snapshot(ws, "D1:F5") == before, outcome=outcome)
 
         self.run("Tk_TestSetFailAfter", 0, 0)
+        before = self.snapshot(ws, formulas)
+        self.run("Tk_TestSetFailAtRegister", True)
+        outcome = self.convert(ws.Range(formulas))
+        self.run("Tk_TestSetFailAtRegister", False)
+        self.record("failure after verified writes, before undo is stored: rolled back (never 'refused'), sheet identical",
+                    outcome.startswith("rolled back:") and self.snapshot(ws, formulas) == before, outcome=outcome)
+        self.record("failure after verified writes: Excel state restored", self.app_state() == state)
+
         self.convert(ws.Range(formulas))
         self.run("Tk_TestSetFailAfter", 0, 2)
         outcome = self.restore()

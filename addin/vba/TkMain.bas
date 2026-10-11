@@ -120,8 +120,8 @@ End Sub
 
 ' ---------- Messages ----------
 
-' Shows a command outcome ("ok: ...", "nothing: ...", "refused: ...", "rolled back: ...",
-' "incomplete: ..."). Success is silent, like Excel's own paste.
+' Shows a command outcome ("ok: ...", "nothing: ...", "refused: ...", "warning: ...",
+' "rolled back: ...", "incomplete: ..."). Success is silent, like Excel's own paste.
 Public Sub Tk_Notify(ByVal outcome As String)
     Dim kind As String, text As String, p As Long
     lastMessage = outcome
@@ -132,6 +132,7 @@ Public Sub Tk_Notify(ByVal outcome As String)
     Case "ok"
     Case "nothing": MsgBox text, vbInformation, TK_TITLE
     Case "refused": MsgBox text, vbExclamation, TK_TITLE
+    Case "warning": MsgBox text, vbExclamation, TK_TITLE
     Case "rolled back": MsgBox "The command could not finish and nothing was changed." & vbCrLf & vbCrLf & text, vbExclamation, TK_TITLE
     Case "incomplete": MsgBox "The command stopped part-way and could not fully restore the cells." & vbCrLf & vbCrLf & text, vbCritical, TK_TITLE
     Case Else: MsgBox outcome, vbInformation, TK_TITLE

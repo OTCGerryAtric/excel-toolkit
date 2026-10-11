@@ -134,6 +134,17 @@ def test_vba_source_imports_cleanly(path):
         assert continuation <= 24, "VBA allows at most 24 line continuations"
 
 
+@pytest.mark.parametrize("path", ALL_VBA, ids=lambda p: p.name)
+def test_module_declarations_precede_the_first_procedure(path):
+    """VBA rejects module-level Dim/Const/Declare/variables after a procedure ("Only comments may appear...")."""
+    seen_procedure = False
+    for line in _code(path).splitlines():
+        if re.match(r"(Public |Private |Friend )?(Sub|Function|Property (Get|Let|Set)) \w+", line):
+            seen_procedure = True
+        elif seen_procedure and re.match(r"(Public|Private|Dim|Const|Global)\b(?! (Sub|Function|Property)\b)|(Private |Public )?Declare\b", line):
+            pytest.fail(f"{path.name}: module-level declaration after a procedure: {line.strip()}")
+
+
 @pytest.mark.parametrize("path", ADDIN_VBA, ids=lambda p: p.name)
 def test_no_clipboard_and_nothing_launched(path):
     code = _code(path)

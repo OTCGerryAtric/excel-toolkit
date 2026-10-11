@@ -29,6 +29,10 @@ Public Sub Tk_ClearRecord()
     Tk_RefreshRibbon
 End Sub
 
+Public Function Tk_RecordIs(ByVal snap As TkCellSnapshot) As Boolean
+    Tk_RecordIs = (current Is snap)
+End Function
+
 Public Function Tk_HasRecord() As Boolean
     Tk_HasRecord = Not current Is Nothing
 End Function
