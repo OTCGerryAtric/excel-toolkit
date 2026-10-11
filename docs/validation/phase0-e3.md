@@ -69,9 +69,9 @@ Plus connection resilience: unsaved workbook, rename, close/reopen, stale proces
 | Excel gone: fails at once, no retries | Pass |
 | VBA `MsgBox` open in the target Excel: read **and write** succeeded immediately | Informational |
 | Built-in dialog (Format Number) open: read **and write** succeeded immediately | Informational |
-| Cell edit mode via posted keystrokes | Not achieved — keystrokes posted to the window did not enter edit mode. **Manual check.** |
+| Cell edit mode via posted keystrokes | Not achieved — keystrokes posted to the window did not enter edit mode. Covered by the manual check below (ExcelBusy after 5.0 s). |
 
-**Finding — dialogs do not block automation.** Neither a VBA message box nor a built-in dialog made Excel reject calls; Python could still write cells. The only real rejection seen so far was in the owner's Excel before E1 (most likely cell edit mode). Two consequences: (1) the retry policy is proven against simulated rejections, and against real edit mode only once the manual check is done; (2) the add-in can change cells while the user has a dialog open — production commands should check for that (e.g. `Application.Interactive` / `Ready`) before writing.
+**Finding — dialogs do not block automation.** Neither a VBA message box nor a built-in dialog made Excel reject calls; Python could still write cells. The only real rejection seen so far was in the owner's Excel before E1 (most likely cell edit mode). Two consequences: (1) the retry policy is proven against simulated rejections and, by the manual check below, against real cell edit mode; (2) the add-in can change cells while the user has a dialog open — production commands should check for that (e.g. `Application.Interactive` / `Ready`) before writing.
 
 ### Excel closing mid-operation
 
@@ -82,7 +82,7 @@ Plus connection resilience: unsaved workbook, rename, close/reopen, stale proces
 
 Nothing can be restored in that case: the unsaved workbook state is lost with Excel. The journal records what happened.
 
-### Excel Ctrl+Z (formatting toggle) — not demonstrated
+### Excel Ctrl+Z (formatting toggle) — programmatic Undo failed; real Ctrl+Z passed (manual check below)
 
 | Check | Result |
 |---|---|
@@ -91,7 +91,7 @@ Nothing can be restored in that case: the unsaved workbook state is lost with Ex
 | `Application.Undo` called inside VBA runs the `OnUndo` restore | **No** |
 | `OnUndo` hook registered for a Python operation fires on `Application.Undo` | **No** |
 
-`OnUndo` is documented for user-initiated undo; when the macro itself is run via `Application.Run` from automation, the registration may not take effect. This does **not** prove a real Ctrl+Z fails. **Manual check:** press Ctrl+Shift+J then Ctrl+Z in a test Excel.
+`OnUndo` is documented for user-initiated undo; when the macro itself is run via `Application.Run` from automation, the registration may not take effect. This does **not** prove a real Ctrl+Z fails — and the manual check below showed that a real Ctrl+Z keypress **does** run the `OnUndo` restore.
 
 ## Manual checks (owner, 2026-10-09)
 
@@ -118,7 +118,7 @@ So: Excel Ctrl+Z integration via `OnUndo` **works for a real keypress**; it only
 ## Limitations
 
 - Single machine; disposable fixtures; one run of each scenario (plus earlier runs while fixing the harness).
-- Busy behaviour was only exercised with simulated rejections; real edit mode pending the manual check.
+- Busy behaviour: automated runs used simulated rejections; real cell edit mode was checked once, manually (ExcelBusy after exactly 5.0 s, responsive after Escape).
 - Excel's own undo history is cleared by the journal's writes (any COM write does this). Custom Undo is our command, not Ctrl+Z.
 - The journal stores cell contents in a local JSON file. Fine for a prototype; production needs a retention/clean-up policy, and care because it holds workbook data.
 - The prototype journal captures and restores **formulas and constants only** (`Formula2` + `Value2`, plus defined names for delete-names). Number formats, fills, borders, spill ranges, merged cells, data validation and conditional formats are not journalled. (Corrected 2026-10-11: this line previously said number formats were covered; `journal.py` never captured them.)

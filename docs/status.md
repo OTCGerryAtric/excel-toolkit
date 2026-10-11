@@ -13,7 +13,7 @@ Update at every approval gate.
 | Production ribbon XML, UserForms, `.xlam` add-in | **None exist.** Only prototype `.bas` modules (E1/E3/E4/E6, Phase B) | — |
 | Worker start | Manual only. Excel never launches Python; installing/auto-starting the worker is part of G0 | — |
 
-This supersedes "Detector progress and the integration gap" below, whose statement that live Excel work must
+This supersedes "Detector progress and the integration gap" in the History section, whose statement that live Excel work must
 not be attempted on this laptop was replaced by the explicit, scoped approvals for the Stage 2 and Phase B live runs.
 The 2026-10-10 E6 deployment rejection still stands (see `docs/incidents/2026-10-10-edr-file-deletion.md`).
 
@@ -25,24 +25,29 @@ Internal Excel add-in for the owner and 6–20 colleagues. All users run Windows
 
 **The add-in must be entirely free to develop, install and use** — no per-user licences, subscriptions or paid tiers, for the owner or colleagues. Every bundled component must be free for internal redistribution, with its licence documented. Non-negotiable. (Set 2026-10-09.)
 
-## Architecture decision (provisional, pending G0)
+## Current approved architecture
 
-- **VBA `.xlam` front end:** ribbon, keyboard shortcuts, formatting toggles and simple commands. Runs in-process, so hotkeys are as fast as the current PERSONAL.XLSB macros.
-- **Python integration layer:** local process talking to the running Excel via COM. Bridge to be chosen in Phase 0 between:
-  - direct VBA → Python with `pywin32`, or
-  - the free open-source **xlwings** core (`RunPython`), no PRO features.
-- **Independent Python analysis engine** (`src/excel_toolkit`): formula classification, inconsistencies, dependency analysis, audit rules. No COM/xlwings imports outside the adapter layer.
-- **Results:** navigable results in Excel (sheet-free where possible, e.g. a form or task pane) and HTML reports.
-- Macro security: the `.xlam` must install **without weakening macro security globally**. Candidate approaches (to verify in E6): per-user Trusted Location for the add-in folder, and/or a code-signing certificate.
-- ADR-001 to be written at the end of Phase 0.
+Decided and in force (ADR-001 **Accepted**; `docs/architecture/deployment-decision.md` approved 2026-10-10).
+Not open questions — do not re-run these comparisons.
 
-### Ruled out
+- **VBA `.xlam` front end:** ribbon, keyboard shortcuts and in-process commands, including all routine
+  modifying commands (Undo via E3's design and `Application.OnUndo`).
+- **Direct pywin32** is the Python–Excel bridge (chosen in E2; xlwings core rejected and removed).
+- **Persistent Python worker** for analysis, reached over E4's per-user named pipe, results by COM callback
+  (live-validated in Phase B). Python commands are read-only.
+- **Independent analysis engine** in `src/excel_toolkit`, no COM imports outside the adapter layer.
+- **Deployment (G0) is blocked**; the E6 installer is rejected and must not be re-run.
+- Next work follows `docs/product-roadmap.md` (M2 approved in principle; implementation awaits the reviewed
+  documentation and scoped live-test authorisation).
+
+## Ruled out
 
 | Option | Reason |
 |---|---|
 | PyXLL | Paid per-user licence (~£259/user/year). Ruled out 2026-10-09. Trial install was cancelled before download; no Excel registration was made (verified). |
 | xlwings PRO features | Paid for commercial/internal business use. Free core only. |
 | Office.js | Mostly TypeScript; Python analysis would need a server or browser runtime; restricted shortcut keys; no central-deployment need. |
+| xlwings open-source core | Rejected in E2 (error fidelity, raw COM still needed, retry default can hang); removed 2026-10-09. |
 
 ## Environment (owner's machine, checked 2026-10-09)
 
@@ -93,8 +98,51 @@ Source extracted to `baseline/vba/PERSONAL_XLSB_olevba.txt`. Shortcuts are set v
   - Destructive commands — confirmation, impact preview and recovery strategy required.
   - Read-only auditing — must never modify the workbook.
 - 2026-10-09: **PyXLL ruled out; zero-licence-cost constraint adopted; architecture changed to VBA `.xlam` + Python.** Roadmap, six initial feature groups and approval gates unchanged.
+- 2026-10-11: Master Product Brief v2.0 — reliable Undo is **mandatory for every modifying command** (supersedes "native Ctrl+Z desirable, not a gate" for toggles above). Roadmap and M2 scope: `docs/product-roadmap.md`.
 
-## Phase 0 state (revised for VBA + Python)
+## Open items / dependencies
+
+- **IT/security question** (precise form in the decision doc): what triggered detection `<redacted-threat-id>`; is it
+  still active; the approved way to distribute an internal Excel add-in with a local Python component (MOTW/Trusted
+  Location, Python-launch); company-CA code-signing availability; whether Trusted Locations are usable on managed devices.
+- ~~Recover the deleted files~~ — done (`beaa200`, working tree recovered after the EDR incident).
+- Colleague machine for the redesigned deployment.
+- "Trust access to the VBA project object model" was already on (`AccessVBOM = 1`) before the project started. The scripted `.xlam` build relies on it (dev machine only). Owner to decide whether to keep it on.
+- Colleague Excel builds/bitness — unverified.
+- Python runtime bundling approach (e.g. embeddable Python or uv-managed standalone Python) — choose and confirm licences (deployment workstream).
+
+## Next gate
+
+**G0 (deployment)** remains blocked: install on a clean PC without manual Python setup or global
+macro-security changes **and without tripping endpoint protection**, all components free with licences
+documented. G0 gates distribution to colleagues, **not** development: the roadmap milestones proceed on the
+owner's machine under scoped approvals. (The earlier "do not start production commands" applied to Phase 0.)
+
+## Related documents
+
+- `docs/product-roadmap.md` — capability inventory, gaps, roadmap and pending decisions (2026-10-11)
+- `docs/hotkeys.md` — hotkey register
+- `docs/rollback.md` — baseline and rollback
+- `reports/Excel add in feature ideas.md` — competitor feature research
+- `baseline/vba/PERSONAL_XLSB_olevba.txt` — existing VBA source
+
+# History (Phase 0 and detector work, 2026-10-09 → 2026-10-11)
+
+Kept as the record of how decisions were reached. Statuses are as written at the time ("awaiting review",
+"not started", "planned") and are **superseded** by the sections above and by ADR-001 (Accepted).
+
+### Architecture as first proposed (2026-10-09, superseded by the section above)
+
+- **VBA `.xlam` front end:** ribbon, keyboard shortcuts, formatting toggles and simple commands. Runs in-process, so hotkeys are as fast as the current PERSONAL.XLSB macros.
+- **Python integration layer:** local process talking to the running Excel via COM. Bridge to be chosen in Phase 0 between:
+  - direct VBA → Python with `pywin32`, or
+  - the free open-source **xlwings** core (`RunPython`), no PRO features.
+- **Independent Python analysis engine** (`src/excel_toolkit`): formula classification, inconsistencies, dependency analysis, audit rules. No COM/xlwings imports outside the adapter layer.
+- **Results:** navigable results in Excel (sheet-free where possible, e.g. a form or task pane) and HTML reports.
+- Macro security: the `.xlam` must install **without weakening macro security globally**. Candidate approaches (to verify in E6): per-user Trusted Location for the add-in folder, and/or a code-signing certificate.
+- ADR-001 to be written at the end of Phase 0.
+
+### Phase 0 state (revised for VBA + Python)
 
 | Step | Status |
 |---|---|
@@ -113,7 +161,7 @@ Source extracted to `baseline/vba/PERSONAL_XLSB_olevba.txt`. Shortcuts are set v
 | Licence register for all bundled components | Not started |
 | Phase 0 results document + ADR-001 | Not started |
 
-## Security incident (2026-10-10)
+### Security incident (2026-10-10)
 
 the EDR (the laptop's endpoint protection; Defender is passive) removed project files during the E6 install
 test. Confirmed it was the EDR, by one detection, deleting by file type; git intact, all recoverable; our
@@ -126,7 +174,7 @@ was deleted but self-restored via the 16:48 auto-update to 2.1.296 — no reinst
 `C:\Users\GerryPidgeon\IncidentEvidence\2026-10-10-ExcelAddIn\`. Do **not** re-run the flagged prototype. Full
 record and the four confirmed/unverified distinctions: `docs/incidents/2026-10-10-edr-file-deletion.md`.
 
-## Detector progress and the integration gap (2026-10-11 — superseded, see Current state)
+### Detector progress and the integration gap (2026-10-11 — superseded, see Current state)
 
 The offline formula-inconsistency detector is built and hardened — **Gates 1–3 + two
 review-driven hardening passes, 52 passing tests** (singleton, worksheet-wide, and
@@ -149,7 +197,7 @@ automation + external Python execution remain blocked post-E6); requires a **sep
 authorised test environment**. Gate 4 detection features and the larger independently-
 labelled corpus are **deferred** until the E2E experience is demonstrated.
 
-## Architecture & plan (APPROVED 2026-10-10; `docs/architecture/deployment-decision.md`)
+### Architecture & plan (APPROVED 2026-10-10; `docs/architecture/deployment-decision.md`)
 
 Architecture and development direction **approved**; no further architecture documents needed.
 Deployment stays blocked (G0).
@@ -182,25 +230,3 @@ acceptance** are separate, neither assumed solved by signing. Corrected claims: 
 .NET component loads via the VSTO `Excel\Addins` registration, not `OPEN`** (only its companion `.xlam` uses `OPEN`).
 Minimal Excel-DNA `.xll` test = **feasibility only**, gated on security clearance.
 
-## Open items / dependencies
-
-- **IT/security question** (precise form in the decision doc): what triggered detection `<redacted-threat-id>`; is it
-  still active; the approved way to distribute an internal Excel add-in with a local Python component (MOTW/Trusted
-  Location, Python-launch); company-CA code-signing availability; whether Trusted Locations are usable on managed devices.
-- Recover the deleted files (post security-clearance; `claude.exe` already self-restored).
-- Colleague machine for the redesigned deployment.
-- "Trust access to the VBA project object model" was already on (`AccessVBOM = 1`) before the project started. The scripted `.xlam` build relies on it (dev machine only). Owner to decide whether to keep it on.
-- Colleague Excel builds/bitness — unverified.
-- Python runtime bundling approach (e.g. embeddable Python or uv-managed standalone Python) — choose and confirm licences in Phase 0.
-
-## Next gate
-
-**G0** — bridge chosen with evidence, hotkey latency matches VBA, live-workbook access proven, safety strategy agreed per command category, install on a clean PC without manual Python setup or global macro-security changes **and without tripping endpoint protection** (the E6 blocker), all components free with licences documented, no undocumented critical blockers. Stop for review at G0; do not start production commands.
-
-## Related documents
-
-- `docs/product-roadmap.md` — capability inventory, gaps, roadmap and pending decisions (2026-10-11)
-- `docs/hotkeys.md` — hotkey register
-- `docs/rollback.md` — baseline and rollback
-- `reports/Excel add in feature ideas.md` — competitor feature research
-- `baseline/vba/PERSONAL_XLSB_olevba.txt` — existing VBA source

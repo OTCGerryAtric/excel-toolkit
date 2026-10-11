@@ -1,95 +1,85 @@
-# Excel integration (Phase B live-validated at `58be1ca`; nothing installed)
+# Excel integration — Excel-triggered formula audit
 
-Prepared for the minimal end-to-end Excel demonstration. **None of this is run, built or
-installed on the current managed laptop** (Excel COM + external Python execution remain
-blocked post-E6). It is staged so the authorised test environment can wire it quickly.
+**Current status:** the Phase B flow is **live-validated** (2026-10-11, commit `58be1ca`) on the owner's
+managed laptop, against the disposable `demo_workbook.xlsx`. Nothing is installed: the VBA is imported
+into an unsaved development workbook and the worker is started by hand. Distribution remains blocked (G0).
 
-## The one detector, two sources
-
-The detector depends only on a small read-only interface
-(`src/excel_toolkit/formula_audit/worksheet_source.py` → `WorksheetSource`):
+## 1. The working integration (Phase B)
 
 ```
-saved .xlsx ──OpenpyxlWorksheet──┐
-                                 ├─▶ scan_worksheet  (identical findings/coverage/order)
-live Excel  ──snapshot_from_com──┘   InMemoryWorksheet
+Excel (VBA, PhaseBBridge)                    Python (started manually)
+  PhaseB_AuditActiveSheet ──JSON request──▶  audit_worker.py  (E4 named pipe, one per user)
+     id + token + identity + sheet              │
+                                                ▼
+                                             audit_engine.py
+                                               attach by identity (excel_link) → confirm sheet
+                                               → snapshot_from_com (2 bulk reads) → scan_worksheet
+                                               → display_json
+  PhaseB_OnResult ◀──COM callback (Application.Run '<macro book>'!PhaseBBridge.PhaseB_OnResult)
+     correlation check → results in a SEPARATE workbook → double-click → cell in the audited workbook
 ```
 
-Parity between the two sources is proven offline in
-`tests/formula_audit/test_snapshot.py` (identical reports across the whole corpus, a
-fake-COM conversion, and an unsaved-edit scenario).
+| File | Role |
+|---|---|
+| `audit_worker.py` | Persistent worker. Reuses E4's `pipe_name` / `create_pipe` / `accept_loop` verbatim (one worker per user, local inbound-only pipe, remote clients rejected). Only the `audit` op is allowed. **Started by hand; never by Excel.** |
+| `audit_engine.py` | One read-only request; never raises for an Excel-side problem — failures return `status="failed"` with the error, never an empty success. The callback procedure is fixed in Python; the request supplies only the macro workbook's name. |
+| `phaseb_contract.py` | Correlation rules: reject unknown, already answered, stale (superseded), identity-mismatch and token-mismatch callbacks. Mirrored in VBA. |
+| `PhaseBBridge.bas` | VBA front end: pipe write only (no Shell, one-shot or auto-start); says clearly if no worker is listening; per-request id + token; flat JSON reader; renders the results workbook. |
+| `PhaseBResultsHook.cls` | Application-level `SheetBeforeDoubleClick` sink for navigation; no VBA-project object-model access, so no trust change. |
 
-## Files
+Shared engine pieces: `src/excel_toolkit/formula_audit/` (`snapshot_from_com`, `scan_worksheet`,
+`display_json`) and `prototypes/e6/engine/excel_link.py` (identity, attach, bounded retries).
+Offline tests: `tests/phaseb/` (fake COM) and `tests/formula_audit/` — 93 passing at `58be1ca`.
 
-- `ExcelToolkitAudit.bas` — minimal VBA: `Toolkit_AuditFormulas` (one command), a results
-  list in a *separate* workbook (audited book untouched), and `Toolkit_GotoFinding`, which
-  navigates to the cell **in the original audited workbook** (resolved via the object model,
-  so apostrophes/spaces in names are safe), never the results workbook. Source only.
-- `audit_live.py` — Python entry point sketch: parse handoff → attach (reuse E2) →
-  `snapshot_from_com` → `scan_worksheet` → `findings_to_json`. Only the snapshot/scan/JSON
-  steps run offline (tested); the live COM attach is left `NotImplementedError` on purpose.
+## 2. How the controlled demonstration was run
 
-## Identity contract (handoff)
+1. Start the worker from the scratch venv: `python audit_worker.py <state_dir> --idle-seconds N`.
+2. In Excel, create an unsaved workbook (e.g. `Book2`) and import `PhaseBBridge.bas` and
+   `PhaseBResultsHook.cls` (both must have CRLF line endings — `.gitattributes` enforces this).
+3. Immediate window: `Application.Run "'Book2'!PhaseB_Configure", "<state_dir>"` (the Immediate window
+   runs in the selected project, so qualify the workbook).
+4. Open `demo_workbook.xlsx`, change `Demo!D3` from `=C3*(1+$A$10)` to `=C3*(1+$A$11)`, **do not save**.
+5. With `Demo` active: Alt+F8 → `PhaseB_AuditActiveSheet`.
+6. Double-click a results row to navigate. Stop the worker with a `shutdown` request or let it idle out.
 
-`hwnd | workbookName | workbookFullPath | worksheetName`. The **PID is not supplied** — Python
-derives it from the window handle, as E2's tested attachment does. The eventual
-implementation **reuses E2's attachment logic**, not a new instance-finding method.
+## 3. Evidence and limitations
 
-## Findings transport
+**Live result (2026-10-11):** the worker attached to the right Excel (by window, process and workbook)
+and read the unsaved D3 edit; status ok, **exactly 2 findings (D3, D4)** in ~138 ms; callback accepted;
+results in a separate workbook with hidden navigation columns; double-click navigated to
+`demo_workbook.xlsx / Demo / $D$3`; audited workbook unchanged in memory (formulas and values) and on
+disk; no Defender or SentinelOne detection; Excel started no Python.
 
-Structured **JSON** (array of objects: `workbook, workbook_path, sheet, cell, kind,
-confidence, conflict, expected_by_axis, message`) — robust to tabs, newlines and unusual
-names, unlike delimited text. Each record keeps the audited workbook identity for navigation.
+**Defects found and fixed during the run:**
+- The callback was unqualified (`PhaseBBridge.PhaseB_OnResult`), so Excel looked only in the active
+  (audited) workbook — "Cannot run the macro". Now workbook-qualified.
+- `PhaseBResultsHook.cls` had LF line endings, so the VBA editor imported it as a standard module.
+  Fixed; `.bas`/`.cls` pinned to CRLF.
 
-## Unresolved live-Excel assumptions (confirm on the authorised machine)
+**Limitations:** worker started manually; trigger is Alt+F8 (no ribbon yet); the worker-failure
+message is tested offline only; active sheet only; single machine, one disposable workbook. ADR-001
+production requirements still open: busy-safe delivery, a user-only pipe security descriptor and
+message-size bound, and discarding requests when their workbook closes.
 
-- `UsedRange.Formula` read in **one bulk COM call** (US A1 syntax, `,` separators — what the
-  tokenizer expects), not `FormulaLocal`; a string starting `=` is a formula, other values
-  are constants; Excel errors / odd COM types coerce to strings (treated as boundaries).
-  Handles the scalar return for a single-cell range.
-- `UsedRange` bounds can over-report; merged cells and array/dynamic-array (`Formula2`,
-  spill) formulas are not special-cased yet.
-- Attaching to the correct instance/worksheet via the E2 handoff; reading unsaved edits live.
-- Returning the JSON to VBA (stdout vs a worker channel vs a temp file) and parsing it there
-  with a bundled JSON parser; never modifying the audited workbook.
+## 4. Historical scaffolding (superseded — kept for reference)
 
-## Phase B — persistent worker + pipe + callback (LIVE-VALIDATED 2026-10-11, `58be1ca`)
+Earlier staging, before live runs were authorised. Do not extend these; Phase B replaces them.
 
-**Live result (owner's managed laptop, disposable `demo_workbook.xlsx`):** audit triggered from Excel
-(Alt+F8 → `PhaseB_AuditActiveSheet`, bridge in a separate unsaved macro workbook); manually started
-worker attached by identity and read the unsaved D3 edit; status ok, exactly 2 findings (D3, D4) in
-~138 ms; callback accepted; results in a separate workbook; double-click navigated to `Demo!$D$3`;
-audited workbook unchanged in memory and on disk; no Defender/SentinelOne detection; Excel spawned
-no Python. Two defects fixed during the run: the callback is now workbook-qualified
-(`'<macro book>'!PhaseBBridge.PhaseB_OnResult`), and `.bas`/`.cls` are pinned to CRLF
-(`.gitattributes`; an LF `.cls` imports as a standard module). The worker-failure MsgBox path is
-tested offline only. The section below describes the design as prepared.
+- **Stage 2 (`stage2_live_audit.py`, `make_demo_workbook.py`):** read-only live check, later run under
+  explicit approval (`92a0ac6`): saved {D4} vs live {D3, D4}, saved/live coverage parity, results
+  workbook and navigation, workbook unchanged. Its docstring still carries the pre-run "DO NOT RUN"
+  warning; it is retained as the record of that test.
+- **`ExcelToolkitAudit.bas` + `audit_live.py`:** first one-command sketch with a handoff of
+  `hwnd | workbook | full path | sheet` and the live attach deliberately left `NotImplementedError`.
+  **Never completed** — superseded by Phase B's request, which also carries pid and a correlation token.
+- **Assumptions that were open at that stage, now settled by the live runs:** a bulk read is used, but
+  as two calls (`UsedRange.Formula` for formula text, `UsedRange.Value` for typed constants — a single
+  `.Formula` read misclassified numeric constants as text); attaching via the E2 identity works; JSON
+  returns via the COM callback and is parsed by a small flat-JSON reader in VBA. Still open: `UsedRange`
+  over-reporting, and merged cells and dynamic-array/spill formulas are not special-cased.
 
+### One detector, two sources
 
-The user-experience demo (click → audit → results → double-click to the suspect cell) without
-Excel ever launching Python. Excel talks to an **already-running** worker over E4's local
-named pipe; findings come back through a COM callback. Nothing here is executed or installed
-on the managed laptop — the live run is a separate, explicit go/no-go.
-
-Files (reuse E4's channel; the detector and JSON transport are the project's own):
-
-- `audit_worker.py` — persistent worker. Reuses E4's `pipe_name`/`create_pipe`/`accept_loop`
-  **verbatim** (one worker per user, local inbound-only pipe, remote clients rejected). Only
-  the op (`audit`) and engine differ. **Started by hand** from the scratch env; never by Excel.
-- `audit_engine.py` — one read-only request: attach by identity → confirm sheet → `snapshot_from_com`
-  → `scan_worksheet` → `display_json`; delivers id+token+identity+status+error+count+JSON to
-  `PhaseBBridge.PhaseB_OnResult`. Never raises for an Excel-side problem; a failure carries
-  `status="failed"` and is never an empty success. COM attach is injected, so it is fully
-  tested offline against a fake COM worksheet.
-- `phaseb_contract.py` — pure correlation rules (`classify_callback`): reject unknown / already
-  answered / **stale (superseded)** / identity-mismatch / token-mismatch callbacks. The VBA
-  mirrors this exactly; both are verified in `tests/phaseb/test_phaseb.py`.
-- `PhaseBBridge.bas` — VBA front end: **pipe write only, no Shell/one-shot/auto-start**; if no
-  worker is listening it says so and stops. Generates a per-request id + correlation token,
-  validates callbacks, renders a *separate* results workbook, and parses the flat findings JSON.
-- `PhaseBResultsHook.cls` — Application-level `SheetBeforeDoubleClick` sink so double-clicking a
-  results row navigates to the cell in the **original** audited workbook (object-model resolve,
-  names safe). Avoids the VBA project object model → no trust/security change.
-
-Run (authorised test only): start `audit_worker.py <state_dir>` from the scratch venv; import
-the two VBA files into the open dev workbook; `PhaseB_Configure <state_dir>`; `PhaseB_AuditActiveSheet`.
+The detector depends only on `WorksheetSource` (`src/excel_toolkit/formula_audit/worksheet_source.py`):
+saved `.xlsx` via `OpenpyxlWorksheet`, live Excel via `snapshot_from_com` → `InMemoryWorksheet`, with
+identical findings proven offline in `tests/formula_audit/test_snapshot.py` and live in Stage 2.
