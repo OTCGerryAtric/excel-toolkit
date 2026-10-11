@@ -212,93 +212,106 @@ authorisation of the scoped M2 live tests (not deployment approval).
 Not decisions now: Excel-DNA, installer method, worker auto-start — unchanged until IT answers the
 questions in `docs/architecture/deployment-decision.md`.
 
-## M3 proposal — port the productivity commands (for review, 2026-10-11)
+## M3 — port the productivity commands (approved with amendments, 2026-10-11)
 
 Goal: every legacy PERSONAL.XLSB productivity command available from the ribbon (and later its
 shortcut), each reversible, with the documented defects fixed. Out of scope: Delete Names (E8,
-stays disabled), External Links (M4), the text-speed improvement (tracked separately), installation.
+stays disabled), External Links (M4), the text-speed improvement (separate tracked item),
+installation, trust changes, PERSONAL.XLSB edits. Disposable workbooks and the M2 security
+restrictions apply to every live test; each live run needs separate confirmation.
 
-### Commands and order
+### Increments and review gates
 
-Built in four increments, each live-accepted before the next. Every modifying command uses the M2
-contract (validate → capture → apply → verify → roll back → one-level undo with identity and
-conflict checks); M3 only adds the **state kinds** each increment needs.
+Every modifying command uses the M2 contract (validate → capture → apply → verify → roll back →
+one-level undo with identity and conflict checks). Each increment adds only the **state kinds** it needs.
 
-| Inc. | Commands (legacy key) | Undo kind added | Legacy defects fixed |
-|---|---|---|---|
-| **M3a** | Number (I), Currency £ (O), Percentage (P) cycles; Date toggle (M) | **Number format** (per area; per cell when mixed) | Multi-area and mixed selections handled (E1 cycle-as-data) |
-| **M3b** | Yellow / Green / Light blue / Grey fill toggles (Q E W Z); Grey outline (G); Row height (R), Column width (C), Best fit width (K) | **Fill** (pattern, colour, theme colour, tint), **borders** (6 edges: style, weight, colour, theme, tint), **row heights / column widths** | Toggles reset to **No Fill**, not white |
-| **M3c** | Clear sheet references (F); Find constants (H) | **Formula rewrite** — reuses `TkCellSnapshot` (formula cells only, restore original `Formula2`) | Quotes every sheet name that needs it (e.g. `P&L`, `2024-25`); changes formulas only, never text cells. Find constants only selects (no undo needed) |
-| **M3d** | **Paste Values** from the clipboard | Decided by a short spike (below) | Legacy macro overwrote the clipboard and failed on multi-area selections |
+| Inc. | Commands (legacy key) | Undo kind added | Legacy defects fixed | Gate |
+|---|---|---|---|---|
+| **M3a** | Number (I), Currency £ (O), Percentage (P) cycles; Date toggle (M) | **Number format** | Multi-area and mixed selections handled | **1** — plus real Ctrl+Z, the shortcut-precedence test and performance |
+| **M3b** | Yellow / Green / Light blue / Grey fills (Q E W Z); Grey outline (G); Row height (R), Column width (C), Best fit (K) | **Fill**, **borders**, **row heights / column widths** | Toggles reset to **No Fill**, not white | **2** (with M3c) |
+| **M3c** | Clear sheet references (F); Find constants (H) | **Formula rewrite** (reuses `TkCellSnapshot`) | Formula-aware rewriting; never touches text cells | **2** |
+| **M3d** | **Paste Values** from the clipboard; final shortcut migration | Native Excel undo if the experiment passes, else custom | Clipboard kept; multi-area handled | **3** |
 
-Shortcut migration runs alongside, per command, after that command's acceptance (below).
-
-Legacy behaviour is preserved exactly unless listed as a fix: format strings and cycle order, row
-height 15 ↔ 4.5, column width 2 → 8.43 → 12, best fit's actual rounding (next multiple of 5 above the
-active cell's width, applied to the selection), and the outline's colour and weight.
+Legacy behaviour is preserved exactly unless listed as a fix: format strings and cycle order (number
+0 → 1 → 2 decimals, percentage 0 → 3, date `dd-mmm-yy` ↔ `mmm-yy`), row height 15 ↔ 4.5, column width
+2 → 8.43 → 12, best fit's actual rounding (next multiple of 5 above the active cell's width, applied to
+the selection), and the outline's six borders with their theme colour, tint and weight.
 
 ### Undo for formatting operations
 
-- **Capture only the properties the command changes**, not a whole-format snapshot: area-level when
-  Excel reports a uniform value, per cell only when it reports mixed (`Null`). Keeps toggles fast.
-- **Exact restore:** a theme fill or border is restored as theme colour + tint, not converted to RGB;
-  a gradient or pattern fill is restored exactly or the command refuses on it.
-- **Conflict check:** undo is refused if the changed properties no longer hold what the command set
-  (e.g. the user recoloured a cell since). Identity checks as in M2.
-- **Speed budget:** toggles must still feel instant — target ≤ 50 ms end to end for 10,000 cells
-  including capture and undo registration (legacy ~1 ms without capture, E1).
+- **Capture only the properties a command changes**, exactly: a uniform area is one read; a mixed
+  area is split recursively until each block is uniform (so a whole column with a few exceptions stays
+  cheap). Too many distinct blocks → refused rather than an incomplete undo.
+- **Exact restore** of RGB colour, theme colour and tint, pattern, No Fill, each border's style,
+  weight and colour representation, and every row height / column width.
+- **Row height and column width change whole rows/columns**, so their snapshot captures the entire
+  affected rows/columns, not only the selected cells.
+- **Unsupported formatting is refused** (e.g. gradient fills) rather than risking incomplete restoration.
+- **Conflict check:** undo refused if the changed properties no longer hold what the command set.
+- **Performance:** for a *uniformly* formatted 10,000-cell selection, ≤ 50 ms end to end is
+  aspirational; *mixed* formatting is benchmarked separately. Correctness and reliable undo take
+  precedence over the target.
 
-### Real clipboard Paste Values (M3d)
+### Clear Sheet References (M3c)
 
-1. **Spike first (short, live):** Microsoft 365 can run Excel's own *Paste Values* from VBA
-   (`CommandBars.ExecuteMso "PasteValues"`). If that keeps **Excel's native undo** (multi-level, no
-   custom record) and leaves the clipboard intact, use it — strictly better than a custom undo.
-   Note: recent Microsoft 365 builds also have a native Ctrl+Shift+V paste-values shortcut, currently
-   overridden by the PERSONAL.XLSB macro on that key (to verify on this build).
-2. **Otherwise, custom:** capture the destination before pasting (all cells, constants included, using
-   E3's exact-constant rules), paste values, verify, register undo. Refuse when the clipboard does not
-   hold an Excel range (`CutCopyMode`), when the destination shape is ambiguous, or over the cell limit.
-   Higher risk than Convert to Values because constants are overwritten and must be restored exactly.
+Formula-aware: tokenise each formula and remove only references that qualify the **current** sheet
+(`'P&L'!A1` → `A1` when run on `P&L`), leaving other sheets, external workbooks (`[Book.xlsx]P&L!A1`),
+string literals (`"P&L!A1"`), defined names and similarly named sheets (`P&L 2`) untouched. Tests cover
+quoted names, doubled apostrophes (`'O''Brien'!A1`), string literals, similar names and external
+references. No unrestricted replace; text cells never changed. Find Constants only changes the
+selection, so it needs no journal.
+
+### Clipboard Paste Values (M3d)
+
+1. **Controlled experiment first:** Excel's own Paste Values via `CommandBars.ExecuteMso "PasteValues"`.
+   It is adopted only if it is shown live to: keep **Excel's native undo** (Ctrl+Z reverses the paste,
+   and the **prior** undo history is still there afterwards), **keep the clipboard** contents, and paste
+   correctly to single and multi-area destinations with the expected selection semantics.
+2. **Otherwise, custom:** a broader snapshot than M2 — the destination's constants as well as formulas
+   (E3's exact-constant rules), plus verify, rollback and undo; refuse when the clipboard holds no Excel
+   range, the destination is ambiguous, or over the cell limit.
+
+Documentation keeps three Ctrl+Shift+V behaviours distinct: Excel's native shortcut (if this build has
+one), the PERSONAL.XLSB assignment, and the toolkit's.
 
 ### Shortcut migration
 
-- Add-in shortcuts use `Application.OnKey`, set when the add-in loads and removed when it closes;
-  PERSONAL.XLSB is never edited. Whether `OnKey` takes precedence over a PERSONAL.XLSB macro key is
-  verified live in M3a.
-- **Default off.** A ribbon toggle turns the toolkit's shortcuts on for the session; keys move over
-  **one command at a time**, only after that command passes live acceptance. Shortcut labels appear in
-  tooltips from the registry. Find constants takes Ctrl+Shift+H (decided 2026-10-09).
-- Remembering the toggle between sessions needs a settings store (file under `%APPDATA%` vs registry) —
-  decided later, not in M3.
+- Add-in shortcuts use `Application.OnKey`; PERSONAL.XLSB is never edited. **Off by default**; a ribbon
+  toggle turns them on for the session; keys move **one command at a time** after that command passes.
+- **Not assumed safe — proven live in M3a** for the four format keys:
+  1. which command runs **before** enabling (PERSONAL.XLSB expected);
+  2. which runs **after enabling** (toolkit expected);
+  3. which runs **after disabling** (must be PERSONAL.XLSB again);
+  4. which runs after the add-in is **closed**, and after **Excel restarts**.
+  The toolkit is identifiable because it registers Ctrl+Z ("Undo Number Format") and enables Undo
+  Toolkit Action; the PERSONAL.XLSB macro does neither. If disabling or closing does not restore the
+  PERSONAL.XLSB behaviour, the toggle is not used and a safer mechanism is proposed.
+- Remembering the toggle between sessions needs a settings store — decided later, not in M3.
 
 ### Ribbon
 
-Keep it uncluttered with menus: **Quick Tools** (Convert to Values, Paste Values, Undo Toolkit Action) ·
+Uncluttered, with menus: **Quick Tools** (Convert to Values, Paste Values, Undo Toolkit Action) ·
 **Format** (Number formats ▾, Fill ▾, Outline, Size ▾) · **Formulas** (Clear sheet references, Find
-constants) · **Audit** (Audit Formulas) · a Shortcuts on/off toggle.
+constants) · **Audit** (Audit Formulas) · a Toolkit shortcuts on/off toggle.
 
 ### Live acceptance (per increment)
 
-- **Automated** (disposable Excel process, as M2): each ported command run **side by side with the
-  legacy macro** — imported into the disposable workbook from `baseline/vba` — on identical fixtures,
-  results compared property by property (the E1 method), except documented fixes; exact restore;
-  conflict refusal; identity refusal; timing.
-- **Manual** (owner): ribbon clicks; **real Ctrl+Z** once per new undo kind; shortcuts on/off and one
-  migrated key; PERSONAL.XLSB keys unchanged when the toggle is off.
+- **Automated** (disposable Excel process): each ported command run **side by side with the legacy
+  macro** — imported from `baseline/vba` into the disposable workbook — on identical fixtures and
+  compared property by property (the E1 method), except documented fixes; exact restore; conflict and
+  identity refusal; timings (uniform and mixed).
+- **Manual** (owner): ribbon clicks; **real Ctrl+Z** once per new undo kind; the shortcut tests above.
 - Evidence in `docs/validation/m3*.md`; PERSONAL.XLSB hash and security checks as in M2.
 
-### Review gates
+### Decisions (reviewer, 2026-10-11)
 
-Three: after **M3a** (proves the formatting-undo pattern and `OnKey` precedence), after **M3b + M3c**,
-and after **M3d** plus shortcut migration.
-
-### Decisions requested
-
-1. Preserve legacy formats, cycle orders and best-fit rounding exactly, fixing only the listed defects.
-2. Formatting undo captures only changed properties, with exact theme restoration (refuse on gradients).
-3. Paste Values: spike native `ExecuteMso` first; custom capture-and-restore only if the spike fails.
-4. Shortcuts default off with a session toggle; per-command cutover; persistence decided later.
-5. Increments and three review gates as above; text-speed optimisation stays a separate track.
+1. Preserve legacy behaviour; fix only the listed defects — **approved**.
+2. Property-specific formatting undo — **approved with the conditions above** (exact theme/tint,
+   borders, dimensions; whole rows/columns; refuse unsupported).
+3. Native Paste Values — **approved as an experiment**; adopted only on the evidence listed.
+4. Shortcuts off by default with a session toggle — **amended**: adopted only if the live test proves
+   disable/close/restart restore the PERSONAL.XLSB behaviour.
+5. Four increments and three gates — **approved**; text-speed optimisation stays separate.
 
 ## Reconciliation of the two assessments
 
