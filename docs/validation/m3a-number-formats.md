@@ -1,6 +1,6 @@
 # M3a validation — number-format commands and shortcut precedence
 
-Status: **implemented and offline-tested; live tests NOT yet run** (need separate confirmation).
+Status: **build, VBA compilation and automated live checks passed (19/19, 2026-10-11/12). Manual checklist and shortcut-precedence test NOT yet run** (awaiting review).
 Plan: `docs/product-roadmap.md` (M3, Gate 1). Source: `addin/`.
 
 ## What M3a adds
@@ -63,6 +63,47 @@ If S3 or S4 does not give the PERSONAL.XLSB macro back, the toggle is not adopte
 is proposed. Excel's own (native) Ctrl+Shift+V behaviour, without PERSONAL.XLSB, is recorded separately
 in M3d.
 
-## Results
+## Results — automated live run
 
-_Not yet run._
+Separate hidden Excel processes for build, compile check and scripted checks; nothing installed.
+PERSONAL.XLSB SHA-256 unchanged; 0 Defender detections; SentinelOne logged one routine burst of 14
+event-143 entries, none naming Excel, Python or the add-in; no Excel process left.
+
+**VBA compilation:** clean at the first build (VBE Debug > Compile; no dialogs).
+
+**First run 13/14 — investigated before re-running:**
+1. *Add-in defect.* A mixed **whole column** failed with error 1004 while capturing (the command
+   refused safely; nothing changed): the recursive split took the second half with `Offset(half)`,
+   which for a whole column runs past the last row of the sheet. Fixed to `Rows(half + 1).Resize(...)`
+   (and the column equivalent). The performance cases are now pass/fail checks, not just timings.
+2. *Harness defect.* `Protect(AllowFormattingCells=True)` passed by keyword through late-bound COM is
+   silently ignored (confirmed: property stays False; positional form sets True). The add-in had
+   correctly refused a sheet that really did not allow formatting. Harness now protects positionally
+   and asserts the fixture.
+
+**Final: 19/19** (`addin/live/results/m3a_live_20261011_235821.json`):
+
+| Area | Result |
+|---|---|
+| Legacy equivalence | Toolkit matches the legacy macro **cell by cell** for all four commands × three selections (single cell, block, multi-area) × every start state (each cycle format, General, `0.00`, mixed) — 72 cases — plus 5-press sequences |
+| Exact undo | Every one of those changes undone exactly, including mixed formats; 500 randomly mixed cells restored exactly |
+| Values | Untouched by format commands |
+| Conflict / identity | Undo refused after a format edit (nothing restored) and after a sheet rename |
+| Protection | Refused when formatting is not allowed (nothing changed); applied and undone when it is |
+| Failures | Forced failure after the first area rolled back exactly; forced restore failure reported as incomplete, record unusable |
+| Safeguard | 60,000 alternating formats (> 50,000 blocks) refused, nothing changed |
+| Shortcut toggle | Switches on and off without error (key behaviour is the manual test) |
+
+**Performance** (Number format; ms; apply = click to undo registered):
+
+| Case | Blocks | Apply | Undo |
+|---|---|---|---|
+| Uniform 10,000 cells | 1 | **3.6** | 15 |
+| Mixed 10,000 (alternating rows) | 10,000 | 202 | 1,279 |
+| Mixed 30,000 (3 uniform columns) | 3 | 5.8 | 18 |
+| Whole column, uniform | 1 | 3.9 | 13 |
+| Whole column, 10 exceptions | 175 | 12.5 | 221 |
+
+Uniform selections meet the 50 ms aspiration by a wide margin. Worst-case mixed formatting (every row
+different) is usable to apply (0.2 s) but slow to undo (1.3 s, one write per block) — a candidate for
+the separate optimisation track, not a correctness issue.

@@ -66,16 +66,18 @@ Private Function AddBlocks(ByVal rng As Range) As Boolean
         AddBlocks = True
         Exit Function
     End If
+    ' The second half starts inside the range (Rows/Columns(half + 1)), never Offset: offsetting a
+    ' whole column by half its height runs past the last row of the sheet (error 1004).
     rows = rng.Rows.Count
     cols = rng.Columns.Count
     If cols > 1 Then
         half = cols \ 2
         ok = AddBlocks(rng.Resize(, half))
-        If ok Then ok = AddBlocks(rng.Offset(, half).Resize(, cols - half))
+        If ok Then ok = AddBlocks(rng.Columns(half + 1).Resize(, cols - half))
     Else
         half = rows \ 2
         ok = AddBlocks(rng.Resize(half))
-        If ok Then ok = AddBlocks(rng.Offset(half).Resize(rows - half))
+        If ok Then ok = AddBlocks(rng.Rows(half + 1).Resize(rows - half))
     End If
     AddBlocks = ok
 End Function

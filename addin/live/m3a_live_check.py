@@ -185,7 +185,10 @@ class Check:
         self.record("protected (formatting not allowed): refused, nothing changed",
                     outcome.startswith("refused:") and self.formats(ws, "A1:B2") == before, outcome=outcome)
         ws.Unprotect()
-        ws.Protect(AllowFormattingCells=True)
+        # Positional: Protect(Password, DrawingObjects, Contents, Scenarios, UserInterfaceOnly,
+        # AllowFormattingCells). The keyword form is silently ignored through late-bound COM.
+        ws.Protect("", True, True, True, False, True)
+        assert ws.Protection.AllowFormattingCells, "fixture: formatting not allowed"
         outcome = self.run("Tk_FormatRange", ws.Range("A1:B2"), "number")
         self.record("protected (formatting allowed): applied and undone",
                     outcome.startswith("ok:") and self.run("Tk_RestoreLast").startswith("ok:")
@@ -253,13 +256,17 @@ class Check:
 
         for label, address, prepare in cases:
             prepare()
+            exceptions = {a: ws.Range(a).NumberFormat for a in (address.split(":")[0] + "1", "K100001", "K900001")}
             started = time.perf_counter()
             outcome = self.run("Tk_FormatRange", ws.Range(address), "number")
             wall = time.perf_counter() - started
-            timings = self.run("Tk_LastFormatTimings")
+            timings = self.run("Tk_LastFormatTimings") if outcome.startswith("ok:") else "(not applied)"
             started = time.perf_counter()
             undo = self.run("Tk_RestoreLast")
             undo_wall = time.perf_counter() - started
+            restored = all(ws.Range(a).NumberFormat == f for a, f in exceptions.items())
+            self.record(f"performance case '{label}': applied and undone exactly",
+                        outcome.startswith("ok:") and undo.startswith("ok:") and restored, outcome=outcome, undo=undo)
             entry = {"case": label, "outcome": outcome, "apply_wall_ms": round(wall * 1000, 1), "vba": timings,
                      "undo": undo, "undo_wall_ms": round(undo_wall * 1000, 1),
                      "undo_vba_ms": round(self.run("Tk_LastRestoreSeconds") * 1000, 1)}
