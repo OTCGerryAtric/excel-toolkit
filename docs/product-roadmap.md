@@ -6,8 +6,9 @@ reviewer's response to the first assessment (five agreed corrections), and a sec
 Claude assessment (reconciled in [Reconciliation](#reconciliation-of-the-two-assessments)).
 Revised after the reviewer's full review of `0d5d543` (M2 Undo contract, selection behaviour,
 performance definition, decisions 8 and 9).
-**Nothing in this document has been implemented; M2 starts only after this revision is reviewed and
-scoped live testing is authorised.**
+**Status (2026-10-11): M2 accepted and merged** — 40/40 automated and 10/10 manual live checks, including
+a real Ctrl+Z (`docs/validation/m2-convert-to-values.md`). Text-conversion speed is a tracked improvement
+(below). Acceptance is for a development add-in on the owner's machine, not G0 deployment.
 
 ## Direction (from the brief)
 
@@ -96,7 +97,7 @@ Each milestone is usable in Excel on its own. Deployment (G0) runs in a separate
 | # | Milestone | Reuse | New | Main risk | Acceptance |
 |---|---|---|---|---|---|
 | M1 | Excel-triggered audit | Phase B | — | — | **Done** (`58be1ca`); docs reconciled |
-| **M2** | **First ribbon + command framework + reversible Convert to Values** | E1 build, E3 `OnUndo` and text rules, Phase B | Ribbon tab, command registry, VBA Undo framework | `OnUndo` unproven for value changes | See §D |
+| M2 | First ribbon + command framework + reversible Convert to Values | E1 build, E3 `OnUndo` and text rules, Phase B | Ribbon tab, command registry, VBA Undo framework | — | **Done** (`b140ea6`): 40/40 automated, 10/10 manual incl. real Ctrl+Z; text speed tracked below |
 | M3 | Port the productivity commands; add clipboard Paste Values | M2 framework, legacy macros | Defect fixes; the framework gains number formats, fills and borders as commands need them. **Delete Names stays disabled** (E8) | Volume; shortcut migration | Each legacy behaviour matches (or is a documented fix); each modifying command reverses live; shortcuts move one by one |
 | M4 | External Links Quick Scan (read-only) | Module2 logic, E5 external-ref detection, bulk reads, Phase B results pattern | Live scan (unsaved changes included) of formulas, names, links, charts; coverage summary; Deep Scan later. **Implementation (VBA, Python worker or hybrid) chosen by a small benchmark at the start of M4** — coverage, time and COM-call count | Speed and COM overhead on large books | ~2 s or less on ordinary workbooks; workbook unchanged; coverage statement correct on a fixture |
 | M5 | Formula Explorer v1 + bracket count | E5 parser, normaliser | Tree, values, navigate and back | Tree control; VBA vs Python parser | 10 representative formulas incl. INDIRECT/OFFSET shown as "not evaluated" |
@@ -104,7 +105,15 @@ Each milestone is usable in Excel on its own. Deployment (G0) runs in a separate
 
 Later: Deep Scan, Audit hardening (ADR requirements), detector extensions, G0 with IT.
 
-## D. Next milestone — M2
+## Known improvements (tracked)
+
+| Item | Measured (live, 2026-10-11) | Target | Constraint |
+|---|---|---|---|
+| Text-result conversion speed (each text cell written individually) | 10,000 cells: 1,596 ms convert, 1,342 ms restore; 100,000: 15,574 ms / 12,070 ms. Numbers: 306 ms / 63 ms at 10,000 | Under 1 s for 10,000 cells, convert and restore | Must not weaken exact type preservation, rollback or undo |
+| Per-cell safety checks during capture (array/spill/lock) | ~60% of the 100,000-number total (2.1 s of 3.3 s) | Part of the same pass | Same |
+| Provisional 100,000-cell safeguard | Retained | Revisit after the optimisation pass | Never truncate a selection |
+
+## D. M2 — complete (accepted 2026-10-11; specification kept for reference)
 
 **Delivered in Excel**
 

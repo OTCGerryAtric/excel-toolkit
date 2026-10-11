@@ -1,7 +1,9 @@
 # Project status
 
-Last updated: 2026-10-11 — **Milestone 1 achieved:** an audit started from Excel ran in a manually started
-Python worker and returned navigable results (Phase B live run, `58be1ca`). Deployment (G0) remains blocked.
+Last updated: 2026-10-11 — **M2 accepted:** the first Excel Toolkit add-in (ribbon, Convert to Values,
+one-level undo) passed 40/40 automated and 10/10 manual live checks, including a real Ctrl+Z (`b140ea6`).
+Milestone 1 (Excel-triggered audit, `58be1ca`) also achieved. Deployment (G0) remains blocked: acceptance
+covers a development add-in on the owner's machine, not distribution to colleagues.
 Update at every approval gate.
 
 ## Current state (2026-10-11)
@@ -10,7 +12,8 @@ Update at every approval gate.
 |---|---|---|
 | Excel-initiated formula audit (Phase B): VBA → named pipe → **manually started** worker → COM callback → separate results workbook → double-click navigation | **Live-validated** on the owner's managed laptop (disposable demo workbook, unsaved edit read, exactly the expected 2 findings, audited workbook unchanged in memory and on disk, no endpoint-protection intervention) | `58be1ca`; `prototypes/integration/README.md` |
 | Formula-inconsistency detector | Offline-tested (93 tests incl. Phase B fakes); runs live through Phase B | `tests/formula_audit/`, `tests/phaseb/` |
-| Production ribbon XML, UserForms, `.xlam` add-in | **None exist.** Only prototype `.bas` modules (E1/E3/E4/E6, Phase B) | — |
+| Excel Toolkit add-in (M2): ribbon tab with Convert to Values, Undo Toolkit Action, Audit Formulas; one-level undo (Ctrl+Z + explicit) | **Live-validated** on the owner's machine as a development `.xlam` opened with File → Open (not installed). Known improvement: text conversion speed | `addin/`; `docs/validation/m2-convert-to-values.md` |
+| UserForms / task panes | None yet | — |
 | Worker start | Manual only. Excel never launches Python; installing/auto-starting the worker is part of G0 | — |
 
 This supersedes "Detector progress and the integration gap" in the History section, whose statement that live Excel work must
@@ -37,8 +40,8 @@ Not open questions — do not re-run these comparisons.
   (live-validated in Phase B). Python commands are read-only.
 - **Independent analysis engine** in `src/excel_toolkit`, no COM imports outside the adapter layer.
 - **Deployment (G0) is blocked**; the E6 installer is rejected and must not be re-run.
-- Next work follows `docs/product-roadmap.md` (M2 approved in principle; implementation awaits the reviewed
-  documentation and scoped live-test authorisation).
+- Next work follows `docs/product-roadmap.md`: M2 complete; M3 proposal under review (no M3 implementation
+  until approved).
 
 ## Ruled out
 
