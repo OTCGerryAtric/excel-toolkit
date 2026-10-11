@@ -56,16 +56,16 @@ modified; stop at once if endpoint protection intervenes.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Look at the ribbon | "Excel Toolkit" tab; three buttons with icons and tooltips; Undo Toolkit Action greyed out || Pass — tab, three buttons with icons and tooltips; Undo Toolkit Action greyed (screenshot) |
-| 2 | Enter `=1+1`, `="0012"`, `=TODAY()` in A1:A3; select; click **Convert to Values** | Values remain, formula bar shows no formulas; Undo Toolkit Action enabled, tooltip names the range || Pass |
-| 3 | Press **Ctrl+Z** | Excel offers "Undo Convert to Values"; the three formulas return; Undo Toolkit Action greyed || **Pass — real Ctrl+Z restored the formulas** |
-| 4 | Convert again; type something in C1; press Ctrl+Z | Ctrl+Z undoes the C1 typing only (Excel's own undo) || Pass |
-| 5 | Click **Undo Toolkit Action** | The A1:A3 formulas return || Pass |
-| 6 | Convert again; overwrite A2; click Undo Toolkit Action | Refused, names A2, nothing changed || Pass |
-| 7 | Filter a list so rows are hidden; select a range across hidden rows; Convert | Refused with the Alt+; hint. Then Alt+; and Convert: only visible cells converted || **Pass — refused with the Alt+; hint; visible-only selection converted only the visible rows** |
-| 8 | Click **Audit Formulas** with no worker running | Clear message that the worker is not running; nothing launched || Pass — "The audit worker is not running … This add-in will not start Python itself." (worker deliberately not started; screenshot) |
-| 9 | Press Ctrl+Shift+V on a selection | Still runs the existing PERSONAL.XLSB macro || Pass |
-| 10 | Close Excel choosing **Don't Save** for every workbook | PERSONAL.XLSB unchanged (hash); no security events || Pass |
+| 1 | Look at the ribbon | "Excel Toolkit" tab; three buttons with icons and tooltips; Undo Toolkit Action greyed out | Pass — tab, three buttons with icons and tooltips; Undo Toolkit Action greyed (screenshot) |
+| 2 | Enter `=1+1`, `="0012"`, `=TODAY()` in A1:A3; select; click **Convert to Values** | Values remain, formula bar shows no formulas; Undo Toolkit Action enabled, tooltip names the range | Pass |
+| 3 | Press **Ctrl+Z** | Excel offers "Undo Convert to Values"; the three formulas return; Undo Toolkit Action greyed | **Pass — real Ctrl+Z restored the formulas** |
+| 4 | Convert again; type something in C1; press Ctrl+Z | Ctrl+Z undoes the C1 typing only (Excel's own undo) | Pass |
+| 5 | Click **Undo Toolkit Action** | The A1:A3 formulas return | Pass |
+| 6 | Convert again; overwrite A2; click Undo Toolkit Action | Refused, names A2, nothing changed | Pass |
+| 7 | Filter a list so rows are hidden; select a range across hidden rows; Convert | Refused with the Alt+; hint. Then Alt+; and Convert: only visible cells converted | **Pass — refused with the Alt+; hint; visible-only selection converted only the visible rows** |
+| 8 | Click **Audit Formulas** with no worker running | Clear message that the worker is not running; nothing launched | Pass — "The audit worker is not running … This add-in will not start Python itself." (worker deliberately not started; screenshot) |
+| 9 | Press Ctrl+Shift+V on a selection | Still runs the existing PERSONAL.XLSB macro | Pass |
+| 10 | Close Excel choosing **Don't Save** for every workbook | PERSONAL.XLSB unchanged (hash); no security events | Pass |
 
 ## Results — automated live run (2026-10-11, owner's managed laptop)
 
