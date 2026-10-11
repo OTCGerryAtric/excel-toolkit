@@ -119,17 +119,17 @@ Later: Deep Scan, Audit hardening (ADR requirements), detector extensions, G0 wi
 **Not in M2:** other macros, clipboard Paste Values, Find a Tool, generic format/fill/border capture,
 any installer, registry or trust change. Ctrl+Shift+V is not taken over.
 
-### Selection behaviour (proposed — confirm before implementation)
+### Selection behaviour (approved 2026-10-11)
 
 | Selection | Behaviour |
 |---|---|
 | Single range, or several **non-overlapping** areas | Converted; each area handled separately |
 | Overlapping areas | Refused |
-| Any hidden or filtered-out row/column inside the selection | **Refused**, with the hint to select visible cells only (Alt+; gives a multi-area selection of visible cells). Hidden cells are never converted silently |
+| Any hidden or filtered-out row/column **included in the selection** | **Refused**, with the hint to select visible cells only. A filtered sheet is not refused as such: an explicit visible-cells-only selection (Alt+;) is allowed. Hidden cells are never converted silently |
 | Merged cells, dynamic-array spill ranges (anchor or spilled cells), legacy array or data-table formulas | Refused (reliable conversion unproven) |
 | Locked formula cells on a protected sheet | Refused before anything is written |
 | No formulas in the selection | Message; nothing changed; no Undo record |
-| Above the size limit (proposed 100,000 cells, set from M2 timings) | Refused in M2 |
+| Above the size limit (provisional 100,000 cells; a configurable safeguard, revisited after M2 timings) | Refused, never truncated |
 
 ### Undo contract (M2)
 
@@ -197,8 +197,8 @@ any installer, registry or trust change. Ctrl+Shift+V is not taken over.
 | 8 | Delete Names | **Deferred** — stays disabled until broader workbook safety and recovery are established (restoring name definitions alone does not prove recovery) |
 | 9 | External Links Quick Scan technology | **Amended** — VBA, Python or hybrid chosen from an M4 benchmark of coverage and speed |
 
-Still open before M2 implementation: confirmation of the selection behaviour in §D, and scoped
-authorisation for the live tests.
+Selection behaviour approved with the visible-cells-only clarification (2026-10-11). Still open: explicit
+authorisation of the scoped M2 live tests (not deployment approval).
 
 Not decisions now: Excel-DNA, installer method, worker auto-start — unchanged until IT answers the
 questions in `docs/architecture/deployment-decision.md`.

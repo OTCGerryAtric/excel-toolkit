@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Excel Toolkit ribbon (M2). Labels, tooltips and enabled state come from the VBA command
+     registry (TkMain) through callbacks, so the ribbon cannot drift from it. Built-in icons only. -->
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Tk_RibbonLoaded">
+  <ribbon>
+    <tabs>
+      <tab id="tkTab" label="Excel Toolkit" keytip="ET">
+        <group id="tkQuickTools" label="Quick Tools">
+          <button id="tkConvertToValues" size="large" imageMso="PasteValues" keytip="V"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          <button id="tkUndo" size="large" imageMso="Undo" keytip="U"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          <separator id="tkQuickToolsSeparator"/>
+          <button id="tkAudit" size="large" imageMso="ErrorChecking" keytip="A"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
