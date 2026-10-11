@@ -1,6 +1,6 @@
 # M2 validation — ribbon, Convert to Values, one-level undo
 
-Status: **build and automated live checks passed (2026-10-11, 40/40); manual ribbon and real Ctrl+Z checklist pending.**
+Status: **build, automated live checks (40/40) and manual ribbon / real Ctrl+Z checklist (10/10) passed, 2026-10-11.** Open issue: text conversion speed (below). Not merged; awaiting review.
 Specification: `docs/product-roadmap.md` §D. Source: `addin/`.
 
 ## What exists
@@ -56,16 +56,16 @@ modified; stop at once if endpoint protection intervenes.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Look at the ribbon | "Excel Toolkit" tab; three buttons with icons and tooltips; Undo Toolkit Action greyed out | |
-| 2 | Enter `=1+1`, `="0012"`, `=TODAY()` in A1:A3; select; click **Convert to Values** | Values remain, formula bar shows no formulas; Undo Toolkit Action enabled, tooltip names the range | |
-| 3 | Press **Ctrl+Z** | Excel offers "Undo Convert to Values"; the three formulas return; Undo Toolkit Action greyed | |
-| 4 | Convert again; type something in C1; press Ctrl+Z | Ctrl+Z undoes the C1 typing only (Excel's own undo) | |
-| 5 | Click **Undo Toolkit Action** | The A1:A3 formulas return | |
-| 6 | Convert again; overwrite A2; click Undo Toolkit Action | Refused, names A2, nothing changed | |
-| 7 | Filter a list so rows are hidden; select a range across hidden rows; Convert | Refused with the Alt+; hint. Then Alt+; and Convert: only visible cells converted | |
-| 8 | Click **Audit Formulas** with no worker running | Clear message that the worker is not running; nothing launched | |
-| 9 | Press Ctrl+Shift+V on a selection | Still runs the existing PERSONAL.XLSB macro | |
-| 10 | Close Excel choosing **Don't Save** for every workbook | PERSONAL.XLSB unchanged (hash); no security events | |
+| 1 | Look at the ribbon | "Excel Toolkit" tab; three buttons with icons and tooltips; Undo Toolkit Action greyed out || Pass — tab, three buttons with icons and tooltips; Undo Toolkit Action greyed (screenshot) |
+| 2 | Enter `=1+1`, `="0012"`, `=TODAY()` in A1:A3; select; click **Convert to Values** | Values remain, formula bar shows no formulas; Undo Toolkit Action enabled, tooltip names the range || Pass |
+| 3 | Press **Ctrl+Z** | Excel offers "Undo Convert to Values"; the three formulas return; Undo Toolkit Action greyed || **Pass — real Ctrl+Z restored the formulas** |
+| 4 | Convert again; type something in C1; press Ctrl+Z | Ctrl+Z undoes the C1 typing only (Excel's own undo) || Pass |
+| 5 | Click **Undo Toolkit Action** | The A1:A3 formulas return || Pass |
+| 6 | Convert again; overwrite A2; click Undo Toolkit Action | Refused, names A2, nothing changed || Pass |
+| 7 | Filter a list so rows are hidden; select a range across hidden rows; Convert | Refused with the Alt+; hint. Then Alt+; and Convert: only visible cells converted || **Pass — refused with the Alt+; hint; visible-only selection converted only the visible rows** |
+| 8 | Click **Audit Formulas** with no worker running | Clear message that the worker is not running; nothing launched || Pass — "The audit worker is not running … This add-in will not start Python itself." (worker deliberately not started; screenshot) |
+| 9 | Press Ctrl+Shift+V on a selection | Still runs the existing PERSONAL.XLSB macro || Pass |
+| 10 | Close Excel choosing **Don't Save** for every workbook | PERSONAL.XLSB unchanged (hash); no security events || Pass |
 
 ## Results — automated live run (2026-10-11, owner's managed laptop)
 
@@ -125,3 +125,24 @@ At 100,000 cells capture dominates for numbers (per-cell array/spill checks). No
 
 **Not established by the automated run:** real Ctrl+Z (Excel runs `OnUndo` handlers only for a
 real keypress) and the ribbon — the manual checklist above.
+
+## Results — manual checklist (2026-10-11, owner, own Excel)
+
+The development `.xlam` was opened with File → Open in the owner's Excel, against a new blank
+workbook. All 10 steps passed (results in the table above). In particular: **a real Ctrl+Z after
+Convert to Values restored the original formulas**, the ribbon's Undo Toolkit Action enabled and
+disabled correctly, the filtered-selection refusal and visible-only conversion behaved as specified,
+Audit Formulas reported the stopped worker clearly and launched nothing, and Ctrl+Shift+V still ran
+the PERSONAL.XLSB macro.
+
+Afterwards: PERSONAL.XLSB SHA-256 unchanged; no Excel process left; 0 Defender detections;
+SentinelOne logged one routine burst of 14 event-143 entries, none naming Excel, Python or the add-in;
+no Trusted Documents record for the add-in; the only add-in `OPEN` key is still Arixcel's (no install).
+
+## Open issues
+
+- **Text conversion speed** misses the 10,000-cell target (1.6 s convert, 1.3 s restore; 15.6 s /
+  12.1 s at 100,000) because text cells are written one at a time. Numbers meet it (306 ms / 63 ms).
+  Planned: one focused optimisation pass on bulk text writes and the per-cell safety checks, without
+  weakening exact type preservation or undo. The provisional 100,000-cell limit stays meanwhile.
+  Whether this blocks M2 acceptance is a review decision.
