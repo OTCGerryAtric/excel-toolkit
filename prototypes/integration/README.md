@@ -1,4 +1,4 @@
-# Excel integration scaffolding (offline prep — not executed/installed)
+# Excel integration (Phase B live-validated at `58be1ca`; nothing installed)
 
 Prepared for the minimal end-to-end Excel demonstration. **None of this is run, built or
 installed on the current managed laptop** (Excel COM + external Python execution remain
@@ -53,7 +53,18 @@ names, unlike delimited text. Each record keeps the audited workbook identity fo
 - Returning the JSON to VBA (stdout vs a worker channel vs a temp file) and parsing it there
   with a bundled JSON parser; never modifying the audited workbook.
 
-## Phase B — persistent worker + pipe + callback (OFFLINE-PREPARED, not run)
+## Phase B — persistent worker + pipe + callback (LIVE-VALIDATED 2026-10-11, `58be1ca`)
+
+**Live result (owner's managed laptop, disposable `demo_workbook.xlsx`):** audit triggered from Excel
+(Alt+F8 → `PhaseB_AuditActiveSheet`, bridge in a separate unsaved macro workbook); manually started
+worker attached by identity and read the unsaved D3 edit; status ok, exactly 2 findings (D3, D4) in
+~138 ms; callback accepted; results in a separate workbook; double-click navigated to `Demo!$D$3`;
+audited workbook unchanged in memory and on disk; no Defender/SentinelOne detection; Excel spawned
+no Python. Two defects fixed during the run: the callback is now workbook-qualified
+(`'<macro book>'!PhaseBBridge.PhaseB_OnResult`), and `.bas`/`.cls` are pinned to CRLF
+(`.gitattributes`; an LF `.cls` imports as a standard module). The worker-failure MsgBox path is
+tested offline only. The section below describes the design as prepared.
+
 
 The user-experience demo (click → audit → results → double-click to the suspect cell) without
 Excel ever launching Python. Excel talks to an **already-running** worker over E4's local

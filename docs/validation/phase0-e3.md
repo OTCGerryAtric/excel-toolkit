@@ -31,7 +31,7 @@ Plus connection resilience: unsaved workbook, rename, close/reopen, stale proces
 
 | Check | Result |
 |---|---|
-| Values, text, errors, booleans and number formats correct after the operation | Pass |
+| Values, text, errors, booleans and number formats correct after the operation (formats are untouched by the operation, not journalled) | Pass |
 | Custom Undo restores formulas and constants exactly (verified cell by cell) | Pass |
 | Undo **refused** when a user edited an affected cell afterwards; conflicting cell reported (`Data!$A$2`) | Pass |
 | Nothing restored after a refused undo (no partial overwrite) | Pass |
@@ -121,7 +121,7 @@ So: Excel Ctrl+Z integration via `OnUndo` **works for a real keypress**; it only
 - Busy behaviour was only exercised with simulated rejections; real edit mode pending the manual check.
 - Excel's own undo history is cleared by the journal's writes (any COM write does this). Custom Undo is our command, not Ctrl+Z.
 - The journal stores cell contents in a local JSON file. Fine for a prototype; production needs a retention/clean-up policy, and care because it holds workbook data.
-- Spill ranges, merged cells, data validation and conditional formats are not covered by the prototype journal (formulas, constants and number formats only).
+- The prototype journal captures and restores **formulas and constants only** (`Formula2` + `Value2`, plus defined names for delete-names). Number formats, fills, borders, spill ranges, merged cells, data validation and conditional formats are not journalled. (Corrected 2026-10-11: this line previously said number formats were covered; `journal.py` never captured them.)
 - Two test Excel instances left dialogs open and did not quit; the harness now terminates its own test instance (by recorded pid) if it hasn't exited 15 s after `Quit`.
 
 ## Outcome

@@ -1,8 +1,21 @@
 # Project status
 
-Last updated: 2026-10-10 — E6 functional work passed but its **deployment method was rejected** after the EDR
-removed project files during the install test (see `docs/incidents/2026-10-10-edr-file-deletion.md`).
-Deployment redesign approved as **design/investigation only**; no install/security changes pending review. Update at every approval gate.
+Last updated: 2026-10-11 — **Milestone 1 achieved:** an audit started from Excel ran in a manually started
+Python worker and returned navigable results (Phase B live run, `58be1ca`). Deployment (G0) remains blocked.
+Update at every approval gate.
+
+## Current state (2026-10-11)
+
+| Capability | Status | Evidence |
+|---|---|---|
+| Excel-initiated formula audit (Phase B): VBA → named pipe → **manually started** worker → COM callback → separate results workbook → double-click navigation | **Live-validated** on the owner's managed laptop (disposable demo workbook, unsaved edit read, exactly the expected 2 findings, audited workbook unchanged in memory and on disk, no endpoint-protection intervention) | `58be1ca`; `prototypes/integration/README.md` |
+| Formula-inconsistency detector | Offline-tested (93 tests incl. Phase B fakes); runs live through Phase B | `tests/formula_audit/`, `tests/phaseb/` |
+| Production ribbon XML, UserForms, `.xlam` add-in | **None exist.** Only prototype `.bas` modules (E1/E3/E4/E6, Phase B) | — |
+| Worker start | Manual only. Excel never launches Python; installing/auto-starting the worker is part of G0 | — |
+
+This supersedes "Detector progress and the integration gap" below, whose statement that live Excel work must
+not be attempted on this laptop was replaced by the explicit, scoped approvals for the Stage 2 and Phase B live runs.
+The 2026-10-10 E6 deployment rejection still stands (see `docs/incidents/2026-10-10-edr-file-deletion.md`).
 
 ## Objective
 
@@ -113,7 +126,7 @@ was deleted but self-restored via the 16:48 auto-update to 2.1.296 — no reinst
 `C:\Users\GerryPidgeon\IncidentEvidence\2026-10-10-ExcelAddIn\`. Do **not** re-run the flagged prototype. Full
 record and the four confirmed/unverified distinctions: `docs/incidents/2026-10-10-edr-file-deletion.md`.
 
-## Detector progress and the integration gap (2026-10-11)
+## Detector progress and the integration gap (2026-10-11 — superseded, see Current state)
 
 The offline formula-inconsistency detector is built and hardened — **Gates 1–3 + two
 review-driven hardening passes, 52 passing tests** (singleton, worksheet-wide, and
@@ -186,6 +199,7 @@ Minimal Excel-DNA `.xll` test = **feasibility only**, gated on security clearanc
 
 ## Related documents
 
+- `docs/product-roadmap.md` — capability inventory, gaps, roadmap and pending decisions (2026-10-11)
 - `docs/hotkeys.md` — hotkey register
 - `docs/rollback.md` — baseline and rollback
 - `reports/Excel add in feature ideas.md` — competitor feature research
