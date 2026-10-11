@@ -40,7 +40,7 @@ DEFAULT_XLAM = HERE.parent / "build" / "ExcelToolkit.xlam"
 PERSONAL = Path(os.environ["APPDATA"]) / "Microsoft" / "Excel" / "XLSTART" / "PERSONAL.XLSB"
 XL_CALC_AUTOMATIC = -4105
 XL_CELL_TYPE_VISIBLE = 12
-STALL_SECONDS = 120
+STALL_SECONDS = 300
 
 # Formula fixtures: (formula, number format or None). Results cover every supported type.
 TYPE_FORMULAS = [
@@ -104,13 +104,18 @@ class Check:
         self.excel = win32com.client.DispatchEx("Excel.Application")
         _, self.pid = win32process.GetWindowThreadProcessId(self.excel.Hwnd)
         self.watchdog = Watchdog(self.pid)
-        self.excel.Visible = False
-        self.excel.DisplayAlerts = False
-        self.addin = self.excel.Workbooks.Open(str(xlam))
-        self.name = self.addin.Name
         self.results: list[dict] = []
         self.timings: list[dict] = []
-        self.run("Tk_SetQuiet", True)
+        try:
+            self.excel.Visible = False
+            self.excel.DisplayAlerts = False
+            self.addin = self.excel.Workbooks.Open(str(xlam))
+            self.name = self.addin.Name
+            self.run("Tk_SetQuiet", True)  # fails with "Cannot run the macro" if the VBA does not compile
+        except Exception:
+            self.watchdog.stop()
+            _terminate(self.pid)  # never leave the disposable Excel running
+            raise
 
     # ----- plumbing -----
 
@@ -265,7 +270,7 @@ class Check:
         ws.Range("I1").Formula2 = "=K1*2"               # data table formula row
         for r, v in enumerate([1, 2, 3], start=2):
             ws.Range(f"H{r}").Value2 = v                # input values; results fill I2:I4
-        ws.Range("H1:I4").Table(ColumnInput=ws.Range("K1"))
+        ws.Range("H1:I4").Table(pythoncom.Empty, ws.Range("K1"))  # (RowInput, ColumnInput); Missing is rejected
         cases = [("merged cells", "A1:B1"), ("spill anchor", "D1"), ("spill range", "D1:D3"), ("spilled cells only", "D2:D3"),
                  ("legacy array formula", "F1:F2"), ("data table", "I2:I4")]
         for name, address in cases:
@@ -348,28 +353,31 @@ class Check:
                     not ws.Range("A1").HasFormula and ws.Range("A5").HasFormula)
         self.record("lifecycle: record cleared after undo", self.restore().startswith("nothing:"))
 
-        self.convert(ws.Range("A1"))
+        # A1 is a value now (left converted above), so each identity case converts a cell that
+        # still holds a formula and asserts the conversion happened before testing the refusal.
+        converted = self.convert(ws.Range("A3"))
         ws.Name = "Renamed"
         outcome = self.restore()
-        self.record("identity: undo refused after the sheet is renamed", outcome.startswith("refused:"), outcome=outcome)
+        self.record("identity: undo refused after the sheet is renamed", converted.startswith("ok:")
+                    and outcome.startswith("refused:") and not ws.Range("A3").HasFormula, converted=converted, outcome=outcome)
 
-        self.convert(ws.Range("A5"))
+        converted = self.convert(ws.Range("A5"))
         path = Path(tempfile.gettempdir()) / f"tk_m2_saveas_{os.getpid()}.xlsx"
         wb.SaveAs(str(path))
         outcome = self.restore()
-        self.record("identity: undo refused after Save As under another name", outcome.startswith("refused:"), outcome=outcome)
+        self.record("identity: undo refused after Save As under another name", converted.startswith("ok:")
+                    and outcome.startswith("refused:") and not ws.Range("A5").HasFormula, converted=converted, outcome=outcome)
 
-        self.convert(ws.Range("A11"))
+        converted = self.convert(ws.Range("A11"))
         wb.Close(SaveChanges=False)
         outcome = self.restore()
-        self.record("identity: undo refused after the workbook is closed", outcome.startswith("refused:"), outcome=outcome)
+        self.record("identity: undo refused after the workbook is closed", converted.startswith("ok:")
+                    and outcome.startswith("refused:"), converted=converted, outcome=outcome)
         path.unlink(missing_ok=True)
 
     def performance(self, sizes):
         for n in sizes:
             for kind, formula in (("number", "=ROW()*2"), ("text", '=TEXT(ROW(),"0000")')):
-                if kind == "text" and n > 10_000:
-                    continue
                 wb, ws = self.new_sheet()
                 ws.Range(f"A1:A{n}").Formula2 = formula
                 started = time.perf_counter()

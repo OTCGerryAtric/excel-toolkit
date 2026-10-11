@@ -1,0 +1,306 @@
+{
+  "results": [
+    {
+      "check": "types: command reports success",
+      "passed": true,
+      "outcome": "ok: 15 formula cell(s) converted to values."
+    },
+    {
+      "check": "types: each converted cell holds exactly its formula's result (type, value, format; no formula)",
+      "passed": true,
+      "mismatches": {}
+    },
+    {
+      "check": "types: constants untouched (formula text, type, value, format)",
+      "passed": true,
+      "before": {},
+      "after": {}
+    },
+    {
+      "check": "types: Excel state restored after convert",
+      "passed": true,
+      "state": [
+        true,
+        true,
+        -4105
+      ]
+    },
+    {
+      "check": "types: undo reports success",
+      "passed": true,
+      "outcome": "ok: Undid Convert to Values."
+    },
+    {
+      "check": "types: undo restores identical Formula2 and recalculated values",
+      "passed": true,
+      "diff": {}
+    },
+    {
+      "check": "types: constants untouched by undo",
+      "passed": true
+    },
+    {
+      "check": "types: second undo has nothing to do",
+      "passed": true
+    },
+    {
+      "check": "selection: three areas converted, nothing else changed",
+      "passed": true,
+      "outcome": "ok: 7 formula cell(s) converted to values.",
+      "changed": [
+        "$A$1",
+        "$A$2",
+        "$A$3",
+        "$A$5",
+        "$A$6",
+        "$C$1",
+        "$C$2"
+      ]
+    },
+    {
+      "check": "selection: overlapping areas refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: Parts of the selection overlap (A1:A5 and A3:A8). Select each cell only once."
+    },
+    {
+      "check": "selection: no formulas -> nothing, nothing changed",
+      "passed": true,
+      "outcome": "nothing: There are no formulas in the selection."
+    },
+    {
+      "check": "selection: over the cell limit refused, not truncated, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection has 11 cells; the current limit is 10. Select fewer cells and try again."
+    },
+    {
+      "check": "filtered: selection including filtered-out rows refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection includes hidden or filtered-out cells, which would also be converted.\r\nTo convert only the visible cells, select them with Alt+; (Home > Find & Select > Go To Special > Visible cells only) and try again."
+    },
+    {
+      "check": "filtered: visible-cells-only selection converted; filtered-out cells untouched",
+      "passed": true,
+      "outcome": "ok: 3 formula cell(s) converted to values."
+    },
+    {
+      "check": "hidden: selection including a hidden column refused",
+      "passed": true,
+      "outcome": "refused: The selection includes hidden or filtered-out cells, which would also be converted.\r\nTo convert only the visible cells, select them with Alt+; (Home > Find & Select > Go To Special > Visible cells only) and try again."
+    },
+    {
+      "check": "unsupported: merged cells refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection includes merged cells (A1:B1). Convert to Values does not support merged cells yet."
+    },
+    {
+      "check": "unsupported: spill anchor refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection includes a dynamic-array spill range (D1). Convert to Values does not support spill ranges yet."
+    },
+    {
+      "check": "unsupported: spill range refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection includes a dynamic-array spill range (D1:D3). Convert to Values does not support spill ranges yet."
+    },
+    {
+      "check": "unsupported: spilled cells only refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection includes a dynamic-array spill range (D2:D3). Convert to Values does not support spill ranges yet."
+    },
+    {
+      "check": "unsupported: legacy array formula refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: cell F1 on 'Sheet1' holds an array formula. Convert to Values does not support array formulas yet."
+    },
+    {
+      "check": "unsupported: data table refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: cell I2 on 'Sheet1' is part of a data table. Convert to Values does not support data tables yet."
+    },
+    {
+      "check": "protected: locked formula cell refused before writing",
+      "passed": true,
+      "outcome": "refused: The selection includes hidden or filtered-out cells, which would also be converted.\r\nTo convert only the visible cells, select them with Alt+; (Home > Find & Select > Go To Special > Visible cells only) and try again."
+    },
+    {
+      "check": "protected: unlocked formula cell converted",
+      "passed": true,
+      "outcome": "ok: 1 formula cell(s) converted to values."
+    },
+    {
+      "check": "protected: undo of the unlocked cell",
+      "passed": true
+    },
+    {
+      "check": "failure (per-cell path): rolled back, sheet identical, reported as rolled back",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while writing: Simulated failure (test hook)"
+    },
+    {
+      "check": "failure: Excel state restored",
+      "passed": true
+    },
+    {
+      "check": "failure: no undo record left behind",
+      "passed": true
+    },
+    {
+      "check": "failure (bulk path): first area rolled back",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while writing: Simulated failure (test hook)"
+    },
+    {
+      "check": "failure after verified writes, before undo is stored: rolled back (never 'refused'), sheet identical",
+      "passed": true,
+      "outcome": "rolled back: The formulas were converted, but the undo record could not be stored (Simulated failure before undo registration (test hook))."
+    },
+    {
+      "check": "failure after verified writes: Excel state restored",
+      "passed": true
+    },
+    {
+      "check": "restore failure: reported as incomplete, never success",
+      "passed": true,
+      "outcome": "incomplete: Not restored: cell A3 on 'Sheet1' cell A4 on 'Sheet1' cell A5 on 'Sheet1' cell A6 on 'Sheet1' cell A7 on 'Sheet1' cell A8 on 'Sheet1' cell A9 on 'Sheet1' cell A10 on 'Sheet1' cell A11 on 'Sheet1' cell A12 on 'Sheet1' cell A13 on 'Sheet1' cell A14 on 'Sheet1' cell A15 on 'Sheet1'."
+    },
+    {
+      "check": "restore failure: record unusable afterwards",
+      "passed": true
+    },
+    {
+      "check": "conflict: undo refused after an edit, names the cell, writes nothing",
+      "passed": true,
+      "outcome": "refused: cell A2 on 'Sheet1' has changed since the conversion. Nothing was changed."
+    },
+    {
+      "check": "conflict: undo allowed again once the edit is reverted",
+      "passed": true
+    },
+    {
+      "check": "lifecycle: a new command replaces the record (only the last one is undone)",
+      "passed": true
+    },
+    {
+      "check": "lifecycle: record cleared after undo",
+      "passed": true
+    },
+    {
+      "check": "identity: undo refused after the sheet is renamed",
+      "passed": false,
+      "outcome": "nothing: There is no Excel Toolkit change to undo."
+    },
+    {
+      "check": "identity: undo refused after Save As under another name",
+      "passed": true,
+      "outcome": "refused: The workbook has been renamed or saved under another name since the change (it was Book7). Nothing was changed."
+    },
+    {
+      "check": "identity: undo refused after the workbook is closed",
+      "passed": true,
+      "outcome": "refused: The workbook that was changed (C:\\Users\\GERRYP~1\\AppData\\Local\\Temp\\tk_m2_saveas_26536.xlsx) is no longer open. Nothing was changed."
+    },
+    {
+      "check": "PERSONAL.XLSB unchanged",
+      "passed": true
+    }
+  ],
+  "timings": [
+    {
+      "cells": 1,
+      "kind": "number",
+      "outcome": "ok: 1 formula cell(s) converted to values.",
+      "convert_wall_ms": 18.4,
+      "vba_timings_ms": "cells=1;validate=0.2;capture=0.4;apply=4.7;verify=8.4;register=0.1;total=13.9",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 13.2,
+      "undo_vba_ms": 12.1
+    },
+    {
+      "cells": 1,
+      "kind": "text",
+      "outcome": "ok: 1 formula cell(s) converted to values.",
+      "convert_wall_ms": 26.7,
+      "vba_timings_ms": "cells=1;validate=0.1;capture=0.3;apply=5.6;verify=8.5;register=0.1;total=14.5",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 11.9,
+      "undo_vba_ms": 11.3
+    },
+    {
+      "cells": 1000,
+      "kind": "number",
+      "outcome": "ok: 1000 formula cell(s) converted to values.",
+      "convert_wall_ms": 53.1,
+      "vba_timings_ms": "cells=1000;validate=0.3;capture=20.8;apply=17.8;verify=8.1;register=0.1;total=47.3",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 19.3,
+      "undo_vba_ms": 15.2
+    },
+    {
+      "cells": 1000,
+      "kind": "text",
+      "outcome": "ok: 1000 formula cell(s) converted to values.",
+      "convert_wall_ms": 227.9,
+      "vba_timings_ms": "cells=1000;validate=0.3;capture=25.2;apply=141.4;verify=13.6;register=0.1;total=180.6",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 161.8,
+      "undo_vba_ms": 157.3
+    },
+    {
+      "cells": 10000,
+      "kind": "number",
+      "outcome": "ok: 10000 formula cell(s) converted to values.",
+      "convert_wall_ms": 354.8,
+      "vba_timings_ms": "cells=10000;validate=0.5;capture=170.2;apply=113.1;verify=21.7;register=0.1;total=305.7",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 93.8,
+      "undo_vba_ms": 62.6
+    },
+    {
+      "cells": 10000,
+      "kind": "text",
+      "outcome": "ok: 10000 formula cell(s) converted to values.",
+      "convert_wall_ms": 1639.0,
+      "vba_timings_ms": "cells=10000;validate=0.5;capture=204.1;apply=1307.6;verify=83.2;register=0.1;total=1595.5",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 1386.5,
+      "undo_vba_ms": 1342.2
+    },
+    {
+      "cells": 100000,
+      "kind": "number",
+      "outcome": "ok: 100000 formula cell(s) converted to values.",
+      "convert_wall_ms": 3347.4,
+      "vba_timings_ms": "cells=100000;validate=2.7;capture=2072.9;apply=1098.4;verify=163.4;register=0.1;total=3337.7",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 856.5,
+      "undo_vba_ms": 481.5
+    },
+    {
+      "cells": 100000,
+      "kind": "text",
+      "outcome": "ok: 100000 formula cell(s) converted to values.",
+      "convert_wall_ms": 15625.3,
+      "vba_timings_ms": "cells=100000;validate=2.9;capture=2366.2;apply=12508.9;verify=695.6;register=0.2;total=15573.8",
+      "undo": "ok: Undid Convert to Values.",
+      "undo_wall_ms": 12433.3,
+      "undo_vba_ms": 12070.1
+    }
+  ],
+  "prefix_characters_after_convert": {
+    "$A$1": "",
+    "$A$2": "",
+    "$A$3": "",
+    "$A$4": "",
+    "$A$5": "",
+    "$A$6": "",
+    "$A$7": "",
+    "$A$8": "'",
+    "$A$9": "",
+    "$A$10": "",
+    "$A$11": "",
+    "$A$12": "",
+    "$A$13": "'",
+    "$A$14": "",
+    "$A$15": ""
+  }
+}

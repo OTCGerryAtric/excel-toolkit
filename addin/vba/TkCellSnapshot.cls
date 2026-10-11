@@ -188,6 +188,8 @@ Private Sub WriteResult(ByVal cell As Range, ByVal value As Variant, ByVal origi
     If VarType(value) = vbString Then
         If Len(value) = 0 Then
             cell.Value2 = "'"                  ' empty text stays text, not a blank cell
+        ElseIf Left$(value, 1) = "'" Then
+            cell.Value2 = "'" & value          ' Excel swallows one leading apostrophe even in a Text cell
         Else
             cell.NumberFormat = "@"            ' store the text verbatim: no number/date parsing
             cell.Value2 = value
@@ -220,7 +222,7 @@ Public Function VerifyConverted() As String
                             VerifyConverted = Where(areas(a), r, c) & " still holds a formula.": Exit Function
                         End If
                     End If
-                    If VarType(v(r, c)) = vbString And Len(v(r, c)) > 0 Then
+                    If IsNonEmptyText(v(r, c)) Then
                         If areas(a).Cells(r, c).NumberFormat <> fmts(r, c) Then
                             VerifyConverted = Where(areas(a), r, c) & " number format changed.": Exit Function
                         End If
@@ -317,7 +319,7 @@ Public Function RestoreFormulas(ByVal useHook As Boolean) As String
                         If limit > 0 And done >= limit Then Err.Raise vbObjectError + 514, "TkCellSnapshot", "Simulated restore failure (test hook)"
                         If Err.Number = 0 Then
                             areas(a).Cells(r, c).Formula2 = f(r, c)
-                            If VarType(v(r, c)) = vbString And Len(v(r, c)) > 0 Then areas(a).Cells(r, c).NumberFormat = fmts(r, c)
+                            If IsNonEmptyText(v(r, c)) Then areas(a).Cells(r, c).NumberFormat = fmts(r, c)
                         End If
                         If Err.Number <> 0 Then
                             problems = problems & " " & Where(areas(a), r, c)
@@ -369,6 +371,11 @@ Private Function As2D(ByVal value As Variant, ByVal rows As Long, ByVal cols As 
     Else
         As2D = value
     End If
+End Function
+
+' VBA's And evaluates both sides, so Len() must never see an error value: test the type first.
+Private Function IsNonEmptyText(ByVal value As Variant) As Boolean
+    If VarType(value) = vbString Then IsNonEmptyText = (Len(value) > 0)
 End Function
 
 ' Same type and value. Matching displayed text is not enough.

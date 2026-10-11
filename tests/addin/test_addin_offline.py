@@ -103,6 +103,49 @@ def test_every_button_has_a_built_in_icon_and_a_keytip():
 
 # ---------- VBA project ----------
 
+def _module_level_names(path: Path) -> list[str]:
+    """Names declared at module level: procedures, Consts, variables and Declares."""
+    names, in_else = [], False
+    for line in _code(path).splitlines():
+        if line.startswith("#Else"):
+            in_else = True  # the #Else branch of #If VBA7 re-declares the same names
+        elif line.startswith("#End If"):
+            in_else = False
+        if in_else or line[:1].isspace():
+            continue  # procedure bodies are indented in this project
+        m = re.match(r"(?:(?:Public|Private|Friend) )?(?:Sub|Function|Property (?:Get|Let|Set)) (\w+)", line)
+        if m:
+            if m.group(0).split()[-2:-1] not in (["Let"], ["Set"]):  # Property Let/Set share the Get's name
+                names.append(m.group(1))
+            continue
+        m = re.match(r"(?:Public|Private|Global) Const (\w+)|(?:Public|Private|Dim|Global) (?!Const|Declare|Sub|Function|Property)(\w+)", line)
+        if m:
+            names.append(m.group(1) or m.group(2))
+        m = re.match(r"(?:(?:Public|Private) )?Declare (?:PtrSafe )?(?:Function|Sub) (\w+)", line)
+        if m:
+            names.append(m.group(1))
+    return names
+
+
+@pytest.mark.parametrize("path", ALL_VBA, ids=lambda p: p.name)
+def test_module_level_names_are_unique_ignoring_case(path):
+    """VBA is case-insensitive: Const TK_VERSION and Function Tk_Version are an 'Ambiguous name' compile error."""
+    names = [n.lower() for n in _module_level_names(path)]
+    duplicates = sorted({n for n in names if names.count(n) > 1})
+    assert not duplicates, f"{path.name}: ambiguous names {duplicates}"
+
+
+def test_public_names_are_unique_across_the_project_ignoring_case():
+    seen = {}
+    for path in ALL_VBA:
+        for line in _code(path).splitlines():
+            m = re.match(r"Public (?:Sub|Function|Const) (\w+)", line)
+            if m:
+                key = m.group(1).lower()
+                assert key not in seen, f"{m.group(1)} in {path.name} clashes with {seen[key]}"
+                seen[key] = f"{m.group(1)} in {path.name}"
+
+
 def test_cross_module_calls_resolve_to_public_procedures():
     procedures = _public_procedures()
     for path in ALL_VBA:
@@ -143,6 +186,14 @@ def test_module_declarations_precede_the_first_procedure(path):
             seen_procedure = True
         elif seen_procedure and re.match(r"(Public|Private|Dim|Const|Global)\b(?! (Sub|Function|Property)\b)|(Private |Public )?Declare\b", line):
             pytest.fail(f"{path.name}: module-level declaration after a procedure: {line.strip()}")
+
+
+@pytest.mark.parametrize("path", ADDIN_VBA, ids=lambda p: p.name)
+def test_type_checks_are_not_combined_with_and(path):
+    """VBA's And does not short-circuit: `VarType(x) = vbString And Len(x) > 0` still calls Len on an
+    error value and raises Type mismatch (found in the first M2 live run). Nest the test instead."""
+    for number, line in enumerate(_code(path).splitlines(), start=1):
+        assert not re.search(r"VarType\((?:[^()]|\([^()]*\))*\)\s*=\s*vb\w+\s+And\b", line), f"{path.name}:{number}: {line.strip()}"
 
 
 @pytest.mark.parametrize("path", ADDIN_VBA, ids=lambda p: p.name)

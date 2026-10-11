@@ -14,7 +14,7 @@ Private Declare Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequen
 #End If
 
 Public Const TK_TITLE As String = "Excel Toolkit"
-Public Const TK_VERSION As String = "0.2.0-m2"
+Public Const TOOLKIT_VERSION As String = "0.2.0-m2"
 
 Private ribbon As IRibbonUI
 Private quietMode As Boolean          ' test harness: record messages instead of showing them
@@ -148,7 +148,7 @@ Public Function Tk_LastMessage() As String
 End Function
 
 Public Function Tk_Version() As String
-    Tk_Version = TK_VERSION
+    Tk_Version = TOOLKIT_VERSION
 End Function
 
 ' ---------- Timing ----------

@@ -1,6 +1,6 @@
 # M2 validation — ribbon, Convert to Values, one-level undo
 
-Status: **implemented and offline-tested; live tests NOT yet run** (awaiting explicit approval).
+Status: **build and automated live checks passed (2026-10-11, 40/40); manual ribbon and real Ctrl+Z checklist pending.**
 Specification: `docs/product-roadmap.md` §D. Source: `addin/`.
 
 ## What exists
@@ -67,6 +67,61 @@ modified; stop at once if endpoint protection intervenes.
 | 9 | Press Ctrl+Shift+V on a selection | Still runs the existing PERSONAL.XLSB macro | |
 | 10 | Close Excel choosing **Don't Save** for every workbook | PERSONAL.XLSB unchanged (hash); no security events | |
 
-## Results
+## Results — automated live run (2026-10-11, owner's managed laptop)
 
-_Not yet run._
+Separate hidden Excel processes for the build and the checks (DispatchEx: no PERSONAL.XLSB, no
+add-ins); nothing installed. PERSONAL.XLSB SHA-256 unchanged; 0 Defender detections; no SentinelOne
+events in the run window; no Excel process left running.
+
+**VBA compilation:** the first build did not compile — *"Ambiguous name detected: Tk_Version"*
+(VBA is case-insensitive: `Const TK_VERSION` vs `Function Tk_Version`). Every macro then reports
+"Cannot run the macro". Found with VBE Debug > Compile in a disposable instance; constant renamed.
+Offline tests now check module-level and public names case-insensitively. Project compiles cleanly.
+
+**Ribbon packaging:** `customUI14.xml` injected and verified in the built `.xlam` (`package OK`).
+Ribbon display and clicks are not exercised by the script (manual checklist).
+
+**Defects found by the live checks and fixed:**
+1. Error results (`#N/A`, `#DIV/0!`) raised *Type mismatch*: VBA's `And` does not short-circuit, so
+   `VarType(x) = vbString And Len(x) > 0` evaluated `Len` on an error. The command rolled back, and
+   the restore reported "incomplete" although the formulas were back — over-reporting, never a false
+   success. Fixed with a nested test; offline test bans the pattern.
+2. Text starting with an apostrophe (`'quoted`) lost it (Excel swallows one leading apostrophe even
+   in a Text cell). Verification caught it and the command **rolled back with nothing changed**.
+   Fixed by escaping the apostrophe.
+3. Harness only: data-table fixture needed `pythoncom.Empty` for the omitted argument; the rename
+   check reused a cell that was no longer a formula.
+
+**Final automated result: 40/40** (`addin/live/results/m2_live_20261011_232739.json`):
+
+| Area | Result |
+|---|---|
+| Data types | 15 formula results (number, `"0012"`, `"1/2"`, date, TRUE, `#N/A`, `#DIV/0!`, empty text, `"=abc"`, padded text, `1/3` with format, `"TRUE"`, `'quoted`, 300-char text, `"12%"`) converted with identical type, value and number format; constants untouched |
+| Restore (programmatic, same procedure as Ctrl+Z) | Identical `Formula2` and recalculated values; second undo has nothing to do |
+| Selections | Three areas converted, nothing else changed; overlapping refused; no formulas → nothing; over-limit refused, not truncated |
+| Hidden / filtered | Selection including filtered-out rows refused; **visible-cells-only selection converted**, hidden cells untouched; hidden column refused |
+| Unsupported | Merged, spill anchor, spill range, spilled cells only, legacy array, data table — all refused, nothing changed |
+| Protection | Locked formula refused before writing; unlocked formula converted and undone |
+| Failures | Forced failure on per-cell and bulk paths rolled back, sheet identical, Excel state restored, no record left; failure after verified writes but before undo is stored → rolled back (never "refused"); forced restore failure → "incomplete", record unusable |
+| Conflicts and lifecycle | Undo refused after an edit (names the cell, writes nothing), allowed once reverted; new command replaces the record; record cleared after undo |
+| Identity | Undo refused after sheet rename, Save As under another name, and workbook close |
+
+**Performance** (`m2_live_20261011_232617.json`; end-to-end from call to undo registered; restore timed separately; ms):
+
+| Cells | Kind | Convert total | of which capture / apply / verify | Restore |
+|---|---|---|---|---|
+| 1 | number | 14 | 0.4 / 4.7 / 8.4 | 12 |
+| 1 | text | 15 | 0.3 / 5.6 / 8.5 | 11 |
+| 1,000 | number | 47 | 21 / 18 / 8 | 15 |
+| 1,000 | text | 181 | 25 / 141 / 14 | 157 |
+| 10,000 | number | **306** | 170 / 113 / 22 | 63 |
+| 10,000 | text | **1,596** | 204 / 1,308 / 83 | 1,342 |
+| 100,000 | number | 3,338 | 2,073 / 1,098 / 163 | 482 |
+| 100,000 | text | 15,574 | 2,366 / 12,509 / 696 | 12,070 |
+
+Numbers meet the 10,000-cell target (< 1 s for convert and restore). **Text misses it** (1.6 s convert,
+1.3 s restore at 10,000), because each text cell is written individually with a temporary Text format.
+At 100,000 cells capture dominates for numbers (per-cell array/spill checks). Not optimised in M2.
+
+**Not established by the automated run:** real Ctrl+Z (Excel runs `OnUndo` handlers only for a
+real keypress) and the ribbon — the manual checklist above.
