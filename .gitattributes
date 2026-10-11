@@ -1,0 +1,3 @@
+# VBA import needs CRLF: an LF-only .cls is silently imported as a standard module.
+*.bas text eol=crlf
+*.cls text eol=crlf

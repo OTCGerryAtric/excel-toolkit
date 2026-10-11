@@ -89,7 +89,8 @@ Public Sub PhaseB_AuditActiveSheet()
     json = "{""op"":""audit"",""id"":""" & id & """,""token"":""" & token & _
            """,""hwnd"":" & Application.Hwnd & ",""pid"":" & GetCurrentProcessId() & _
            ",""workbook"":""" & JsonEscape(wb.Name) & """,""full_name"":""" & JsonEscape(wb.FullName) & _
-           """,""sheet"":""" & JsonEscape(ws.Name) & """}"
+           """,""sheet"":""" & JsonEscape(ws.Name) & _
+           """,""macro_workbook"":""" & JsonEscape(ThisWorkbook.Name) & """}"   ' qualifies the callback
 
     If Not TryWritePipe(json) Then
         record("status") = "failed"

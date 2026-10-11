@@ -39,6 +39,16 @@ CALLBACK = "PhaseBBridge.PhaseB_OnResult"
 ALLOWED_OPS = ("audit",)
 
 
+def callback_name(macro_workbook: str | None) -> str:
+    """Workbook-qualified callback target. An unqualified ``Application.Run`` name resolves
+    only against the ACTIVE workbook (the audited one, which has no code), so the live run
+    failed with "Cannot run the macro". The request supplies only the macro workbook's NAME;
+    the procedure stays fixed here, so the pipe cannot be used to run arbitrary macros."""
+    if not macro_workbook:
+        return CALLBACK
+    return "'" + macro_workbook.replace("'", "''") + "'!" + CALLBACK
+
+
 def _default_attach(request):
     identity = Identity.from_handoff(
         f"{request['hwnd']}|{request['pid']}|{request['workbook']}|{request['full_name']}"
@@ -70,6 +80,7 @@ def handle_audit(request, attach_fn=_default_attach, call_fn=call) -> dict:
         "id": request.get("id"), "token": request.get("token"), "pid": request.get("pid"),
         "workbook": request.get("workbook"), "full_name": request.get("full_name"),
         "sheet": request.get("sheet"), "hwnd": request.get("hwnd"),
+        "macro_workbook": request.get("macro_workbook"),
         "status": "ok", "error": "", "count": 0, "findings_json": "[]",
     }
     try:
@@ -84,11 +95,13 @@ def handle_audit(request, attach_fn=_default_attach, call_fn=call) -> dict:
     return response
 
 
-def deliver(response, attach_fn=None, call_fn=call, callback=CALLBACK) -> str:
+def deliver(response, attach_fn=None, call_fn=call, callback=None) -> str:
     """Call ``PhaseB_OnResult`` back in the requesting Excel. Passes BOTH the Excel identity
     (pid / workbook / full name) — so the front end can preserve E4's identity checks — and
     the correlation ``id`` + ``token``, then status / error / count / flat findings JSON.
     Returns VBA's verdict (or a 'not delivered: ...' note)."""
+    if callback is None:
+        callback = callback_name(response.get("macro_workbook"))
     try:
         if attach_fn is None:
             identity = Identity.from_handoff(

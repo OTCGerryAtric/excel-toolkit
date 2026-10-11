@@ -247,6 +247,23 @@ def test_deliver_passes_identity_token_and_json_and_is_accepted():
     assert reg[resp["id"]].status == "done"
 
 
+def test_callback_is_qualified_with_the_macro_workbook():
+    # Live defect: an unqualified Application.Run name resolves only in the ACTIVE (audited)
+    # workbook -> "Cannot run the macro". The callback must name the macro workbook.
+    assert audit_engine.callback_name("Book2") == "'Book2'!PhaseBBridge.PhaseB_OnResult"
+    assert audit_engine.callback_name("O'Brien.xlsm") == "'O''Brien.xlsm'!PhaseBBridge.PhaseB_OnResult"
+    assert audit_engine.callback_name(None) == audit_engine.CALLBACK
+
+    req = dict(_request(), macro_workbook="Book2")
+    book = _FakeBook({"Live": _FakeComWorksheet("Live", 1, 2, _FORMULA, _VALUE)})
+    resp = handle_audit(req, attach_fn=_attach_to(book), call_fn=_passthrough_call)
+    reg = {resp["id"]: PendingRequest(id=resp["id"], token=resp["token"], pid=resp["pid"],
+                                      workbook=resp["workbook"], full_name=resp["full_name"])}
+    excel = _FakeExcel(reg, current_id=resp["id"])
+    assert deliver(resp, attach_fn=lambda r: (excel, None), call_fn=_passthrough_call) == "accepted"
+    assert excel.last_args["callback"] == "'Book2'!PhaseBBridge.PhaseB_OnResult"
+
+
 def test_deliver_of_stale_result_is_rejected_by_front_end():
     resp = _response_from_audit()
     reg = {resp["id"]: PendingRequest(id=resp["id"], token=resp["token"], pid=resp["pid"],
