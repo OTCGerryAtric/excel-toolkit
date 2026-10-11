@@ -55,8 +55,11 @@ from .worksheet_source import (
 )
 from .integration import (
     a1_sheet_reference,
+    display_json,
+    display_records,
     findings_payload,
     findings_to_json,
+    navigation_from_record,
     navigation_target,
 )
 
@@ -68,6 +71,7 @@ __all__ = [
     "RESOLVED", "PARTIAL", "UNSUPPORTED", "CONST",
     "WorksheetFinding", "WorksheetReport", "scan_worksheet", "segment_line",
     "WorksheetSource", "OpenpyxlWorksheet", "InMemoryWorksheet", "as_source", "snapshot_from_com",
-    "a1_sheet_reference", "navigation_target", "findings_payload", "findings_to_json",
+    "a1_sheet_reference", "navigation_target", "navigation_from_record",
+    "findings_payload", "findings_to_json", "display_records", "display_json",
     "SUPPORTED_OPENPYXL", "openpyxl_supported",
 ]

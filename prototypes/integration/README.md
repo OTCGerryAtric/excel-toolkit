@@ -52,3 +52,33 @@ names, unlike delimited text. Each record keeps the audited workbook identity fo
 - Attaching to the correct instance/worksheet via the E2 handoff; reading unsaved edits live.
 - Returning the JSON to VBA (stdout vs a worker channel vs a temp file) and parsing it there
   with a bundled JSON parser; never modifying the audited workbook.
+
+## Phase B — persistent worker + pipe + callback (OFFLINE-PREPARED, not run)
+
+The user-experience demo (click → audit → results → double-click to the suspect cell) without
+Excel ever launching Python. Excel talks to an **already-running** worker over E4's local
+named pipe; findings come back through a COM callback. Nothing here is executed or installed
+on the managed laptop — the live run is a separate, explicit go/no-go.
+
+Files (reuse E4's channel; the detector and JSON transport are the project's own):
+
+- `audit_worker.py` — persistent worker. Reuses E4's `pipe_name`/`create_pipe`/`accept_loop`
+  **verbatim** (one worker per user, local inbound-only pipe, remote clients rejected). Only
+  the op (`audit`) and engine differ. **Started by hand** from the scratch env; never by Excel.
+- `audit_engine.py` — one read-only request: attach by identity → confirm sheet → `snapshot_from_com`
+  → `scan_worksheet` → `display_json`; delivers id+token+identity+status+error+count+JSON to
+  `PhaseBBridge.PhaseB_OnResult`. Never raises for an Excel-side problem; a failure carries
+  `status="failed"` and is never an empty success. COM attach is injected, so it is fully
+  tested offline against a fake COM worksheet.
+- `phaseb_contract.py` — pure correlation rules (`classify_callback`): reject unknown / already
+  answered / **stale (superseded)** / identity-mismatch / token-mismatch callbacks. The VBA
+  mirrors this exactly; both are verified in `tests/phaseb/test_phaseb.py`.
+- `PhaseBBridge.bas` — VBA front end: **pipe write only, no Shell/one-shot/auto-start**; if no
+  worker is listening it says so and stops. Generates a per-request id + correlation token,
+  validates callbacks, renders a *separate* results workbook, and parses the flat findings JSON.
+- `PhaseBResultsHook.cls` — Application-level `SheetBeforeDoubleClick` sink so double-clicking a
+  results row navigates to the cell in the **original** audited workbook (object-model resolve,
+  names safe). Avoids the VBA project object model → no trust/security change.
+
+Run (authorised test only): start `audit_worker.py <state_dir>` from the scratch venv; import
+the two VBA files into the open dev workbook; `PhaseB_Configure <state_dir>`; `PhaseB_AuditActiveSheet`.

@@ -47,3 +47,45 @@ def findings_to_json(report, workbook: str, workbook_path: str) -> str:
     """Serialise findings as JSON — robust to tabs, newlines and unusual workbook/sheet
     names (everything is a JSON string value, nothing delimiter-separated)."""
     return json.dumps(findings_payload(report, workbook, workbook_path), ensure_ascii=False)
+
+
+# -- Display-oriented transport (flat) -----------------------------------------------------
+# The full findings_payload carries a nested ``expected_by_axis``. The Excel front end only
+# needs flat, scalar fields to render a results row and navigate back, and a *flat* array of
+# string/bool values is far simpler (and safer) for the VBA JSON reader to parse than nested
+# arrays. These are a thin projection of the same findings — no new detection, no rule change.
+
+DISPLAY_FIELDS = ("workbook", "workbook_path", "sheet", "cell", "confidence", "kind",
+                  "conflict", "message")
+
+
+def display_records(report, workbook: str, workbook_path: str) -> list[dict]:
+    """Flat per-finding records for the results table. Each keeps the audited workbook name
+    and path plus sheet/cell, so a double-click can navigate to the ORIGINAL workbook."""
+    return [
+        {
+            "workbook": workbook,
+            "workbook_path": workbook_path,
+            "sheet": report.sheet,
+            "cell": f.coord,
+            "confidence": f.confidence,
+            "kind": f.kind,
+            "conflict": f.conflict,
+            "message": f.message,
+        }
+        for f in report.findings
+    ]
+
+
+def display_json(report, workbook: str, workbook_path: str) -> str:
+    """Flat findings JSON for the COM callback: an array of objects whose values are strings
+    or booleans only (no nested arrays), so tabs/newlines/quotes survive as JSON-escaped
+    string values and the VBA reader stays small."""
+    return json.dumps(display_records(report, workbook, workbook_path), ensure_ascii=False)
+
+
+def navigation_from_record(record: dict) -> dict:
+    """The navigation descriptor a results-row double-click produces: read the audited
+    workbook/sheet/cell off the record and target the ORIGINAL workbook (never the results
+    book). Mirrors what ``PhaseBBridge`` does from the hidden columns of a results row."""
+    return navigation_target(record["workbook"], record["sheet"], record["cell"])
