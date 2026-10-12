@@ -2,7 +2,7 @@
 
 Status: **build, VBA compilation and automated live checks passed: 39/39 on the third run (2026-10-12),
 after two add-in defects found by the first runs were fixed.** Automated results reviewed and accepted;
-manual checklist (ribbon, real Ctrl+Z) approved, not yet run. Not approved for merge. M3c not started.
+**manual checklist passed 13/13 (2026-10-12)**; PERSONAL.XLSB unchanged, no security events. Not approved for merge. M3c not started.
 Plan: `docs/product-roadmap.md` (M3, Gate 2). Source: `addin/`.
 
 ## What M3b adds
@@ -179,16 +179,33 @@ PERSONAL.XLSB SHA-256 before: `A4F5900D…BB81EB7D`.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Excel Toolkit tab | Format group: Number formats, **Fill** menu (Yellow, Green, Light blue, Grey), **Grey Outline**, **Size** menu (Row height, Column width, Best fit), each with a tooltip; note any blank icon | |
-| 2 | Select B2:D6; Fill ▸ Yellow | Yellow; Undo Toolkit Action enabled | |
-| 3 | **Ctrl+Z** | No fill again (gridlines visible); button greyed | |
-| 4 | Fill ▸ Yellow twice on B2:D6, then **Ctrl+Z** | Second click gives **No Fill** (gridlines visible, not white); Ctrl+Z brings the yellow back | |
-| 5 | Select F4; Home ▸ Borders ▸ **Thick Box Border**. Select B2:E6; Grey Outline | Thin grey grid on B2:E6; F4's left side becomes thin grey | |
-| 6 | **Ctrl+Z** | Grid gone; **F4's thick box complete again**, left side included | |
-| 7 | Select B10; Size ▸ Row height; then **Ctrl+Z** | Row 10 changes (15 → 4.5, or → 15); Ctrl+Z restores it | |
-| 8 | Select C1; Size ▸ Column width; then **Ctrl+Z** | Column C changes (8.43 → 12); Ctrl+Z restores it | |
-| 9 | Click B1; Size ▸ Best fit; then Undo Toolkit Action **button** | Column B widens to 15; the button restores it and greys out | |
-| 10 | Fill ▸ Green on B2:D6; change C3's fill by hand; Undo Toolkit Action | Refused with a message; C3 keeps its hand-set fill | |
-| 11 | Toolkit shortcuts **off**: on a spare cell, Ctrl+Shift+Q, G, R, K | PERSONAL.XLSB macros (Undo Toolkit Action does not light up) | |
-| 12 | Toolkit shortcuts **on**: the same keys; then Ctrl+Shift+I; then switch off | Q, G, R, K still PERSONAL.XLSB; I runs the toolkit Number format | |
-| 13 | Close Excel, **Don't Save** everywhere | PERSONAL.XLSB unchanged (hash); no security events | |
+| 1 | Excel Toolkit tab | Format group: Number formats, **Fill** menu (Yellow, Green, Light blue, Grey), **Grey Outline**, **Size** menu (Row height, Column width, Best fit), each with a tooltip; note any blank icon | **Pass** (2026-10-12) |
+| 2 | Select B2:D6; Fill ▸ Yellow | Yellow; Undo Toolkit Action enabled | **Pass** (2026-10-12) |
+| 3 | **Ctrl+Z** | No fill again (gridlines visible); button greyed | **Pass** (2026-10-12) |
+| 4 | Fill ▸ Yellow twice on B2:D6, then **Ctrl+Z** | Second click gives **No Fill** (gridlines visible, not white); Ctrl+Z brings the yellow back | **Pass** (2026-10-12) |
+| 5 | Select F4; Home ▸ Borders ▸ **Thick Box Border**. Select B2:E6; Grey Outline | Thin grey grid on B2:E6; F4's left side becomes thin grey | **Pass** (2026-10-12). The owner first expected an outline only; the inside lines are the legacy macro's behaviour (inside vertical and horizontal), confirmed identical in the automated run |
+| 6 | **Ctrl+Z** | Grid gone; **F4's thick box complete again**, left side included | **Pass** (2026-10-12) |
+| 7 | Select B10; Size ▸ Row height; then **Ctrl+Z** | Row 10 changes (15 → 4.5, or → 15); Ctrl+Z restores it | **Pass** (2026-10-12) |
+| 8 | Select C1; Size ▸ Column width; then **Ctrl+Z** | Column C changes (8.43 → 12); Ctrl+Z restores it | **Pass** (2026-10-12) |
+| 9 | Click B1; Size ▸ Best fit; then Undo Toolkit Action **button** | Column B widens to 15; the button restores it and greys out | **Pass** (2026-10-12) |
+| 10 | Fill ▸ Green on B2:D6; change C3's fill by hand; Undo Toolkit Action | Refused with a message; C3 keeps its hand-set fill | **Pass** (2026-10-12) |
+| 11 | Toolkit shortcuts **off**: on a spare cell, Ctrl+Shift+Q, G, R, K | PERSONAL.XLSB macros (Undo Toolkit Action does not light up) | **Pass** (2026-10-12) |
+| 12 | Toolkit shortcuts **on**: the same keys; then Ctrl+Shift+I; then switch off | Q, G, R, K still PERSONAL.XLSB; I runs the toolkit Number format | **Pass** (2026-10-12) |
+| 13 | Close Excel, **Don't Save** everywhere | PERSONAL.XLSB unchanged (hash); no security events | **Pass** (2026-10-12) |
+
+After the checklist: PERSONAL.XLSB SHA-256 unchanged (`A4F5900D…BB81EB7D`, last written 15/06/2026); 0 Defender
+detections; SentinelOne one routine burst of 14 anti-tamper entries (12:40), none naming Excel, Python or the
+add-in; no Excel left running.
+
+## Owner request: use the workbook's default sizes (proposed change, not implemented)
+
+The legacy macros use fixed numbers for Excel's usual defaults: row height **15** (row toggle 15 ↔ 4.5)
+and column width **8.43** (cycle 2 → 8.43 → 12). Some workbooks have different defaults (another font or
+size, or a changed standard width), and the owner would like these values to be **the workbook's own
+default** instead: the sheet's `StandardHeight` and `StandardWidth`. This changes legacy behaviour, so it
+is listed here for a decision, not made in M3b:
+- **Row height:** standard height ↔ 4.5 (instead of 15 ↔ 4.5).
+- **Column width:** 2 → standard width → 12 → 2 (instead of 2 → 8.43 → 12).
+- **Best fit** is unchanged (it is based on the active cell's width).
+- On a workbook whose defaults are 15 and 8.43, nothing changes. The legacy-equivalence checks would then
+  compare against the documented change on other workbooks.
