@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "check": "equivalence: toolkit matches the legacy macro cell by cell (72 start states + 5-press cycles)",
+      "passed": true,
+      "mismatches": []
+    },
+    {
+      "check": "equivalence: every toolkit change undone exactly (incl. mixed formats)",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "check": "values untouched by format commands",
+      "passed": true,
+      "values": [
+        "1234.5"
+      ]
+    },
+    {
+      "check": "mixed 500 cells: applied",
+      "passed": true,
+      "outcome": "ok: Number Format set to #,##0_-;[Red](#,##0)_-;-_-."
+    },
+    {
+      "check": "mixed 500 cells: undo restores every cell's format exactly",
+      "passed": true
+    },
+    {
+      "check": "conflict: undo refused after a format edit, nothing restored",
+      "passed": true,
+      "outcome": "refused: Number formats in A1:E100 on 'Sheet1' have changed since the command. Nothing was changed."
+    },
+    {
+      "check": "identity: undo refused after the sheet is renamed",
+      "passed": true,
+      "outcome": "refused: The sheet has been renamed since the change (it was 'Sheet1'). Nothing was changed."
+    },
+    {
+      "check": "protected (formatting not allowed): refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The sheet is protected and does not allow formatting. Unprotect it first; nothing was changed."
+    },
+    {
+      "check": "protected (formatting allowed): applied and undone",
+      "passed": false,
+      "outcome": "refused: The sheet is protected and does not allow formatting. Unprotect it first; nothing was changed."
+    },
+    {
+      "check": "forced failure after the first area: rolled back, formats identical",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while formatting: Simulated failure (test hook)"
+    },
+    {
+      "check": "forced restore failure: reported as incomplete, record unusable",
+      "passed": true,
+      "outcome": "incomplete: Number formats not restored: A3 A4 A5 A6 B1 B2 B3 B4 B5 B6 C1 C2 C3 C4 C5 C6."
+    },
+    {
+      "check": "too many distinct format blocks: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection has too many different number formats (more than 50,000 separate blocks) to undo safely. Select a smaller range; nothing was changed."
+    },
+    {
+      "check": "shortcut toggle switches on and off without error (key behaviour: manual test)",
+      "passed": true
+    },
+    {
+      "check": "PERSONAL.XLSB unchanged",
+      "passed": true
+    }
+  ],
+  "timings": [
+    {
+      "case": "uniform 10,000",
+      "outcome": "ok: Number Format set to #,##0_-;[Red](#,##0)_-;-_-.",
+      "apply_wall_ms": 4.6,
+      "vba": "blocks=1;capture=0.4;apply+verify=2.5;register=0.1;total=3.0",
+      "undo": "ok: Undid Number Format.",
+      "undo_wall_ms": 14.1,
+      "undo_vba_ms": 13.5
+    },
+    {
+      "case": "mixed 10,000 (alternating rows)",
+      "outcome": "ok: Number Format set to #,##0_-;[Red](#,##0)_-;-_-.",
+      "apply_wall_ms": 194.8,
+      "vba": "blocks=10000;capture=186.8;apply+verify=3.9;register=0.1;total=190.8",
+      "undo": "ok: Undid Number Format.",
+      "undo_wall_ms": 1068.6,
+      "undo_vba_ms": 1066.3
+    },
+    {
+      "case": "mixed 30,000 (3 columns, each uniform)",
+      "outcome": "ok: Number Format set to #,##0_-;[Red](#,##0)_-;-_-.",
+      "apply_wall_ms": 9.8,
+      "vba": "blocks=3;capture=1.3;apply+verify=4.5;register=0.1;total=5.9",
+      "undo": "ok: Undid Number Format.",
+      "undo_wall_ms": 21.4,
+      "undo_vba_ms": 20.5
+    },
+    {
+      "case": "whole column, uniform",
+      "outcome": "ok: Number Format set to #,##0_-;[Red](#,##0)_-;-_-.",
+      "apply_wall_ms": 5.5,
+      "vba": "blocks=1;capture=0.5;apply+verify=3.1;register=0.1;total=3.7",
+      "undo": "ok: Undid Number Format.",
+      "undo_wall_ms": 14.6,
+      "undo_vba_ms": 13.9
+    },
+    {
+      "case": "whole column, 10 exceptions",
+      "outcome": "refused: Excel reported an error before anything was changed: Application-defined or object-defined error",
+      "apply_wall_ms": 6.3,
+      "vba": "blocks=1;capture=0.5;apply+verify=3.1;register=0.1;total=3.7",
+      "undo": "nothing: There is no Excel Toolkit change to undo.",
+      "undo_wall_ms": 0.3,
+      "undo_vba_ms": 13.9
+    }
+  ]
+}

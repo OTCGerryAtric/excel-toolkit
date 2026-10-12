@@ -14,7 +14,7 @@ Private Declare Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequen
 #End If
 
 Public Const TK_TITLE As String = "Excel Toolkit"
-Public Const TOOLKIT_VERSION As String = "0.2.0-m2"
+Public Const TOOLKIT_VERSION As String = "0.3.0-m3a"
 
 Private ribbon As IRibbonUI
 Private quietMode As Boolean          ' test harness: record messages instead of showing them
@@ -36,6 +36,32 @@ Private Function Registry(ByVal id As String) As Variant
         Registry = Array("Undo Toolkit Action", "Undo Toolkit Action", _
             "Reverses the last Excel Toolkit change, if the changed cells have not been edited since.", _
             "", True, "")
+    Case "tkFmtNumber"
+        Registry = Array("Number (0 / 0.0 / 0.00)", "Number format", _
+            "Cycles the selection through #,##0 -> #,##0.0 -> #,##0.00 (negatives in red brackets, zero as a " & _
+            "dash) - the same formats as the existing macro. Only the number format changes. Undo with Ctrl+Z " & _
+            "straight away, or with Undo Toolkit Action.", _
+            "Ctrl+Shift+I", True, "format")
+    Case "tkFmtCurrency"
+        Registry = Array("Currency " & ChrW(163) & " (0 / 0.0 / 0.00)", "Currency format", _
+            "Cycles the selection through the " & ChrW(163) & " formats with 0, 1 and 2 decimals - the same formats " & _
+            "as the existing macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "Ctrl+Shift+O", True, "format")
+    Case "tkFmtPercent"
+        Registry = Array("Percentage (0% to 0.000%)", "Percentage format", _
+            "Cycles the selection through percentages with 0, 1, 2 and 3 decimals - the same formats as the " & _
+            "existing macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "Ctrl+Shift+P", True, "format")
+    Case "tkFmtDate"
+        Registry = Array("Date (dd-mmm-yy / mmm-yy)", "Date format", _
+            "Switches the selection between dd-mmm-yy and mmm-yy - the same formats as the existing macro. " & _
+            "Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "Ctrl+Shift+M", True, "format")
+    Case "tkShortcuts"
+        Registry = Array("Toolkit shortcuts", "Toolkit keyboard shortcuts", _
+            "When on (this Excel session only), Ctrl+Shift+I, O, P and M run the Excel Toolkit number-format " & _
+            "commands, which can be undone. When off, those keys do what they did before. Off by default.", _
+            "", False, "none")
     Case "tkAudit"
         Registry = Array("Audit Formulas", "Audit Formulas", _
             "Checks the active sheet for formulas that break the pattern of their neighbours and lists " & _
@@ -48,7 +74,8 @@ Private Function Registry(ByVal id As String) As Variant
 End Function
 
 Public Function Tk_CommandIds() As Variant
-    Tk_CommandIds = Array("tkConvertToValues", "tkUndo", "tkAudit")
+    Tk_CommandIds = Array("tkConvertToValues", "tkUndo", "tkFmtNumber", "tkFmtCurrency", "tkFmtPercent", _
+                          "tkFmtDate", "tkShortcuts", "tkAudit")
 End Function
 
 ' ---------- Ribbon callbacks (customUI14.xml) ----------
@@ -62,6 +89,11 @@ Public Sub Tk_RefreshRibbon()
     If Not ribbon Is Nothing Then ribbon.InvalidateControl "tkUndo"
 End Sub
 
+Public Sub Tk_RefreshShortcutToggle()
+    On Error Resume Next
+    If Not ribbon Is Nothing Then ribbon.InvalidateControl "tkShortcuts"
+End Sub
+
 Public Sub Tk_GetLabel(control As IRibbonControl, ByRef returnedVal)
     Dim info As Variant
     info = Registry(control.Id)
@@ -71,7 +103,7 @@ End Sub
 Public Sub Tk_GetScreentip(control As IRibbonControl, ByRef returnedVal)
     Dim info As Variant
     info = Registry(control.Id)
-    If Len(info(3)) > 0 Then returnedVal = info(1) & " (" & info(3) & ")" Else returnedVal = info(1)
+    If Len(info(3)) > 0 Then returnedVal = info(1) & " (" & info(3) & " with Toolkit shortcuts on)" Else returnedVal = info(1)
 End Sub
 
 Public Sub Tk_GetSupertip(control As IRibbonControl, ByRef returnedVal)
@@ -96,8 +128,20 @@ Public Sub Tk_OnAction(control As IRibbonControl)
     Select Case control.Id
     Case "tkConvertToValues": Tk_ConvertToValues
     Case "tkUndo": Tk_UndoToolkitAction
+    Case "tkFmtNumber": Tk_RunFormat "number"
+    Case "tkFmtCurrency": Tk_RunFormat "currency"
+    Case "tkFmtPercent": Tk_RunFormat "percent"
+    Case "tkFmtDate": Tk_RunFormat "date"
     Case "tkAudit": Tk_AuditFormulas
     End Select
+End Sub
+
+Public Sub Tk_GetPressed(control As IRibbonControl, ByRef returnedVal)
+    If control.Id = "tkShortcuts" Then returnedVal = Tk_ShortcutsEnabled() Else returnedVal = False
+End Sub
+
+Public Sub Tk_OnToggle(control As IRibbonControl, pressed As Boolean)
+    If control.Id = "tkShortcuts" Then Tk_SetShortcuts pressed
 End Sub
 
 ' ---------- Commands (also runnable from Alt+F8) ----------
