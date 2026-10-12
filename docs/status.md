@@ -1,9 +1,10 @@
 # Project status
 
-Last updated: 2026-10-12 — **M3a accepted and merged** (`4ccc9fe`): four number-format commands with
-exact one-level undo and optional session shortcuts that hand back to PERSONAL.XLSB when switched off,
-when the add-in closes and after a restart. **M2 accepted** (`b140ea6`). Milestone 1 (Excel-triggered
-audit, `58be1ca`) achieved. **M3b: offline implementation only.** Deployment (G0) remains blocked:
+Last updated: 2026-10-12 — **M3b accepted and merged** (`5a355cb`): fill toggles, Grey Outline, row
+height, column width and best fit, each with exact undo (row height: numeric height, not automatic sizing).
+**M3a accepted and merged** (`4ccc9fe`): number formats with exact undo and optional session shortcuts that
+hand back to PERSONAL.XLSB. **M2 accepted** (`b140ea6`). Milestone 1 (Excel-triggered audit, `58be1ca`)
+achieved. **M3c: offline implementation only.** Deployment (G0) remains blocked:
 acceptance covers a development add-in on the owner's machine, not distribution to colleagues.
 Update at every approval gate.
 
@@ -15,6 +16,7 @@ Update at every approval gate.
 | Formula-inconsistency detector | Offline-tested (93 tests incl. Phase B fakes); runs live through Phase B | `tests/formula_audit/`, `tests/phaseb/` |
 | Excel Toolkit add-in (M2): ribbon tab with Convert to Values, Undo Toolkit Action, Audit Formulas; one-level undo (Ctrl+Z + explicit) | **Live-validated** on the owner's machine as a development `.xlam` opened with File → Open (not installed). Known improvement: text conversion speed | `addin/`; `docs/validation/m2-convert-to-values.md` |
 | Excel Toolkit add-in (M3a): Number formats menu (Number, Currency £, Percentage, Date) matching the legacy macros; exact undo of number formats; Toolkit shortcuts toggle (off by default, session only) | **Live-validated** (19/19 automated, manual checklist and shortcut-precedence test passed; PERSONAL.XLSB unchanged). Tracked: mixed-format undo speed, multi-level undo, shortcut release on programmatic close | `docs/validation/m3a-number-formats.md` |
+| Excel Toolkit add-in (M3b): Fill menu (Yellow, Green, Light blue, Grey), Grey Outline, Size menu (Row height, Column width, Best fit); exact undo of fills (incl. theme colours, tints, patterns), every border edge, and whole affected rows/columns. Improvements over PERSONAL.XLSB: fill off = No Fill (not white); sizes use the sheet's standard height/width (not fixed 15 / 8.43). No M3b shortcuts yet | **Live-validated** (40/40 automated; 13/13 manual plus standard-size checks; PERSONAL.XLSB unchanged). Limitation: row-height undo restores the numeric height, not automatic sizing. Tracked: Grey Outline speed, whole-column row height, worst-case mixed-fill undo | `docs/validation/m3b-fills-borders-sizes.md` |
 | UserForms / task panes | None yet | — |
 | Worker start | Manual only. Excel never launches Python; installing/auto-starting the worker is part of G0 | — |
 
@@ -42,8 +44,8 @@ Not open questions — do not re-run these comparisons.
   (live-validated in Phase B). Python commands are read-only.
 - **Independent analysis engine** in `src/excel_toolkit`, no COM imports outside the adapter layer.
 - **Deployment (G0) is blocked**; the E6 installer is rejected and must not be re-run.
-- Next work follows `docs/product-roadmap.md`: M2 and M3a complete; M3b in offline
-  implementation (live tests need separate approval; M3c not started).
+- Next work follows `docs/product-roadmap.md`: M2, M3a and M3b complete; M3c in offline
+  implementation (live tests need separate approval; M3d not started).
 
 ## Ruled out
 

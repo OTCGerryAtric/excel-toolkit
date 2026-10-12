@@ -2,7 +2,9 @@
 
 Status: **build, VBA compilation and automated live checks passed: 39/39 on the third run (2026-10-12),
 after two add-in defects found by the first runs were fixed.** Automated results reviewed and accepted;
-**manual checklist passed 13/13, and the standard-size change D1–D4 (2026-10-12)**; PERSONAL.XLSB unchanged, no security events. Not approved for merge. M3c not started.
+**manual checklist passed 13/13, and the standard-size change D1–D4 (2026-10-12)**; PERSONAL.XLSB unchanged, no security events. **Approved for merge at `1227d54` and merged (`5a355cb`,
+2026-10-12).** The standard-size behaviour is accepted as an intentional improvement over PERSONAL.XLSB's
+fixed 15 / 8.43, alongside No Fill. M3b shortcuts stay unmigrated.
 Plan: `docs/product-roadmap.md` (M3, Gate 2). Source: `addin/`.
 
 ## What M3b adds
