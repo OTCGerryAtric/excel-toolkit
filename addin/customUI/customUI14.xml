@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Excel Toolkit ribbon (M3a). Labels, tooltips and enabled/pressed state come from the VBA command
+<!-- Excel Toolkit ribbon (M3b). Labels, tooltips and enabled/pressed state come from the VBA command
      registry (TkMain) through callbacks, so the ribbon cannot drift from it. Built-in icons only. -->
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Tk_RibbonLoaded">
   <ribbon>
@@ -25,6 +25,34 @@
                     getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
                     getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
             <button id="tkFmtDate" keytip="M"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          </menu>
+          <menu id="tkFills" label="Fill" size="large" imageMso="CellFillColorPicker" keytip="F">
+            <button id="tkFillYellow" keytip="Q"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFillGreen" keytip="E"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFillLightBlue" keytip="W"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkFillGrey" keytip="Z"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          </menu>
+          <button id="tkOutline" size="large" imageMso="BordersAll" keytip="G"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          <menu id="tkSizes" label="Size" size="large" imageMso="ColumnWidth" keytip="S">
+            <button id="tkRowHeight" keytip="R"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkColWidth" keytip="C"
+                    getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                    getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+            <button id="tkBestFit" keytip="K"
                     getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
                     getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
           </menu>

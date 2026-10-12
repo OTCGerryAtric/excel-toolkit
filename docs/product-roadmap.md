@@ -231,7 +231,7 @@ one-level undo with identity and conflict checks). Each increment adds only the 
 | Inc. | Commands (legacy key) | Undo kind added | Legacy defects fixed | Gate |
 |---|---|---|---|---|
 | **M3a** | Number (I), Currency £ (O), Percentage (P) cycles; Date toggle (M) | **Number format** | Multi-area and mixed selections handled | **1** — plus real Ctrl+Z, the shortcut-precedence test and performance. **Passed; merged `4ccc9fe`** |
-| **M3b** | Yellow / Green / Light blue / Grey fills (Q E W Z); Grey outline (G); Row height (R), Column width (C), Best fit (K) | **Fill**, **borders**, **row heights / column widths** | Toggles reset to **No Fill**, not white | **2** (with M3c) |
+| **M3b** | Yellow / Green / Light blue / Grey fills (Q E W Z); Grey outline (G); Row height (R), Column width (C), Best fit (K) | **Fill**, **borders**, **row heights / column widths** | Toggles reset to **No Fill**, not white | **2** (with M3c). Offline implementation on `m3b/fills-borders-sizes`; `docs/validation/m3b-fills-borders-sizes.md` |
 | **M3c** | Clear sheet references (F); Find constants (H) | **Formula rewrite** (reuses `TkCellSnapshot`) | Formula-aware rewriting; never touches text cells | **2** |
 | **M3d** | **Paste Values** from the clipboard; final shortcut migration | Native Excel undo if the experiment passes, else custom | Clipboard kept; multi-area handled | **3** |
 

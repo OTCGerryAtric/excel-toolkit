@@ -14,7 +14,7 @@ Private Declare Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequen
 #End If
 
 Public Const TK_TITLE As String = "Excel Toolkit"
-Public Const TOOLKIT_VERSION As String = "0.3.0-m3a"
+Public Const TOOLKIT_VERSION As String = "0.4.0-m3b"
 
 Private ribbon As IRibbonUI
 Private quietMode As Boolean          ' test harness: record messages instead of showing them
@@ -57,6 +57,36 @@ Private Function Registry(ByVal id As String) As Variant
             "Switches the selection between dd-mmm-yy and mmm-yy - the same formats as the existing macro. " & _
             "Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
             "Ctrl+Shift+M", True, "format")
+    Case "tkFillYellow"
+        Registry = Array("Yellow", "Yellow fill", FillTip("light yellow"), "", True, "style")
+    Case "tkFillGreen"
+        Registry = Array("Green", "Green fill", FillTip("green"), "", True, "style")
+    Case "tkFillLightBlue"
+        Registry = Array("Light blue", "Light blue fill", FillTip("light blue"), "", True, "style")
+    Case "tkFillGrey"
+        Registry = Array("Grey", "Grey fill", FillTip("light grey"), "", True, "style")
+    Case "tkOutline"
+        Registry = Array("Grey Outline", "Grey outline", _
+            "Draws thin grey lines around and between the selected cells. If the selection's top edge " & _
+            "already has a line, removes the outside and inside lines instead - the same as the existing " & _
+            "macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "", True, "style")
+    Case "tkRowHeight"
+        Registry = Array("Row height (15 / 4.5)", "Row height", _
+            "Sets the selected rows to 4.5 points if they are 15, otherwise to 15 - the same as the existing " & _
+            "macro. Hidden rows are not changed: unhide them or leave them out. Undo with Ctrl+Z straight " & _
+            "away, or with Undo Toolkit Action.", _
+            "", True, "style")
+    Case "tkColWidth"
+        Registry = Array("Column width (2 / 8.43 / 12)", "Column width", _
+            "Cycles the selected columns through widths 2, 8.43 and 12 - the same as the existing macro. " & _
+            "Hidden columns are not changed. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "", True, "style")
+    Case "tkBestFit"
+        Registry = Array("Best fit (multiple of 5)", "Best fit width", _
+            "Sets the selected columns to a multiple of 5 just wider than the active cell's column, rounded " & _
+            "the same way as the existing macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "", True, "style")
     Case "tkShortcuts"
         Registry = Array("Toolkit shortcuts", "Toolkit keyboard shortcuts", _
             "When on (this Excel session only), Ctrl+Shift+I, O, P and M run the Excel Toolkit number-format " & _
@@ -73,9 +103,16 @@ Private Function Registry(ByVal id As String) As Variant
     End Select
 End Function
 
+Private Function FillTip(ByVal colourName As String) As String
+    FillTip = "Fills the selection " & colourName & ", or removes the fill if it already has exactly that colour " & _
+        "- the same as the existing macro, except that removing leaves No Fill rather than white, so the " & _
+        "gridlines stay visible. Undo with Ctrl+Z straight away, or with Undo Toolkit Action."
+End Function
+
 Public Function Tk_CommandIds() As Variant
     Tk_CommandIds = Array("tkConvertToValues", "tkUndo", "tkFmtNumber", "tkFmtCurrency", "tkFmtPercent", _
-                          "tkFmtDate", "tkShortcuts", "tkAudit")
+                          "tkFmtDate", "tkFillYellow", "tkFillGreen", "tkFillLightBlue", "tkFillGrey", "tkOutline", _
+                          "tkRowHeight", "tkColWidth", "tkBestFit", "tkShortcuts", "tkAudit")
 End Function
 
 ' ---------- Ribbon callbacks (customUI14.xml) ----------
@@ -132,6 +169,14 @@ Public Sub Tk_OnAction(control As IRibbonControl)
     Case "tkFmtCurrency": Tk_RunFormat "currency"
     Case "tkFmtPercent": Tk_RunFormat "percent"
     Case "tkFmtDate": Tk_RunFormat "date"
+    Case "tkFillYellow": Tk_RunFill "yellow"
+    Case "tkFillGreen": Tk_RunFill "green"
+    Case "tkFillLightBlue": Tk_RunFill "lightblue"
+    Case "tkFillGrey": Tk_RunFill "grey"
+    Case "tkOutline": Tk_RunOutline
+    Case "tkRowHeight": Tk_RunRowHeight
+    Case "tkColWidth": Tk_RunColumnWidth
+    Case "tkBestFit": Tk_RunBestFit
     Case "tkAudit": Tk_AuditFormulas
     End Select
 End Sub
