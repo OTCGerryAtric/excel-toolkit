@@ -2,7 +2,9 @@
 
 Status: **build, VBA compilation and automated live checks passed (19/19, 2026-10-11/12), reviewed and
 accepted at `eabaadf`. Manual checklist and shortcut-precedence test passed (2026-10-12): original
-PERSONAL.XLSB shortcuts returned after disabling, after closing the add-in and after restarting Excel.** Not approved for merge.
+PERSONAL.XLSB shortcuts returned after disabling, after closing the add-in and after restarting Excel.** **Accepted and approved for merge at `53a560e`
+(2026-10-12); merged to master.** S0 was not run separately; the reviewer accepted S1, S3, S5 and S6 as
+establishing the behaviour.
 Plan: `docs/product-roadmap.md` (M3, Gate 1). Source: `addin/`.
 
 ## What M3a adds

@@ -1,18 +1,20 @@
 # Project status
 
-Last updated: 2026-10-11 — **M2 accepted:** the first Excel Toolkit add-in (ribbon, Convert to Values,
-one-level undo) passed 40/40 automated and 10/10 manual live checks, including a real Ctrl+Z (`b140ea6`).
-Milestone 1 (Excel-triggered audit, `58be1ca`) also achieved. Deployment (G0) remains blocked: acceptance
-covers a development add-in on the owner's machine, not distribution to colleagues.
+Last updated: 2026-10-12 — **M3a accepted and merged** (`4ccc9fe`): four number-format commands with
+exact one-level undo and optional session shortcuts that hand back to PERSONAL.XLSB when switched off,
+when the add-in closes and after a restart. **M2 accepted** (`b140ea6`). Milestone 1 (Excel-triggered
+audit, `58be1ca`) achieved. **M3b: offline implementation only.** Deployment (G0) remains blocked:
+acceptance covers a development add-in on the owner's machine, not distribution to colleagues.
 Update at every approval gate.
 
-## Current state (2026-10-11)
+## Current state (2026-10-12)
 
 | Capability | Status | Evidence |
 |---|---|---|
 | Excel-initiated formula audit (Phase B): VBA → named pipe → **manually started** worker → COM callback → separate results workbook → double-click navigation | **Live-validated** on the owner's managed laptop (disposable demo workbook, unsaved edit read, exactly the expected 2 findings, audited workbook unchanged in memory and on disk, no endpoint-protection intervention) | `58be1ca`; `prototypes/integration/README.md` |
 | Formula-inconsistency detector | Offline-tested (93 tests incl. Phase B fakes); runs live through Phase B | `tests/formula_audit/`, `tests/phaseb/` |
 | Excel Toolkit add-in (M2): ribbon tab with Convert to Values, Undo Toolkit Action, Audit Formulas; one-level undo (Ctrl+Z + explicit) | **Live-validated** on the owner's machine as a development `.xlam` opened with File → Open (not installed). Known improvement: text conversion speed | `addin/`; `docs/validation/m2-convert-to-values.md` |
+| Excel Toolkit add-in (M3a): Number formats menu (Number, Currency £, Percentage, Date) matching the legacy macros; exact undo of number formats; Toolkit shortcuts toggle (off by default, session only) | **Live-validated** (19/19 automated, manual checklist and shortcut-precedence test passed; PERSONAL.XLSB unchanged). Tracked: mixed-format undo speed, multi-level undo, shortcut release on programmatic close | `docs/validation/m3a-number-formats.md` |
 | UserForms / task panes | None yet | — |
 | Worker start | Manual only. Excel never launches Python; installing/auto-starting the worker is part of G0 | — |
 
@@ -40,8 +42,8 @@ Not open questions — do not re-run these comparisons.
   (live-validated in Phase B). Python commands are read-only.
 - **Independent analysis engine** in `src/excel_toolkit`, no COM imports outside the adapter layer.
 - **Deployment (G0) is blocked**; the E6 installer is rejected and must not be re-run.
-- Next work follows `docs/product-roadmap.md`: M2 complete; M3 proposal under review (no M3 implementation
-  until approved).
+- Next work follows `docs/product-roadmap.md`: M2 and M3a complete; M3b in offline
+  implementation (live tests need separate approval; M3c not started).
 
 ## Ruled out
 
