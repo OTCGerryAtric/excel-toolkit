@@ -416,6 +416,80 @@ def test_m3d_harness_uses_a_disposable_excel_only():
     assert "DEFAULT_XLAM" not in text and "PERSONAL" in text  # no add-in; PERSONAL.XLSB only hashed
     assert "SaveAs" not in text and "Close(SaveChanges=False)" in text
     assert "DO NOT RUN until authorised" in text
+    assert "self.mechanism_control()\n        self.controls()" in text  # the no-paste control runs first
+
+
+def _m3d_results(**changes):
+    """Synthetic results in which every check passes; `changes` maps scenario -> fields to override."""
+    import m3d_native_paste_experiment as m3d
+
+    history = {"bold": "ok|", "bold_applied": True, "undo": {"enabled": True, "count": 1, "entries": ["Bold"]}}
+    results = [{"scenario": m3d.MECHANISM, "history": history, "native_undo": "ok|", "bold_removed_by_undo": True},
+               *({"scenario": name, "history": history, "native_undo": "disabled|", "bold_still_on": True}
+                 for name in m3d.NEGATIVE),
+               *({"scenario": name, "history": history, "paste": "ok|1|1", "cut_copy_mode_after": 1,
+                  "values_as_expected": True, "no_formulas_or_formats_pasted": True, "paste_reversed_by_undo": True,
+                  "bold_kept_after_undo_1": True, "earlier_history_reversed_by_undo_2": True} for name in m3d.CORE),
+               {"scenario": m3d.REUSE, "first": "ok|1|1", "second": "ok|1|1", "both_pastes_as_expected": True}]
+    for r in results:
+        r.update(changes.get(r["scenario"], {}))
+    return m3d.summarise(results)
+
+
+def _m3d_verdicts(summary):
+    return {k: v["verdict"] for k, v in summary.items() if isinstance(v, dict) and "verdict" in v}
+
+
+def test_m3d_summary_passes_when_every_measurement_holds():
+    summary = _m3d_results()
+    assert set(_m3d_verdicts(summary).values()) == {"pass"} and not summary["visible retry suggested"]
+    assert all(v["verdict"] == "pass" for v in summary["negative controls (history cleared)"].values())
+
+
+def test_m3d_failed_mechanism_control_makes_undo_history_inconclusive_not_failed():
+    import m3d_native_paste_experiment as m3d
+
+    summary = _m3d_results(**{m3d.MECHANISM: {"native_undo": "disabled|", "bold_removed_by_undo": False},
+                              m3d.CORE[0]: {"earlier_history_reversed_by_undo_2": False}})
+    verdicts = _m3d_verdicts(summary)
+    assert verdicts["mechanism control (no paste)"] == "fail"
+    assert verdicts["earlier Undo history kept"] == "inconclusive"
+    assert verdicts["native Undo reverses the paste"] == "inconclusive"
+    assert verdicts["keeps the clipboard"] == "pass"  # not an Undo measurement
+    assert summary["visible retry suggested"]
+
+
+def test_m3d_negative_control_that_keeps_history_makes_the_result_inconclusive():
+    import m3d_native_paste_experiment as m3d
+
+    summary = _m3d_results(**{m3d.NEGATIVE[1]: {"bold_still_on": False}})
+    assert summary["negative controls (history cleared)"][m3d.NEGATIVE[1]]["verdict"] == "fail"
+    assert _m3d_verdicts(summary)["earlier Undo history kept"] == "inconclusive"
+
+
+def test_m3d_genuine_failure_is_reported_as_fail():
+    import m3d_native_paste_experiment as m3d
+
+    summary = _m3d_results(**{m3d.CORE[1]: {"earlier_history_reversed_by_undo_2": False, "cut_copy_mode_after": 0}})
+    verdicts = _m3d_verdicts(summary)
+    assert verdicts["earlier Undo history kept"] == "fail" and verdicts["keeps the clipboard"] == "fail"
+    assert verdicts["native Undo reverses the paste"] == "pass"
+
+
+def test_m3d_paste_that_did_not_run_is_inconclusive_and_suggests_a_visible_retry():
+    import m3d_native_paste_experiment as m3d
+
+    summary = _m3d_results(**{name: {"paste": "disabled|1"} for name in m3d.CORE})
+    assert set(_m3d_verdicts(summary).values()) - {"pass"} == {"inconclusive"}
+    assert _m3d_verdicts(summary)["mechanism control (no paste)"] == "pass"
+    assert summary["visible retry suggested"]
+
+
+def test_m3d_partial_run_is_inconclusive():
+    import m3d_native_paste_experiment as m3d
+
+    summary = m3d.summarise([])
+    assert set(_m3d_verdicts(summary).values()) == {"inconclusive"}
 
 
 # ---------- VBA project ----------

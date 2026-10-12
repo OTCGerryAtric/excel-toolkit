@@ -2,9 +2,11 @@
 
 Question (roadmap, "Clipboard Paste Values (M3d)"): does Excel's built-in Paste Values, invoked from VBA
 with CommandBars.ExecuteMso "PasteValues", (1) keep the clipboard, (2) give a native Undo for the paste,
-(3) leave the EARLIER Undo history in place, and (4) handle single and multi-area destinations? Two
-controls (an object-model write and the legacy Range.PasteSpecial) show what the same measurements look
-like when Excel's Undo history IS cleared, so a "kept" result can be trusted.
+(3) leave the EARLIER Undo history in place, and (4) handle single and multi-area destinations? A
+no-paste mechanism control (native Bold, Undo state, native Undo) first shows the probe can build, see and
+reverse a native Undo entry at all; two negative controls (an object-model write and the legacy
+Range.PasteSpecial) show what the same measurements look like when Excel's Undo history IS cleared. Each
+criterion is reported as pass, fail or inconclusive (see summarise).
 
 Boundaries as m2-m3c: a SEPARATE disposable Excel process (DispatchEx: no XLSTART, no PERSONAL.XLSB, no
 add-ins), workbooks it creates and closes without saving, the probe module (m3d_paste_probe.bas)
@@ -142,7 +144,8 @@ class Experiment:
     def build_history(self, ws) -> dict:
         """One earlier Undo entry from a user-interface command: Bold on J1."""
         ws.Range(HISTORY_CELL).Select()
-        return {"bold": self.probe("Probe_NativeBold"), "undo": self.undo_state()}
+        bold = self.probe("Probe_NativeBold")
+        return {"bold": bold, "bold_applied": bool(ws.Range(HISTORY_CELL).Font.Bold), "undo": self.undo_state()}
 
     @staticmethod
     def box(ws) -> list:
@@ -163,7 +166,19 @@ class Experiment:
                     grid[top + r][left + c] = value
         return grid
 
-    # ----- controls: what a cleared Undo history looks like -----
+    # ----- mechanism control: can the probe build, see and reverse a native Undo entry at all? -----
+
+    def mechanism_control(self):
+        """No paste: Bold J1 natively, read the Undo state, Undo once. If this fails, nothing can be
+        concluded about whether Paste Values keeps the earlier history (the measurement itself is broken)."""
+        ws = self.fresh_sheet("mechanism")
+        history = self.build_history(ws)
+        undo = self.probe("Probe_NativeUndo")
+        self.record("mechanism control: native Bold then native Undo, no paste", history=history,
+                    native_undo=undo, bold_removed_by_undo=not ws.Range(HISTORY_CELL).Font.Bold,
+                    undo_after=self.undo_state())
+
+    # ----- negative controls: what a cleared Undo history looks like -----
 
     def controls(self):
         ws = self.fresh_sheet("control_write")
@@ -290,6 +305,7 @@ class Experiment:
     # ----- run -----
 
     def run_all(self):
+        self.mechanism_control()
         self.controls()
         self.native_case("single cell destination D1", "D1", [(0, 0)])
         self.native_case("same-size destination D1:E3", "D1:E3", [(0, 0)])
@@ -317,21 +333,89 @@ class Experiment:
         _terminate(self.pid)
 
 
+MECHANISM = "mechanism control: native Bold then native Undo, no paste"
+NEGATIVE = ("control: object-model write after a Bold", "control: Range.PasteSpecial (legacy) after a Bold")
+CORE = ("single cell destination D1", "same-size destination D1:E3",
+        "twice-the-size destination D1:E6 (Excel repeats the copy)")
+REUSE = "clipboard kept: two pastes from one copy (D1 then G1)"
+
+
+def _verdict(status: str, why: str) -> dict:
+    return {"verdict": status, "why": why}
+
+
 def summarise(results: list[dict]) -> dict:
+    """Each criterion is 'pass', 'fail' (measured, and the property does not hold) or 'inconclusive' (the
+    measurement could not be trusted or did not run). A failed mechanism control or a negative control that
+    does NOT show a cleared history makes the Undo-history criteria inconclusive, never a pass or a fail."""
     by = {r["scenario"]: r for r in results}
-    core = [by[s] for s in ("single cell destination D1", "same-size destination D1:E3",
-                            "twice-the-size destination D1:E6 (Excel repeats the copy)")]
-    controls = [by["control: object-model write after a Bold"], by["control: Range.PasteSpecial (legacy) after a Bold"]]
-    return {
-        "controls show a cleared history (measurement trustworthy)": all(c["bold_still_on"] for c in controls),
-        "native paste: values correct, no formulas or formats": all(c.get("values_as_expected")
-                                                                    and c["no_formulas_or_formats_pasted"] for c in core),
-        "native paste keeps the clipboard": all(c["cut_copy_mode_after"] == 1 for c in core)
-        and by["clipboard kept: two pastes from one copy (D1 then G1)"]["both_pastes_as_expected"],
-        "native Undo reverses the paste": all(c["paste_reversed_by_undo"] and c["bold_kept_after_undo_1"] for c in core),
-        "earlier Undo history kept": all(c["earlier_history_reversed_by_undo_2"] for c in core),
-        "multi-area destinations": "see scenarios (behaviour recorded, decision for review)",
-    }
+    summary: dict = {}
+
+    m = by.get(MECHANISM)
+    if m is None:
+        mechanism = _verdict("inconclusive", "mechanism control did not run")
+    elif not (m["history"]["bold"].startswith("ok") and m["history"]["bold_applied"]):
+        mechanism = _verdict("fail", f"native Bold did not apply ({m['history']['bold']})")
+    elif not m["history"]["undo"]["enabled"]:
+        mechanism = _verdict("fail", "Undo not available after native Bold")
+    elif not (m["native_undo"].startswith("ok") and m["bold_removed_by_undo"]):
+        mechanism = _verdict("fail", f"native Undo did not reverse Bold ({m['native_undo']})")
+    else:
+        mechanism = _verdict("pass", "native Bold created an Undo entry and native Undo reversed it")
+    summary["mechanism control (no paste)"] = mechanism
+
+    negatives = {}
+    for name in NEGATIVE:
+        c = by.get(name)
+        if c is None:
+            negatives[name] = _verdict("inconclusive", "did not run")
+        elif not c["history"]["bold_applied"]:
+            negatives[name] = _verdict("inconclusive", "the earlier Bold was never applied")
+        elif c["bold_still_on"]:
+            negatives[name] = _verdict("pass", f"history cleared as expected (Undo: {c['native_undo']})")
+        else:
+            negatives[name] = _verdict("fail", "Undo still reversed the earlier Bold: the history was NOT cleared")
+    summary["negative controls (history cleared)"] = negatives
+
+    history_trustworthy = mechanism["verdict"] == "pass" and all(v["verdict"] == "pass" for v in negatives.values())
+    untrusted_why = "mechanism or negative control did not pass, so Undo measurements cannot be trusted"
+
+    core = [by.get(s) for s in CORE]
+    missing = [s for s, c in zip(CORE, core) if c is None]
+    not_run = [f"{c['scenario']}: {c['paste']}" for c in core if c is not None and not c["paste"].startswith("ok")]
+    no_bold = [c["scenario"] for c in core if c is not None and not c["history"]["bold_applied"]]
+
+    def criterion(check, *, undo_related: bool) -> dict:
+        if missing:
+            return _verdict("inconclusive", f"scenarios did not run: {missing}")
+        if not_run:
+            return _verdict("inconclusive", f"native Paste Values did not run: {not_run}")
+        if undo_related and not history_trustworthy:
+            return _verdict("inconclusive", untrusted_why)
+        if undo_related and no_bold:
+            return _verdict("inconclusive", f"earlier Bold not applied in: {no_bold}")
+        failed = [c["scenario"] for c in core if not check(c)]
+        return _verdict("fail", f"failed in: {failed}") if failed else _verdict("pass", "all core destinations")
+
+    summary["values correct, no formulas or formats"] = criterion(
+        lambda c: c.get("values_as_expected") and c["no_formulas_or_formats_pasted"], undo_related=False)
+    clipboard = criterion(lambda c: c["cut_copy_mode_after"] == 1, undo_related=False)
+    reuse = by.get(REUSE)
+    if clipboard["verdict"] == "pass":
+        if reuse is None or not (reuse["first"].startswith("ok") and reuse["second"].startswith("ok")):
+            clipboard = _verdict("inconclusive", "copy marquee kept, but the two-paste check did not run")
+        elif not reuse["both_pastes_as_expected"]:
+            clipboard = _verdict("fail", "copy marquee kept, but the second paste from one copy was wrong")
+    summary["keeps the clipboard"] = clipboard
+    summary["native Undo reverses the paste"] = criterion(
+        lambda c: c["paste_reversed_by_undo"] and c["bold_kept_after_undo_1"], undo_related=True)
+    summary["earlier Undo history kept"] = criterion(
+        lambda c: c["earlier_history_reversed_by_undo_2"], undo_related=True)
+    summary["clipboard behaviour (CutCopyMode after each paste; 1 = copy marquee kept)"] = {
+        r["scenario"]: r.get("cut_copy_mode_after") for r in results if "cut_copy_mode_after" in r}
+    summary["multi-area destinations"] = "see scenarios (behaviour recorded, decision for review)"
+    summary["visible retry suggested"] = mechanism["verdict"] != "pass" or bool(not_run)
+    return summary
 
 
 def main() -> int:
@@ -351,7 +435,7 @@ def main() -> int:
         fired = experiment.watchdog.fired
         experiment.stop()
         set_clipboard_text(None)
-    summary = summarise(experiment.results) if error is None else {}
+    summary = summarise(experiment.results)  # partial runs too: missing scenarios read "inconclusive"
     out = {"visible": args.visible, "error": error, "watchdog_fired": fired, "summary": summary,
            "personal_unchanged": sha256(PERSONAL) == personal_before, "results": experiment.results}
     args.out.parent.mkdir(parents=True, exist_ok=True)
