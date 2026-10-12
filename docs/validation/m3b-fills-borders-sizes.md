@@ -225,7 +225,7 @@ on 10,000 cells 3.2 s; 40,000-cell outline 7.3 s apply, 13.7 s undo; whole-colum
 apply), with the owner's own Excel open at the same time. This adds to the variance already recorded
 for those tracked optimisation items.
 
-Quick manual check of the change (owner): see the next section.
+Quick manual check of the change (owner):
 
 | # | Step | Expected | Result |
 |---|---|---|---|
