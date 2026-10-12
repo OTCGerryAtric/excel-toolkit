@@ -111,6 +111,7 @@ Later: Deep Scan, Audit hardening (ADR requirements), detector extensions, G0 wi
 |---|---|---|---|
 | Text-result conversion speed (each text cell written individually) | 10,000 cells: 1,596 ms convert, 1,342 ms restore; 100,000: 15,574 ms / 12,070 ms. Numbers: 306 ms / 63 ms at 10,000 | Under 1 s for 10,000 cells, convert and restore | Must not weaken exact type preservation, rollback or undo |
 | Per-cell safety checks during capture (array/spill/lock) | ~60% of the 100,000-number total (2.1 s of 3.3 s) | Part of the same pass | Same |
+| Mixed-format number-format undo (one write per uniform block) | 10,000 alternating rows (10,000 blocks): 202 ms apply, 1,279 ms undo (2026-10-12). Uniform and mostly-uniform selections: under 25 ms apply, ~220 ms undo or less | Optimisation candidate; does not block M3a | Must keep exact per-cell format restore |
 | Provisional 100,000-cell safeguard | Retained | Revisit after the optimisation pass | Never truncate a selection |
 
 ## D. M2 — complete (accepted 2026-10-11; specification kept for reference)

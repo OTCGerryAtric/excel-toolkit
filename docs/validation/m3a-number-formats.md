@@ -1,6 +1,8 @@
 # M3a validation — number-format commands and shortcut precedence
 
-Status: **build, VBA compilation and automated live checks passed (19/19, 2026-10-11/12). Manual checklist and shortcut-precedence test NOT yet run** (awaiting review).
+Status: **build, VBA compilation and automated live checks passed (19/19, 2026-10-11/12), reviewed and
+accepted at `eabaadf`. Manual checklist and shortcut-precedence test approved to run (2026-10-12); not
+yet run.** Not approved for merge.
 Plan: `docs/product-roadmap.md` (M3, Gate 1). Source: `addin/`.
 
 ## What M3a adds
@@ -37,31 +39,43 @@ names, declarations, no clipboard or process launch). Not provable offline: comp
    identity refusal; protected sheet (refused unless formatting is allowed); forced apply and restore
    failures; too-many-blocks refusal; toggle on/off; timings (uniform 10,000; alternating 10,000; three
    uniform columns; whole column uniform; whole column with 10 exceptions) with undo timed separately.
-3. **Manual** (owner's Excel, File → Open the development `.xlam`, new blank workbook):
+3. **Manual** (owner's normal Excel, so PERSONAL.XLSB loads as usual; File → Open the development
+   `addin/build/ExcelToolkit.xlam`; new blank workbook). Nothing is installed and no setting changes.
+   PERSONAL.XLSB SHA-256 before the session: `A4F5900D…BB81EB7D`.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Ribbon | Format ▸ Number formats menu with four commands and tooltips; Settings ▸ Toolkit shortcuts (not pressed) | |
-| 2 | Put numbers in A1:A3 with **different** formats; select; Number formats ▸ Number | All become `#,##0` style; Undo Toolkit Action enabled | |
-| 3 | Press **Ctrl+Z** | Excel offers "Undo Number Format"; each cell gets back its **own** original format | |
-| 4 | Use Currency, Percentage and Date once each; Ctrl+Z after each | Each applies and undoes | |
+| 1 | Ribbon, before any command | Format ▸ Number formats menu with four commands and tooltips; Settings ▸ Toolkit shortcuts not pressed; **Undo Toolkit Action greyed out** | |
+| 2 | Numbers in A1:A3 with **different** formats; select; Number formats ▸ Number | All become `#,##0` style; Undo Toolkit Action **enabled** | |
+| 3 | Press **Ctrl+Z** | Each cell gets back its **own** original format; Undo Toolkit Action **greyed out** again | |
+| 4 | Currency, Percentage and Date once each: undo the first two with Ctrl+Z, the third with the **Undo Toolkit Action** button | Each applies and undoes; the button greys out after each undo | |
+| 5 | Number on A1; change A1's format by hand (Ctrl+1); click Undo Toolkit Action | Refused with a message; A1 keeps the hand-set format | |
 
-**Shortcut-precedence test** (the toolkit is identifiable: it enables Undo Toolkit Action and offers
-"Undo Number Format" on Ctrl+Z; the PERSONAL.XLSB macro does neither):
+**Shortcut-precedence test.** The toolkit is identifiable: it enables Undo Toolkit Action and Ctrl+Z
+reverses it; the PERSONAL.XLSB macro does neither. Each step uses all four keys (Ctrl+Shift+I, O, P, M)
+on a cell holding a number.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| S1 | Toggle **off** (default). Select a cell, press **Ctrl+Shift+I** | PERSONAL.XLSB macro runs (format changes; Undo Toolkit Action stays as it was; Ctrl+Z cannot undo it) | |
-| S2 | Toggle **on**. Press Ctrl+Shift+I | Toolkit runs (Undo Toolkit Action enabled; Ctrl+Z offers "Undo Number Format") | |
-| S3 | Toggle **off** again. Press Ctrl+Shift+I | **PERSONAL.XLSB macro again** | |
-| S4 | Toggle on; close the add-in by closing Excel (**Don't Save**); reopen Excel *without* the add-in; press Ctrl+Shift+I | PERSONAL.XLSB macro | |
-| S5 | Repeat S1–S3 for Ctrl+Shift+O, P, M (quick check) | Same pattern | |
-| S6 | Ctrl+Shift+V with the toggle on and off | Always the PERSONAL.XLSB macro (the toolkit does not bind V in M3a) | |
-| S7 | Close Excel, **Don't Save** everywhere | PERSONAL.XLSB unchanged (hash); no security events | |
+| S0 | **Before opening the add-in**: press each key | PERSONAL.XLSB macros (baseline) | |
+| S1 | Add-in open, toggle **off** (default): each key | PERSONAL.XLSB macros | |
+| S2 | Toggle **on**: each key | Toolkit commands | |
+| S3 | Toggle **off** again: each key | **PERSONAL.XLSB macros again** | |
+| S4 | Ctrl+Shift+V with the toggle on, then off | Always the PERSONAL.XLSB macro (the toolkit does not bind V in M3a) | |
+| S5 | Toggle **on**, then close **only the add-in**: Alt+F11, Ctrl+G, type `Workbooks("ExcelToolkit.xlam").Close False`, Enter, Alt+Q. The Excel Toolkit tab disappears. Press each key | PERSONAL.XLSB macros; **no "Cannot run the macro" message** | |
+| S6 | Close Excel (**Don't Save** everywhere); start Excel normally, without the add-in; press each key | PERSONAL.XLSB macros | |
+| S7 | Close Excel, Don't Save | PERSONAL.XLSB unchanged (hash); no security events | |
 
-If S3 or S4 does not give the PERSONAL.XLSB macro back, the toggle is not adopted and a safer mechanism
-is proposed. Excel's own (native) Ctrl+Shift+V behaviour, without PERSONAL.XLSB, is recorded separately
-in M3d.
+Known risk in S5: Excel documents that `Auto_Close` does **not** run when a workbook is closed by code, so
+the toggle's switch-off may not run and the keys may still point at the closed add-in. Closing by code is
+the only way to close a File → Open add-in without closing Excel, so the step is kept as written. Excel
+closing (S6) does run `Auto_Close`, and `OnKey` assignments never survive a restart.
+
+**Stop rule.** If S3, S5 or S6 does not give the PERSONAL.XLSB macro back, record the exact behaviour
+(including any message text), stop the shortcut migration and report. Do not edit PERSONAL.XLSB, repair
+anything automatically or change shortcut registrations. The formatting commands can still be accepted
+through the ribbon. Excel's own (native) Ctrl+Shift+V behaviour, without PERSONAL.XLSB, is recorded
+separately in M3d.
 
 ## Results — automated live run
 
