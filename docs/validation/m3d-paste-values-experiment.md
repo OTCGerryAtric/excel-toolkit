@@ -1,8 +1,9 @@
 # M3d — native Paste Values experiment
 
-Status: **approved in principle (review of `7bd3025`), amended, not yet run (2026-10-12).** The amendment
-adds a no-paste mechanism control and pass / fail / inconclusive verdicts (below). The run waits for the
-machine owner's explicit clipboard consent. No custom Paste Values fallback will be written until the experiment has
+Status: **run 2026-10-12 (hidden, then one visible retry); Undo results inconclusive; awaiting review.**
+Approved in principle at `7bd3025`. The amendment (`601b0d6`) adds a no-paste mechanism control and
+pass / fail / inconclusive verdicts. The machine owner consented to the clipboard use before the run. See
+"Results" at the end. No custom Paste Values fallback will be written until the experiment has
 been reviewed. The add-in is unchanged: the probe is a standalone module that is never built into it.
 Plan: `docs/product-roadmap.md` (M3, "Clipboard Paste Values (M3d)").
 
@@ -150,3 +151,52 @@ The usual limits still apply:
 The complete results, including inconclusive measurements and clipboard behaviour, are reported before any
 implementation is proposed. Not authorised: merging M3d, a custom fallback, shortcut migration, further
 milestones.
+
+## Results (2026-10-12)
+
+Runs:
+- hidden: `addin/live/results/m3d_native_paste_20261012_173219.json`;
+- visible retry: `m3d_native_paste_20261012_173253.json`.
+
+Both runs gave the same results, with no errors, no watchdog stop and no Excel message boxes.
+
+| Criterion | Verdict | Evidence |
+|---|---|---|
+| Mechanism control (no paste) | **fail** | Native Bold applied to J1, but Excel's Undo was **not available** afterwards. Native Undo returned "disabled" and the Bold stayed |
+| Negative controls (object-model write; `Range.PasteSpecial`) | pass | Undo disabled and the Bold kept, as expected. They cannot be told apart from the mechanism control, because Undo was never available |
+| 1. Keeps the clipboard | **pass** | `CutCopyMode` = 1 (copy marquee) after every native paste. Two pastes from one copy were both correct |
+| Values correct, no formulas or formats | **pass** | Single, same-size and twice-the-size (source repeated) destinations: values only, every format General |
+| 2. Native Undo reverses the paste | **inconclusive** | Undo was disabled after every paste, but the mechanism control failed |
+| 3. Earlier Undo history kept | **inconclusive** | As above. No conclusion is drawn |
+| 4. Multi-area destinations | recorded | See below |
+
+**What the failed control means.** A Bold run through `ExecuteMso`, from a macro started by
+`Application.Run`, left no Undo entry that Excel's Undo command could see, hidden or visible. So this method
+cannot measure native Undo at all, with or without a paste. The classic Undo list (control 128) was not
+readable either: `ListCount` failed and was recorded as -1. One possible explanation, **not tested**, is
+that Excel does not keep Undo entries for changes made while a VBA macro runs, or clears them when the macro
+ends, even for built-in commands. Answering criteria 2 and 3 needs a method where the earlier action and the
+Undo are real user actions. That would be a manual stage, which needs its own approval.
+
+**Destination and source behaviour** (identical hidden and visible):
+- **Two areas D1,G1, and two blocks D1:E3,G1:H3:** pasted the full source into both areas, with no message.
+  Excel did not refuse.
+- **Two-area source A1,A3 to D1:** pasted 1234.5 and "text" into D1:D2, stacked, with no message.
+- **After Cut:** Paste Values was **disabled** (`CutCopyMode` 2), so nothing was pasted.
+- **Source in another workbook:** values correct, clipboard kept.
+- **Text copied from outside Excel:** Paste Values was **disabled** (`CutCopyMode` 0). **Empty clipboard:**
+  disabled.
+- **Protected sheet, locked destination:** reported **disabled**, with no message. The protection test ran
+  with nothing copied, because `Protect` cleared the copy (an artefact of the setup). It shows only that
+  nothing was pasted.
+- **Filtered destination** (rows 3 and 5 hidden; A1:A3 copied, pasted at E2): E2 = 1234.5 and E3 = 2469,
+  written into the **hidden** row. E4 kept "old", where "text" was expected. This is **not explained**, and
+  needs a closer look before any conclusion.
+
+**Clipboard:** the owner's clipboard was overwritten during the run and emptied at the end, as agreed.
+
+**Security (both runs):**
+- Defender: 0 detections.
+- SentinelOne Operational and Firewall: no events since the start (17:32).
+- No Excel left running.
+- PERSONAL.XLSB: SHA-256 `A4F5900D...EB7D`, last written 15/06/2026, unchanged.

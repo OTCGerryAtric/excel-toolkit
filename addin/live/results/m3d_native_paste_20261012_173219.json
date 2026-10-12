@@ -1,0 +1,893 @@
+{
+  "visible": false,
+  "error": null,
+  "watchdog_fired": false,
+  "summary": {
+    "mechanism control (no paste)": {
+      "verdict": "fail",
+      "why": "Undo not available after native Bold"
+    },
+    "negative controls (history cleared)": {
+      "control: object-model write after a Bold": {
+        "verdict": "pass",
+        "why": "history cleared as expected (Undo: disabled|)"
+      },
+      "control: Range.PasteSpecial (legacy) after a Bold": {
+        "verdict": "pass",
+        "why": "history cleared as expected (Undo: disabled|)"
+      }
+    },
+    "values correct, no formulas or formats": {
+      "verdict": "pass",
+      "why": "all core destinations"
+    },
+    "keeps the clipboard": {
+      "verdict": "pass",
+      "why": "all core destinations"
+    },
+    "native Undo reverses the paste": {
+      "verdict": "inconclusive",
+      "why": "mechanism or negative control did not pass, so Undo measurements cannot be trusted"
+    },
+    "earlier Undo history kept": {
+      "verdict": "inconclusive",
+      "why": "mechanism or negative control did not pass, so Undo measurements cannot be trusted"
+    },
+    "clipboard behaviour (CutCopyMode after each paste; 1 = copy marquee kept)": {
+      "single cell destination D1": 1,
+      "same-size destination D1:E3": 1,
+      "twice-the-size destination D1:E6 (Excel repeats the copy)": 1,
+      "multi-area destination D1,G1": 1,
+      "multi-area destination D1:E3,G1:H3": 1,
+      "multi-area source A1,A3 to D1": 1,
+      "after Cut (not Copy)": 2,
+      "clipboard kept: two pastes from one copy (D1 then G1)": 1,
+      "source in another workbook": 1
+    },
+    "multi-area destinations": "see scenarios (behaviour recorded, decision for review)",
+    "visible retry suggested": true
+  },
+  "personal_unchanged": true,
+  "results": [
+    {
+      "scenario": "mechanism control: native Bold then native Undo, no paste",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "native_undo": "disabled|",
+      "bold_removed_by_undo": false,
+      "undo_after": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "dialogs": []
+    },
+    {
+      "scenario": "control: object-model write after a Bold",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "write": "ok|",
+      "undo_after": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "native_undo": "disabled|",
+      "bold_still_on": true,
+      "dialogs": []
+    },
+    {
+      "scenario": "control: Range.PasteSpecial (legacy) after a Bold",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "paste": "ok|1|1",
+      "undo_after": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "cut_copy_mode": 1,
+      "native_undo": "disabled|",
+      "box_after_undo_attempt": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "bold_still_on": true,
+      "dialogs": []
+    },
+    {
+      "scenario": "single cell destination D1",
+      "destination": "D1",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "values_as_expected": true,
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "same-size destination D1:E3",
+      "destination": "D1:E3",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "values_as_expected": true,
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "twice-the-size destination D1:E6 (Excel repeats the copy)",
+      "destination": "D1:E6",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          1234.5,
+          45000.0,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "values_as_expected": true,
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "multi-area destination D1,G1",
+      "destination": "D1,G1",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          1234.5,
+          45000.0
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          2469.0,
+          0.25
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "text",
+          true
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "multi-area destination D1:E3,G1:H3",
+      "destination": "D1:E3,G1:H3",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          1234.5,
+          45000.0
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          2469.0,
+          0.25
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "text",
+          true
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "multi-area source A1,A3 to D1",
+      "destination": "D1",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          1234.5,
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "text",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": false,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "after Cut (not Copy)",
+      "destination": "D1",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "undo_after_copy": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "paste": "disabled|2",
+      "cut_copy_mode_after": 2,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "box_after": [
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "box_details": {
+        "formulas": [],
+        "formats": [
+          "General"
+        ]
+      },
+      "no_formulas_or_formats_pasted": true,
+      "undo_1": "disabled|",
+      "paste_reversed_by_undo": true,
+      "bold_kept_after_undo_1": true,
+      "undo_2": "disabled|",
+      "earlier_history_reversed_by_undo_2": false,
+      "dialogs": []
+    },
+    {
+      "scenario": "clipboard kept: two pastes from one copy (D1 then G1)",
+      "first": "ok|1|1",
+      "second": "ok|1|1",
+      "cut_copy_mode_after": 1,
+      "box_after": [
+        [
+          1234.5,
+          45000.0,
+          "old",
+          1234.5,
+          45000.0
+        ],
+        [
+          2469.0,
+          0.25,
+          "old",
+          2469.0,
+          0.25
+        ],
+        [
+          "text",
+          true,
+          "old",
+          "text",
+          true
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "both_pastes_as_expected": true,
+      "dialogs": []
+    },
+    {
+      "scenario": "source in another workbook",
+      "history": {
+        "bold": "ok|",
+        "bold_applied": true,
+        "undo": {
+          "enabled": false,
+          "count": -1,
+          "entries": []
+        }
+      },
+      "paste": "ok|1|1",
+      "values_as_expected": true,
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "cut_copy_mode_after": 1,
+      "dialogs": []
+    },
+    {
+      "scenario": "clipboard holds text from outside Excel",
+      "paste": "disabled|0",
+      "box_after": [
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ],
+        [
+          "old",
+          "old",
+          "old",
+          "old",
+          "old"
+        ]
+      ],
+      "undo_after_paste": {
+        "enabled": false,
+        "count": -1,
+        "entries": []
+      },
+      "dialogs": []
+    },
+    {
+      "scenario": "clipboard empty",
+      "paste": "disabled|0",
+      "box_unchanged": true,
+      "dialogs": []
+    },
+    {
+      "scenario": "protected sheet (destination locked)",
+      "paste": "disabled|0",
+      "box_unchanged": true,
+      "dialogs": []
+    },
+    {
+      "scenario": "filtered destination (rows 3 and 5 hidden), 3 cells pasted at E2",
+      "paste": "ok|1|1",
+      "column_e": [
+        "old",
+        1234.5,
+        2469.0,
+        "old",
+        "old",
+        "old"
+      ],
+      "hidden_rows": [
+        3,
+        5
+      ],
+      "dialogs": []
+    }
+  ]
+}
