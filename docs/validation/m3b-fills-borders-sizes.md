@@ -207,5 +207,9 @@ is listed here for a decision, not made in M3b:
 - **Row height:** standard height ↔ 4.5 (instead of 15 ↔ 4.5).
 - **Column width:** 2 → standard width → 12 → 2 (instead of 2 → 8.43 → 12).
 - **Best fit** is unchanged (it is based on the active cell's width).
+- The standard width is often only *around* 8.43 (for example 8.38 or 9.14, depending on the workbook's
+  font and the screen's pixel rounding). An exact comparison with 8.43, as in the legacy macro, then never
+  matches, so the cycle jumps straight back to 2. The change would compare with the sheet's own standard
+  width, allowing for pixel rounding, rather than with a fixed number.
 - On a workbook whose defaults are 15 and 8.43, nothing changes. The legacy-equivalence checks would then
   compare against the documented change on other workbooks.
