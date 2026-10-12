@@ -1,8 +1,9 @@
 # M3c validation — Clear Sheet References and Find Constants
 
-Status: **scripted live check passed, 28/28 (2026-10-12).** Offline implementation reviewed (`2ea8167`);
-the design and decisions were approved, with one amendment (ranges Excel could read two ways), made below.
-Manual testing awaits approval. Not merged. M3d not started.
+Status: **manual checklist passed (2026-10-12)**, after the scripted live check (28/28, `39259d0`).
+Offline implementation reviewed (`2ea8167`); the design and decisions were approved, with one amendment
+(ranges Excel could read two ways), made below. Awaiting final review for merge. Not merged. M3d not
+started.
 Plan: `docs/product-roadmap.md` (M3, "Clear Sheet References (M3c)"). Source: `addin/`.
 
 ## What M3c adds
@@ -184,3 +185,41 @@ no Office trust or registry changes; PERSONAL.XLSB unchanged; the audit worker n
    - timings at 10,000 formulas.
 3. **Manual** (owner): ribbon, real Ctrl+Z after Clear Sheet References, Find Constants on a real model;
    PERSONAL.XLSB hash and security checks as before.
+
+## Manual checklist (approved 2026-10-12)
+
+Approved decisions at this gate: ambiguous formulas stay entirely unchanged and are reported; the 2.6 s
+rewrite and 2.0 s undo for 10,000 formulas are accepted for this milestone (recorded, no optimisation
+work); exact restoration, conflict checks and the protected-sheet, array-formula and 100,000-formula
+refusals stay; Find Constants stays selection-only and leaves the undo record alone; no M3c shortcuts.
+
+Owner's normal Excel (PERSONAL.XLSB loads as usual). File → Open the development
+`addin/build/ExcelToolkit.xlam` (built from `39259d0`'s VBA) and a disposable workbook made by
+`addin/live/m3c_manual_book.py` in a separate disposable Excel (saved to the scratch folder, closed without
+saving afterwards). Sheet **Model** (sheets Model, A, AB, Other, Constants): one formula per row in E10:E20,
+the expected formula in F, the live formula (`FORMULATEXT`) in G, the value before in H and "same value?"
+in I. The workbook was first dry-run with the add-in in a disposable Excel, giving exactly the expected
+results below. Nothing installed. PERSONAL.XLSB SHA-256 before: `A4F5900D…BB81EB7D`.
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| A | Excel Toolkit tab | **Formulas** group: Clear Sheet References, Find Constants | **Pass** |
+| B | Model: click A1; Clear Sheet References (ribbon) | Warning: removed `'Model'!` from **6** formulas; **2** left unchanged, the first in **E19** | **Pass** |
+| C | Compare G with F; column I | G = F on every row (other sheet, INDIRECT text, string literal, sheets A/AB, 3D range, other-sheet first half and text cells unchanged); I all TRUE (calculated values unchanged) | **Pass** |
+| D | **Ctrl+Z** | Original formulas back; Undo Toolkit Action greyed | **Pass** |
+| E | Select E19:E20 (the two-way formulas); Clear Sheet References | "Nothing was changed", with the reason; no change | **Pass** |
+| F | Select E10:E11; Clear Sheet References | Only those two rewritten | **Pass** |
+| G | Undo Toolkit Action **button** | Both restored; button greyed | **Pass** |
+| H | Constants: click A1; Find Constants | Only A2:A5 (typed numbers) selected; not formulas, text or TRUE | **Pass** |
+| I | Select B2:D4; Find Constants | "No typed-in numbers" message | **Pass** |
+| J | New workbook, A2 `=Sheet1!A1`; **Ctrl+Shift+F** (toolkit shortcuts off) | PERSONAL.XLSB macro runs (A2 becomes `=A1`); Undo Toolkit Action does not light up | **Pass** |
+| K | Close Excel, Don't Save | — | **Pass** |
+
+To keep the checklist short for the owner, two items were left to the automated run rather than repeated
+by hand: Ctrl+Shift+F / H with toolkit shortcuts **on** (no M3c shortcut exists to take them; the M3a
+shortcut set is unchanged), and the undo record surviving Find Constants (scripted check "find constants
+leaves the existing undo record alone", passed).
+
+After the checklist: PERSONAL.XLSB SHA-256 unchanged (`A4F5900D…BB81EB7D`, last written 15/06/2026; read-only
+hash, the owner's Excel open again); 0 Defender detections; SentinelOne one routine burst of 7 anti-tamper
+entries (15:35), none naming Excel, Python or the add-in; no Firewall events.

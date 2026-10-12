@@ -4,7 +4,7 @@ Last updated: 2026-10-12 — **M3b accepted and merged** (`5a355cb`): fill toggl
 height, column width and best fit, each with exact undo (row height: numeric height, not automatic sizing).
 **M3a accepted and merged** (`4ccc9fe`): number formats with exact undo and optional session shortcuts that
 hand back to PERSONAL.XLSB. **M2 accepted** (`b140ea6`). Milestone 1 (Excel-triggered audit, `58be1ca`)
-achieved. **M3c: reviewed; scripted live check passed (28/28); manual testing awaits approval.** Deployment (G0) remains blocked:
+achieved. **M3c: scripted live check (28/28) and manual checklist passed; awaiting final review for merge.** Deployment (G0) remains blocked:
 acceptance covers a development add-in on the owner's machine, not distribution to colleagues.
 Update at every approval gate.
 
@@ -44,8 +44,8 @@ Not open questions — do not re-run these comparisons.
   (live-validated in Phase B). Python commands are read-only.
 - **Independent analysis engine** in `src/excel_toolkit`, no COM imports outside the adapter layer.
 - **Deployment (G0) is blocked**; the E6 installer is rejected and must not be re-run.
-- Next work follows `docs/product-roadmap.md`: M2, M3a and M3b complete; M3c reviewed and its
-  scripted live check passed (manual testing needs approval; M3d not started).
+- Next work follows `docs/product-roadmap.md`: M2, M3a and M3b complete; M3c scripted and manual
+  checks passed, awaiting final review (M3d not started).
 
 ## Ruled out
 
