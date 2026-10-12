@@ -1,9 +1,13 @@
 # M3c validation — Clear Sheet References and Find Constants
 
-Status: **manual checklist passed (2026-10-12)**, after the scripted live check (28/28, `39259d0`).
-Offline implementation reviewed (`2ea8167`); the design and decisions were approved, with one amendment
-(ranges Excel could read two ways), made below. Awaiting final review for merge. Not merged. M3d not
-started.
+Status: **accepted and merged (`2777b74`, 2026-10-12)** at `a372145`, after the manual checklist (A–K)
+and the scripted live check (28/28, `39259d0`). Offline implementation reviewed (`2ea8167`); the design and
+decisions were approved, with one amendment (ranges Excel could read two ways), made below.
+
+Kept as **mandatory regression coverage**: the 57 rewrite cases and 6 two-way cases (`m3c_cases.py`, offline
+and live) and the calculated-value checks (`m3c_live_check.py`, "meaning"). Kept: the 100,000-changed-formula
+refusal and the timings below. No M3c shortcuts; PERSONAL.XLSB untouched. G0 deployment stays blocked: this
+acceptance does not authorise installation or distribution to colleagues.
 Plan: `docs/product-roadmap.md` (M3, "Clear Sheet References (M3c)"). Source: `addin/`.
 
 ## What M3c adds
