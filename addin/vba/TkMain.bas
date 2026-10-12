@@ -14,7 +14,7 @@ Private Declare Function QueryPerformanceFrequency Lib "kernel32" (ByRef frequen
 #End If
 
 Public Const TK_TITLE As String = "Excel Toolkit"
-Public Const TOOLKIT_VERSION As String = "0.4.0-m3b"
+Public Const TOOLKIT_VERSION As String = "0.5.0-m3c"
 
 Private ribbon As IRibbonUI
 Private quietMode As Boolean          ' test harness: record messages instead of showing them
@@ -88,6 +88,18 @@ Private Function Registry(ByVal id As String) As Variant
             "Sets the selected columns to a multiple of 5 just wider than the active cell's column, rounded " & _
             "the same way as the existing macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
             "", True, "style")
+    Case "tkClearSheetRefs"
+        Registry = Array("Clear Sheet References", "Clear sheet references", _
+            "Removes this sheet's own name from references in the selected formulas ('P&L'!A1 becomes A1), " & _
+            "which does not change what they refer to. With a single cell selected, works on the whole " & _
+            "sheet. Text, quoted text inside formulas, other sheets and other workbooks are never changed. " & _
+            "Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+            "", True, "formulas")
+    Case "tkFindConstants"
+        Registry = Array("Find Constants", "Find constants", _
+            "Selects the cells in the selection that hold typed-in numbers rather than formulas - the same as " & _
+            "the existing macro. With a single cell selected, looks at the whole sheet. Changes only the selection.", _
+            "", False, "none")
     Case "tkShortcuts"
         Registry = Array("Toolkit shortcuts", "Toolkit keyboard shortcuts", _
             "When on (this Excel session only), Ctrl+Shift+I, O, P and M run the Excel Toolkit number-format " & _
@@ -113,7 +125,8 @@ End Function
 Public Function Tk_CommandIds() As Variant
     Tk_CommandIds = Array("tkConvertToValues", "tkUndo", "tkFmtNumber", "tkFmtCurrency", "tkFmtPercent", _
                           "tkFmtDate", "tkFillYellow", "tkFillGreen", "tkFillLightBlue", "tkFillGrey", "tkOutline", _
-                          "tkRowHeight", "tkColWidth", "tkBestFit", "tkShortcuts", "tkAudit")
+                          "tkRowHeight", "tkColWidth", "tkBestFit", "tkClearSheetRefs", "tkFindConstants", _
+                          "tkShortcuts", "tkAudit")
 End Function
 
 ' ---------- Ribbon callbacks (customUI14.xml) ----------
@@ -178,6 +191,8 @@ Public Sub Tk_OnAction(control As IRibbonControl)
     Case "tkRowHeight": Tk_RunRowHeight
     Case "tkColWidth": Tk_RunColumnWidth
     Case "tkBestFit": Tk_RunBestFit
+    Case "tkClearSheetRefs": Tk_RunClearSheetReferences
+    Case "tkFindConstants": Tk_RunFindConstants
     Case "tkAudit": Tk_AuditFormulas
     End Select
 End Sub

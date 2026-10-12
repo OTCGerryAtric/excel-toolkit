@@ -10,6 +10,7 @@ a real Office package built with openpyxl. Behaviour in Excel is proven by the l
 from __future__ import annotations
 
 import re
+import sys
 import zipfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
@@ -165,7 +166,7 @@ def test_format_cycles_reproduce_the_legacy_macros(macro, cycle):
 UNDO_RECORD_INTERFACE = {"Description": 0, "CheckIdentity": 0, "FindConflict": 0, "Restore": 1}
 
 
-@pytest.mark.parametrize("name", ["TkCellSnapshot", "TkFormatSnapshot", "TkStyleSnapshot"])
+@pytest.mark.parametrize("name", ["TkCellSnapshot", "TkFormatSnapshot", "TkStyleSnapshot", "TkFormulaSnapshot"])
 def test_snapshot_classes_provide_the_undo_record_interface(name):
     """TkUndo holds records late-bound (As Object), so the compiler cannot check this - the test does."""
     code = _code(ROOT / "addin" / "vba" / f"{name}.cls")
@@ -300,6 +301,133 @@ def test_style_undo_refuses_gradients_and_never_compares_a_theme_marker_with_equ
     # theme is a number or the NO_THEME string: `theme = NO_THEME` would be a Type mismatch on numbers
     assert not re.search(r"\b\w*[Tt]heme\w*\(?\w*\)?\s*=\s*NO_THEME\b(?!\s*$)", snap.replace("ThemeOf = NO_THEME", ""))
     assert "IsRgb(theme)" in snap
+
+
+# ---------- Clear Sheet References and Find Constants (M3c) ----------
+
+sys.path.insert(0, str(ROOT / "addin" / "live"))
+from m3c_cases import REWRITE_CASES  # noqa: E402
+
+
+def _formulas_code() -> str:
+    return _code(ROOT / "addin" / "vba" / "TkFormulas.bas")
+
+
+def _is_name_char(ch: str) -> bool:
+    return bool(re.fullmatch(r"[A-Za-z0-9_.]", ch)) or ord(ch) > 127
+
+
+def _quote_end(formula: str, start: int, quote: str) -> int:
+    k = start + 1
+    while k < len(formula):
+        if formula[k] == quote:
+            if k + 1 < len(formula) and formula[k + 1] == quote:
+                k += 2
+                continue
+            return k
+        k += 1
+    return len(formula) - 1
+
+
+def _range_before_colon(formula: str, colon: int) -> bool:
+    k = colon - 1
+    if k < 0:
+        return False
+    if formula[k] == ")":
+        return True
+    word = ""
+    while k >= 0 and (formula[k] == "$" or _is_name_char(formula[k])):
+        if formula[k] != "$":
+            word = formula[k] + word
+        k -= 1
+    return bool(re.fullmatch(r"[A-Za-z]{0,3}[0-9]{0,7}", word)) and word != ""
+
+
+def remove_sheet_prefix(formula: str, sheet: str) -> str:
+    """Python model of TkFormulas.Tk_RemoveSheetPrefix (same steps, 0-based). The VBA function is
+    checked against the same cases live; this pins down the rules and the case table offline."""
+    out, i, n = [], 0, len(formula)
+    while i < n:
+        ch = formula[i]
+        if ch == '"':
+            j = _quote_end(formula, i, '"')
+            out.append(formula[i:j + 1])
+            i = j + 1
+        elif ch == "'":
+            j = _quote_end(formula, i, "'")
+            if j + 1 < n and formula[j + 1] == "!" and formula[i + 1:j].replace("''", "'").lower() == sheet.lower():
+                i = j + 2
+                continue
+            out.append(formula[i:j + 1])
+            i = j + 1
+        elif _is_name_char(ch):
+            j = i
+            while j + 1 < n and _is_name_char(formula[j + 1]):
+                j += 1
+            prev = formula[i - 1] if i > 0 else ""
+            own = j + 1 < n and formula[j + 1] == "!" and prev not in ("]", "#") \
+                and (prev != ":" or _range_before_colon(formula, i - 1)) and formula[i:j + 1].lower() == sheet.lower()
+            if own:
+                i = j + 2
+            else:
+                out.append(formula[i:j + 1])
+                i = j + 1
+        else:
+            out.append(ch)
+            i += 1
+    return "".join(out)
+
+
+@pytest.mark.parametrize("sheet,before,after", REWRITE_CASES, ids=[f"{s}|{b}" for s, b, _ in REWRITE_CASES])
+def test_clear_sheet_references_rewrite_rules(sheet, before, after):
+    assert remove_sheet_prefix(before, sheet) == after
+    assert remove_sheet_prefix(after, sheet) == after  # idempotent: what VerifyApplied relies on
+
+
+def test_the_legacy_text_replace_damages_what_the_toolkit_keeps():
+    """The legacy macro: Cells.Replace "<name>!" (or "'<name>'!" if the name has a space) anywhere in any
+    cell, case-insensitive. On these cases it changes text the toolkit rightly leaves alone."""
+    def legacy(formula, sheet):
+        what = f"'{sheet}'!" if " " in sheet else f"{sheet}!"
+        return re.sub(re.escape(what), "", formula, flags=re.I)
+    damaged = [(s, b) for s, b, a in REWRITE_CASES if legacy(b, s) != a]
+    for case in [("Sheet1", "=MySheet1!A1"), ("Sheet1", "=[Book.xlsx]Sheet1!A1"), ("Sheet1", '="Sheet1!A1"'),
+                 ("Sheet3", "=SUM(Sheet1:Sheet3!A1)"), ("REF", "=REF!A1+#REF!")]:
+        assert case in damaged
+    assert legacy("Sales note: see Sheet1!A1", "Sheet1") != "Sales note: see Sheet1!A1"  # and text cells
+
+
+def test_rewrite_rules_in_vba_match_the_model():
+    code = _formulas_code()
+    fn = _vba_function(code, "Tk_RemoveSheetPrefix")
+    assert 'j = QuoteEnd(formula, i, """")' in fn and "j = QuoteEnd(formula, i, \"'\")" in fn
+    assert "Replace(Mid$(formula, i + 1, j - i - 1), \"''\", \"'\")" in fn
+    assert "StrComp(nameText, sheetName, vbTextCompare) = 0" in fn
+    own = code.split("Private Function IsOwnSheetWord(", 1)[1].split("End Function", 1)[0]
+    assert 'If prevCh = "]" Or prevCh = "#" Then Exit Function' in own
+    assert "If Not RangeBeforeColon(formula, i - 1) Then Exit Function" in own
+    assert "vbTextCompare" in own
+    assert 'IsNameChar = (ch Like "[A-Za-z0-9_.]") Or code > 127' in code
+    assert "RangeBeforeColon = (letters <= 3 And digits <= 7)" in code
+
+
+def test_clear_sheet_references_reads_and_writes_formula_cells_only():
+    snap = _code(ROOT / "addin" / "vba" / "TkFormulaSnapshot.cls")
+    assert "scope.SpecialCells(xlCellTypeFormulas)" in snap
+    assert "If Not area.Cells(r, c).HasFormula Then GoTo NextCell" in snap
+    assert ".HasArray Then" in snap  # array formulas refused, not rewritten cell by cell
+    for path in ADDIN_VBA:
+        assert not re.search(r"\.Replace\b", _code(path)), f"{path.name}: no Range.Replace (the legacy text replace)"
+    main = _formulas_code()
+    assert "If target.CountLarge = 1 Then Set scope = target.Worksheet.UsedRange Else Set scope = target" in main
+
+
+def test_find_constants_is_the_legacy_selection_and_changes_nothing_else():
+    legacy = _legacy_body("Find_Constants")
+    assert "Selection.SpecialCells(xlCellTypeConstants, 1).Select" in legacy  # 1 = xlNumbers
+    fn = _vba_function(_formulas_code(), "Tk_FindConstants")
+    assert "target.SpecialCells(xlCellTypeConstants, xlNumbers)" in fn and "found.Select" in fn
+    assert "Tk_SetRecord" not in fn and "Formula" not in fn and ".Value" not in fn
 
 
 # ---------- VBA project ----------
