@@ -112,6 +112,8 @@ Later: Deep Scan, Audit hardening (ADR requirements), detector extensions, G0 wi
 | Text-result conversion speed (each text cell written individually) | 10,000 cells: 1,596 ms convert, 1,342 ms restore; 100,000: 15,574 ms / 12,070 ms. Numbers: 306 ms / 63 ms at 10,000 | Under 1 s for 10,000 cells, convert and restore | Must not weaken exact type preservation, rollback or undo |
 | Per-cell safety checks during capture (array/spill/lock) | ~60% of the 100,000-number total (2.1 s of 3.3 s) | Part of the same pass | Same |
 | Mixed-format number-format undo (one write per uniform block) | 10,000 alternating rows (10,000 blocks): 202 ms apply, 1,279 ms undo (2026-10-12). Uniform and mostly-uniform selections: under 25 ms apply, ~220 ms undo or less | Optimisation candidate; does not block M3a | Must keep exact per-cell format restore |
+| Multi-level toolkit Undo (one-level is the approved requirement and passed in M3a) | Owner noticed during M3a manual testing (2026-10-12): after three changes only the latest can be undone | Possible future feature; not part of M3 | Each level keeps the identity, conflict and verified-restore checks |
+| Shortcut release on add-in close: whether `Auto_Close` or Excel itself drops the `OnKey` bindings when the add-in is closed by code (both gave the correct result in M3a) | Not distinguished | Investigate for reliability across Excel installations before wider shortcut migration | Never edit PERSONAL.XLSB |
 | Provisional 100,000-cell safeguard | Retained | Revisit after the optimisation pass | Never truncate a selection |
 
 ## D. M2 — complete (accepted 2026-10-11; specification kept for reference)
