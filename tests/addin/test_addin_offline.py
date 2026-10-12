@@ -390,6 +390,34 @@ def test_find_constants_is_the_legacy_selection_and_changes_nothing_else():
     assert "Tk_SetRecord" not in fn and "Formula" not in fn and ".Value" not in fn
 
 
+# ---------- Clipboard Paste Values experiment (M3d, prepared only) ----------
+
+M3D_PROBE = ROOT / "addin" / "live" / "m3d_paste_probe.bas"
+M3D_HARNESS = ROOT / "addin" / "live" / "m3d_native_paste_experiment.py"
+
+
+def test_m3d_probe_tests_the_native_command_and_stays_out_of_the_addin():
+    raw = M3D_PROBE.read_bytes()
+    assert raw.isascii() and raw.count(b"\r\n") == raw.count(b"\n")
+    code = _code(M3D_PROBE)
+    native = _vba_function(code, "Probe_NativePasteValues")
+    assert 'Application.CommandBars.ExecuteMso "PasteValues"' in native and "PasteSpecial" not in native
+    assert 'GetEnabledMso("PasteValues")' in native
+    # the object-model paste appears only as the labelled control
+    assert code.count(".PasteSpecial") == 1 and ".PasteSpecial" in _vba_function(code, "Probe_ControlPasteSpecial")
+    assert M3D_PROBE.name not in (ROOT / "addin" / "build_addin.py").read_text(encoding="utf-8")
+    assert not (ROOT / "addin" / "vba" / M3D_PROBE.name).exists()
+    assert not any("PasteValues" in _code(path) for path in ADDIN_VBA)  # no Paste Values in the add-in yet
+
+
+def test_m3d_harness_uses_a_disposable_excel_only():
+    text = M3D_HARNESS.read_text(encoding="utf-8")
+    assert 'DispatchEx("Excel.Application")' in text and "GetActiveObject" not in text
+    assert "DEFAULT_XLAM" not in text and "PERSONAL" in text  # no add-in; PERSONAL.XLSB only hashed
+    assert "SaveAs" not in text and "Close(SaveChanges=False)" in text
+    assert "DO NOT RUN until authorised" in text
+
+
 # ---------- VBA project ----------
 
 def _module_level_names(path: Path) -> list[str]:
