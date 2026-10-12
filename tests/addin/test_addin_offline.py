@@ -419,6 +419,36 @@ def test_m3d_harness_uses_a_disposable_excel_only():
     assert "self.mechanism_control()\n        self.controls()" in text  # the no-paste control runs first
 
 
+def test_m3d_manual_macros_are_menu_runnable_and_do_nothing_changes_nothing():
+    code = _code(M3D_PROBE)
+    for name in ("Manual_NativePasteValues", "Manual_NativeBold", "Manual_DoNothing"):
+        assert re.search(rf"^Public Sub {name}\(\)\r?$", code, re.M), name  # Alt+F8 lists argument-less Subs
+    body = re.search(r"Public Sub Manual_DoNothing\(\)(.*?)End Sub", code, re.S).group(1)
+    assert not re.search(r"Range|Cells|Selection|Application|ActiveSheet|ActiveCell|MsgBox|Worksheets", body)
+
+
+def test_m3d_manual_book_reproduces_the_filtered_layout(tmp_path):
+    from openpyxl import load_workbook
+
+    import m3d_manual_book
+
+    path = tmp_path / "m3d_manual.xlsx"
+    m3d_manual_book.build(path)
+    wb = load_workbook(path)
+    assert wb.sheetnames == ["1 Baseline", "3 Do nothing", "2 Probe paste", "4a Filter macro", "4b Filter Excel",
+                             "4c Source", "4c Filter other source"]
+    assert path.suffix == ".xlsx" and not wb.vba_archive  # no macros in the file itself
+    for name in ("4a Filter macro", "4b Filter Excel", "4c Filter other source"):
+        ws = wb[name]
+        assert ws.auto_filter.ref == "D1:D6"
+        assert [r for r in range(1, 7) if ws.row_dimensions[r].hidden] == [3, 5]
+        assert [ws.cell(row=8, column=c).value for c in range(2, 8)] == [f"=E{r}" for r in range(1, 7)]
+        assert all(ws.cell(row=r, column=5).value == "old" for r in range(1, 7))
+    assert wb["4a Filter macro"]["A3"].value == "text"  # the source cell the filter hides
+    assert wb["4c Filter other source"]["A3"].value is None and wb["4c Source"]["A3"].value == "text"
+    assert wb["4c Filter other source"]["B11"].value == "='4c Source'!A1"
+
+
 def _m3d_results(**changes):
     """Synthetic results in which every check passes; `changes` maps scenario -> fields to override."""
     import m3d_native_paste_experiment as m3d

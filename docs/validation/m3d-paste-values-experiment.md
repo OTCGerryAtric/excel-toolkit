@@ -1,6 +1,9 @@
 # M3d — native Paste Values experiment
 
-Status: **run 2026-10-12 (hidden, then one visible retry); Undo results inconclusive; awaiting review.**
+Status: **automated results accepted (review of `3d994a3`); manual investigation prepared, awaiting approval.**
+Native Paste Values is not yet approved as the implementation. Disabled Undo in the automated runs is **not**
+a native Paste Values defect: the mechanism control failed. The automated run took place 2026-10-12 (hidden,
+then one visible retry).
 Approved in principle at `7bd3025`. The amendment (`601b0d6`) adds a no-paste mechanism control and
 pass / fail / inconclusive verdicts. The machine owner consented to the clipboard use before the run. See
 "Results" at the end. No custom Paste Values fallback will be written until the experiment has
@@ -200,3 +203,145 @@ Undo are real user actions. That would be a manual stage, which needs its own ap
 - SentinelOne Operational and Firewall: no events since the start (17:32).
 - No Excel left running.
 - PERSONAL.XLSB: SHA-256 `A4F5900D...EB7D`, last written 15/06/2026, unchanged.
+
+## Manual investigation (prepared 2026-10-12, NOT run; needs approval and fresh clipboard consent)
+
+**Purpose.** To settle Undo by hand: real Ctrl+Z, real user actions, macros started with Alt+F8. The four
+reviewer questions are:
+
+| Reviewer item | Checklist part |
+|---|---|
+| 1. Baseline: manual Bold and Excel's Paste Values, then Ctrl+Z twice | Part 1 |
+| 2. `ExecuteMso "PasteValues"` through the probe, real Ctrl+Z | Part 3 |
+| 3. Does running a harmless macro clear an earlier manual Undo entry? | Part 2 (run **before** Part 3, so Part 3 can be read correctly) |
+| 4. Filtered-row anomaly, visible and hidden cells before and after | Part 4 |
+
+**Materials (prepared offline, no Excel started):**
+- `addin/live/m3d_manual_book.py` writes the disposable workbook `m3d_manual.xlsx` (plain .xlsx, no macros)
+  with openpyxl. A copy is in the session scratch folder.
+- `addin/live/m3d_paste_probe.bas` has three new Subs that Alt+F8 can run:
+  - `Manual_NativePasteValues`: the probe's `ExecuteMso "PasteValues"`, silent when it works;
+  - `Manual_NativeBold`: the probe's `ExecuteMso "Bold"`;
+  - `Manual_DoNothing`: changes nothing; an offline test checks that it touches no cells, selection or
+    settings.
+
+The probe is imported by hand for the session only. The workbook is closed **without saving**. The add-in
+is not involved.
+
+**Limits:**
+- Alt+F8 is the nearest user-started route without installing the add-in. A ribbon button is not tested.
+- The new Subs are checked offline but have not been compiled in Excel. A compile error at Part 0 is
+  reported, not fixed in Excel.
+
+**Hypothesis for Part 4 (to be tested, not assumed).** In the automated run, the filter hid **whole rows**
+3 and 5, including source cell A3. Copying A1:A3 would then copy only the visible A1:A2. Pasting at E2 would
+fill E2 and the hidden E3, leaving E4 "old", which is what was seen. Part 4c puts the source on an
+unfiltered sheet to separate the source effect from the destination effect.
+
+### Checklist
+
+Record each **check** (for example "1c: yes") and send the list back.
+
+**Part 0: Setup**
+1. Save your work. **Close Excel completely.** Excel's Undo history is shared by every open workbook, and
+   a macro could clear it.
+2. When asked, **confirm clipboard consent**: the clipboard will be overwritten and you will not copy
+   anything outside this checklist.
+3. Open `m3d_manual.xlsx` (path given at approval) in Excel as normal.
+   - If a yellow or red security bar appears, **stop and report it**. Do not click Enable Content or
+     change any setting.
+4. Press **Alt+F11** to open the VBA editor. In the Project pane on the left, click
+   **VBAProject (m3d_manual.xlsx)**.
+5. Choose **File > Import File...** and pick
+   `C:\Users\GerryPidgeon\MasterCodingFolder\Python\Personal\ExcelAddIn\addin\live\m3d_paste_probe.bas`.
+6. A module **M3dPasteProbe** appears under Modules. Press **Alt+Q** to return to Excel.
+7. **Throughout:** do **not** press **Ctrl+Shift+V**. It runs the legacy PERSONAL.XLSB macro, which empties
+   the clipboard and may clear Undo. To see the Undo list, click the small **arrow next to the Undo
+   button** (Home tab, far left, or the Quick Access Toolbar).
+
+**Part 1: Baseline, everything by hand (sheet "1 Baseline")**
+1. Click **J1** and press **Ctrl+B**. J1 turns bold.
+2. Select **A1:B3** and press **Ctrl+C**.
+3. Click **D1**. On **Home**, click the **arrow under Paste** and choose **Paste Values** (the clipboard with
+   "123").
+   - **1a**: Does D1:E3 show 1,234.50 / 45000 / 2469 / 0.25 / text / TRUE, unformatted? (yes/no)
+   - **1b**: Is the dashed copy border still around A1:B3? (yes/no)
+   - **1c**: What does the Undo list show? (for example "Paste Special, Bold")
+4. Press **Ctrl+Z** once.
+   - **1d**: Is D1:E3 back to "old", with J1 still bold? (yes/no)
+5. Press **Ctrl+Z** again.
+   - **1e**: Is J1 no longer bold? (yes/no)
+
+**Part 2: Does running a macro clear earlier Undo? (sheet "3 Do nothing")**
+1. Click **J1** and press **Ctrl+B**.
+   - **2a**: Does the Undo list show Bold? (yes/no)
+2. Press **Alt+F8**, choose **Manual_DoNothing** and click **Run**. Nothing visible should happen.
+   - **2b**: Is the Undo button still available, and what does the list show?
+3. Press **Ctrl+Z**.
+   - **2c**: Is J1 no longer bold? (yes/no)
+4. Click **J2**, press **Alt+F8**, choose **Manual_NativeBold** and click **Run**. This is the failed
+   automated control, done by hand.
+   - **2d**: Is J2 bold? (yes/no)
+   - **2e**: Is Undo available, and what does the list show?
+5. Press **Ctrl+Z**.
+   - **2f**: Is J2 no longer bold? (yes/no)
+
+**Part 3: Excel's Paste Values through the probe (sheet "2 Probe paste")**
+1. Click **J1** and press **Ctrl+B**.
+2. Select **A1:B3** and press **Ctrl+C**.
+3. Click **D1**. Press **Alt+F8**, choose **Manual_NativePasteValues** and click **Run**. If a message box
+   appears, write down its text.
+   - **3a**: Does D1:E3 show the values, unformatted? (yes/no)
+   - **3b**: Is the copy border still around A1:B3? (yes/no)
+   - **3c**: What does the Undo list show?
+4. Click **G1** and press **Ctrl+V** (an ordinary paste).
+   - **3d**: Did G1:H3 receive the copy, so the clipboard was kept? (yes/no) Then press **Ctrl+Z** once to
+     remove it.
+5. Press **Ctrl+Z**.
+   - **3e**: Is D1:E3 back to "old", with J1 still bold? (yes/no)
+6. Press **Ctrl+Z** again.
+   - **3f**: Is J1 no longer bold? (yes/no)
+
+**Part 4: Filtered rows (sheets "4a", "4b", "4c")**
+
+On each sheet, rows 3 and 5 are hidden by a filter on column D. Row 8 shows E1 to E6, including hidden
+cells. Row 11 shows the source cells.
+
+First, on each 4 sheet, press **Ctrl+Alt+L** (Data > Reapply) so Excel applies the filter itself.
+
+- **4a, "4a Filter macro"**: source on the same sheet, pasted with the probe.
+  1. **4a-before**: write down rows 8 and 11.
+  2. Click the **Name Box** (left of the formula bar), type **A1:A3**, press **Enter**, then **Ctrl+C**.
+  3. In the Name Box, type **E2**, press **Enter**, then run **Manual_NativePasteValues** with Alt+F8.
+  4. **4a-after**: write down row 8.
+  5. **4a-copy**: did the copy border cover only A1:A2, or did it reach row 4?
+- **4b, "4b Filter Excel"**: the same steps, but in step 3 use **Home > Paste arrow > Paste Values**
+  instead of the macro. Record **4b-before**, **4b-after** and **4b-copy**. This shows whether Excel itself
+  behaves the same as the probe.
+- **4c, "4c Filter other source"**: the source is on sheet **"4c Source"**, which is not filtered.
+  1. **4c-before**: write down row 8.
+  2. Go to **"4c Source"**, select **A1:A3** and press **Ctrl+C**.
+  3. Go back to **"4c Filter other source"**, type **E2** in the Name Box, press **Enter**, and run
+     **Manual_NativePasteValues**.
+  4. **4c-after**: write down rows 8 and 11.
+
+**Part 5: Finish**
+1. Close the workbook and choose **Don't Save**.
+2. Close Excel. If Excel asks to save **PERSONAL.XLSB**, choose **Don't Save** and tell me.
+3. Tell me you have finished. I then check:
+   - Defender detections;
+   - SentinelOne Operational and Firewall;
+   - no Excel running;
+   - the PERSONAL.XLSB hash and last-written date.
+
+**How the results will be read:**
+- **Part 1** sets what "Undo works" looks like here.
+- **Part 2** shows whether running any macro clears earlier history (2c) and whether a macro's
+  `ExecuteMso` creates an Undo entry (2e, 2f).
+- **Part 3** is meaningful only alongside Part 2:
+  - **3e/3f yes**: native Paste Values keeps Undo when the macro is run by the user;
+  - **3e/3f no, and 2c no**: the loss is caused by running a macro at all, not by Paste Values;
+  - **3e/3f no, and 2c yes**: the loss comes from Paste Values itself.
+
+  Any of these leads to an implementation decision, not a fallback, until reviewed.
+- **Part 4** confirms or rejects the hypothesis above.

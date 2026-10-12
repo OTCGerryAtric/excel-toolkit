@@ -88,3 +88,27 @@ Public Function Probe_ControlPasteSpecial() As String
 Failed:
     Probe_ControlPasteSpecial = "error|" & Err.Number & "|" & Err.Description
 End Function
+
+' ----- Manual investigation (run by the owner with Alt+F8; Alt+F8 lists only Subs) -----
+
+' Excel's own Paste Values through the probe, on the current selection. Silent when it runs, so that
+' nothing else happens between the paste and the owner's Ctrl+Z.
+Public Sub Manual_NativePasteValues()
+    Dim result As String
+    result = Probe_NativePasteValues()
+    If Left$(result, 3) <> "ok|" Then MsgBox "Paste Values did not run: " & result, vbExclamation, "M3d probe"
+End Sub
+
+' Excel's own Bold through the probe (the manual version of the failed mechanism control).
+Public Sub Manual_NativeBold()
+    Dim result As String
+    result = Probe_NativeBold()
+    If Left$(result, 3) <> "ok|" Then MsgBox "Bold did not run: " & result, vbExclamation, "M3d probe"
+End Sub
+
+' Changes nothing at all: no cells, selection, formats or settings. Shows whether merely running a macro
+' clears an Undo entry the owner made by hand.
+Public Sub Manual_DoNothing()
+    Dim unused As Long
+    unused = 1
+End Sub
