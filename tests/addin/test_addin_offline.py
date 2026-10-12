@@ -165,7 +165,7 @@ def test_format_cycles_reproduce_the_legacy_macros(macro, cycle):
 UNDO_RECORD_INTERFACE = {"Description": 0, "CheckIdentity": 0, "FindConflict": 0, "Restore": 1}
 
 
-@pytest.mark.parametrize("name", ["TkCellSnapshot", "TkFormatSnapshot"])
+@pytest.mark.parametrize("name", ["TkCellSnapshot", "TkFormatSnapshot", "TkStyleSnapshot"])
 def test_snapshot_classes_provide_the_undo_record_interface(name):
     """TkUndo holds records late-bound (As Object), so the compiler cannot check this - the test does."""
     code = _code(ROOT / "addin" / "vba" / f"{name}.cls")
@@ -173,6 +173,133 @@ def test_snapshot_classes_provide_the_undo_record_interface(name):
         m = re.search(rf"^Public Function {method}\(([^)]*)\) As String", code, re.M)
         assert m, f"{name} lacks Public Function {method}(...) As String"
         assert (0 if not m.group(1).strip() else m.group(1).count(",") + 1) == arity, method
+
+
+# ---------- Legacy equivalence (M3b) ----------
+
+def _legacy_body(macro: str) -> str:
+    return LEGACY.read_text(encoding="utf-8").split(f"Sub {macro}()", 1)[1].split("End Sub", 1)[0]
+
+
+def _style_code() -> str:
+    return _code(ROOT / "addin" / "vba" / "TkStyle.bas")
+
+
+def _vba_function(code: str, name: str) -> str:
+    return code.split(f"Public Function {name}(", 1)[1].split("End Function", 1)[0]
+
+
+FILLS = {"Yellow_Cell_Toggle": "yellow", "Green_Cell_Toggle": "green", "Light_Blue_Cell_Toggle": "lightblue",
+         "Grey_Cell_Toggle": "grey"}
+
+
+@pytest.mark.parametrize("macro,name", FILLS.items())
+def test_fill_toggles_use_the_legacy_colours_and_switch_off_to_no_fill(macro, name):
+    """Same colour and decision (Interior.Color equal to the colour -> off) as the legacy macro; the one
+    documented fix is that "off" is No Fill rather than white."""
+    body = _legacy_body(macro)
+    checked = re.findall(r"If Selection\.Interior\.Color = RGB\((\d+), (\d+), (\d+)\) Then", body)
+    assigned = re.findall(r"Selection\.Interior\.Color = RGB\((\d+), (\d+), (\d+)\)\s*\n", body)
+    assert len(checked) == 1 and assigned == [("255", "255", "255"), checked[0]]  # off = white, on = colour
+    toolkit = re.search(rf'Case "{name}": Tk_FillColour = RGB\((\d+), (\d+), (\d+)\)', _style_code())
+    assert toolkit and toolkit.groups() == checked[0]
+    decide = _style_code().split("Private Function Decide(", 1)[1]
+    assert "If current = colour Then" in decide and "newValue = NO_FILL" in decide
+    assert "area.Interior.Pattern = xlNone" in _style_code()
+
+
+def test_toolkit_never_fills_white():
+    for path in ADDIN_VBA:
+        assert "RGB(255, 255, 255)" not in _code(path), path.name
+
+
+def test_outline_reproduces_the_legacy_borders():
+    body = _legacy_body("Grey_Ouline")
+    legacy_on = re.findall(r"With Selection\.Borders\((\w+)\)\s*\n\s*\.LineStyle = (\w+)\s*\n\s*\.ThemeColor = (\d+)"
+                           r"\s*\n\s*\.TintAndShade = (-?[\d.]+)\s*\n\s*\.Weight = (\w+)", body)
+    legacy_off = re.findall(r"Selection\.Borders\((\w+)\)\.LineStyle = xlNone", body.split("Else", 1)[1])
+    edges = [e for e, *_ in legacy_on]
+    assert edges == legacy_off == ["xlEdgeLeft", "xlEdgeTop", "xlEdgeBottom", "xlEdgeRight", "xlInsideVertical",
+                                   "xlInsideHorizontal"]
+    assert {tuple(rest) for _, *rest in legacy_on} == {("xlContinuous", "1", "-0.249946592608417", "xlThin")}
+    assert re.search(r"If Selection\.Borders\(xlEdgeTop\)\.LineStyle = xlNone Then", body)
+
+    code = _style_code()
+    apply = code.split("Private Sub ApplyChange(", 1)[1].split("End Sub", 1)[0]
+    assert re.search(r"For Each edge In Array\(" + r", ".join(edges) + r"\)", apply)
+    assert re.search(r"\.LineStyle = xlContinuous\s*\n\s*\.ThemeColor = OUTLINE_THEME\s*\n\s*"
+                     r"\.TintAndShade = OUTLINE_TINT\s*\n\s*\.Weight = xlThin", apply)  # legacy order
+    assert "Private Const OUTLINE_THEME As Long = 1" in code
+    assert "Private Const OUTLINE_TINT As Double = -0.249946592608417" in code
+    assert "current = target.Borders(xlEdgeTop).LineStyle" in code and "newValue = (current = xlNone)" in code
+
+
+def test_row_height_and_column_width_toggles_follow_the_legacy_rules_with_the_sheet_standard_size():
+    """Legacy: 15 <-> 4.5 and 2 -> 8.43 -> 12 -> 2, where 15 and 8.43 are Excel's usual standard row height
+    and column width. Documented change (owner, 2026-10-12): the sheet's own StandardHeight/StandardWidth
+    takes their place, matched within half a pixel; the other values are unchanged."""
+    row = _legacy_body("Row_Height_Toggle")
+    assert re.findall(r"Selection\.RowHeight = ([\d.]+)", row) == ["15", "4.5", "15"]
+    col = _legacy_body("Column_Width_Toggle")
+    assert re.findall(r"Selection\.ColumnWidth = ([\d.]+)", col) == ["2", "8.43", "8.43", "12", "2"]
+    code = _style_code()
+    rows = _vba_function(code, "Tk_NextRowHeight")
+    assert "If Abs(current - standardHeight) <= ROW_MATCH Then Tk_NextRowHeight = 4.5" in rows
+    assert re.search(r"Tk_NextRowHeight = standardHeight\s*$", rows)
+    cols = _vba_function(code, "Tk_NextColumnWidth")
+    assert re.findall(r"If Abs\(current - (\w+)\) <= COLUMN_MATCH Then Tk_NextColumnWidth = (\w+)", cols) == \
+        [("2", "standardWidth"), ("standardWidth", "12")]
+    assert re.search(r"Tk_NextColumnWidth = 2\s*$", cols)
+    assert "Tk_NextRowHeight(target.RowHeight, target.Worksheet.StandardHeight)" in code
+    assert "Tk_NextColumnWidth(target.ColumnWidth, target.Worksheet.StandardWidth)" in code
+
+
+def test_best_fit_uses_the_legacy_expression_and_integer_rounding():
+    body = _legacy_body("Best_Fit_Column_Width")
+    assert "Dim CColWidth As Integer" in body
+    assert "CColWidth = Round(ActiveCell.ColumnWidth + 5) / 5" in body
+    assert "Selection.ColumnWidth = CColWidth * 5" in body
+    fn = _vba_function(_style_code(), "Tk_BestFitWidth")
+    assert "Dim steps As Integer" in fn
+    assert "steps = Round(activeWidth + 5) / 5" in fn and "Tk_BestFitWidth = steps * 5" in fn
+    assert "Tk_BestFitRange(Selection, ActiveCell)" in _style_code()
+
+
+def test_size_undo_captures_whole_rows_and_columns_and_refuses_hidden_ones():
+    snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
+    assert "ws.Range(ws.Cells(area.Row, 1), ws.Cells(area.Row + area.Rows.Count - 1, 1))" in snap
+    assert "ws.Range(ws.Cells(1, area.Column), ws.Cells(1, area.Column + area.Columns.Count - 1))" in snap
+    assert re.search(r"If size = 0 Then", snap)  # hidden rows/columns read as 0 and are refused
+
+
+def test_border_undo_reads_every_cell_and_each_shared_edge_once():
+    """For several cells Excel reports the first cell's edge, never "mixed" (M3b live run), so borders are
+    read cell by cell: each cell's top and left, then the last row's bottoms and the last column's rights
+    (the facing edges of the cells around the selection)."""
+    snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
+    rows = snap.split("Private Function AddBorderBlocks(", 1)[1].split("End Function", 1)[0]
+    assert rows.index("Array(xlEdgeTop, xlEdgeLeft)") < rows.index("Array(xlEdgeBottom)") < rows.index("Array(xlEdgeRight)")
+    state = snap.split("Private Function BorderState(", 1)[1].split("End Function", 1)[0]
+    assert "For Each cell In rng.Cells" in state and "CellBorderState(cell, cellEdges)" in state
+    assert "CellBorderState(strip.Cells(i), cellEdges)" in snap
+    assert "MAX_BORDER_CELLS" in snap
+
+
+def test_style_snapshot_splits_ranges_by_corner_cells():
+    """Rows(n)/Columns(n) return a range that counts rows/columns, not cells (M3b live run: a mixed
+    selection with a merged cell was refused); Offset runs off the sheet on whole columns."""
+    snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
+    assert not any(token in snap for token in (".Offset(", ".Resize(", ".Rows(", ".Columns("))
+    assert "Set SubRange = ws.Range(rng.Cells(r1, c1), rng.Cells(r2, c2))" in snap
+    assert ".CountLarge = 1" not in snap.replace("rng.Cells.CountLarge = 1", "")
+
+
+def test_style_undo_refuses_gradients_and_never_compares_a_theme_marker_with_equals():
+    snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
+    assert "xlPatternLinearGradient" in snap and "xlPatternRectangularGradient" in snap
+    # theme is a number or the NO_THEME string: `theme = NO_THEME` would be a Type mismatch on numbers
+    assert not re.search(r"\b\w*[Tt]heme\w*\(?\w*\)?\s*=\s*NO_THEME\b(?!\s*$)", snap.replace("ThemeOf = NO_THEME", ""))
+    assert "IsRgb(theme)" in snap
 
 
 # ---------- VBA project ----------
