@@ -292,6 +292,36 @@ class Check(M3aCheck):
         self.record("sizes: every change undone exactly (whole affected rows and columns)", not undo_failures,
                     failures=undo_failures[:10])
 
+    def standard_sizes(self):
+        """Owner decision (2026-10-12): the size rules use the sheet's own standard height and width.
+        A separate disposable workbook with a 14 pt Normal font and a standard width of 10."""
+        wb = self.excel.Workbooks.Add()
+        try:
+            wb.Styles("Normal").Font.Size = 14
+            ws = wb.Worksheets(1)
+            ws.StandardWidth = 10
+            standard_h, standard_w = ws.StandardHeight, ws.StandardWidth
+            heights, widths, undo_ok = [], [], True
+            for _ in range(3):
+                before = (ws.Rows(3).RowHeight, ws.Columns("C").ColumnWidth)
+                self.run("Tk_RowHeightRange", ws.Range("C3"))
+                heights.append(ws.Rows(3).RowHeight)
+                self.run("Tk_ColumnWidthRange", ws.Range("C3"))
+                widths.append(ws.Columns("C").ColumnWidth)
+                undo_ok &= self.run("Tk_RestoreLast").startswith("ok:")         # the width change
+                undo_ok &= ws.Columns("C").ColumnWidth == before[1]
+                self.run("Tk_ColumnWidthRange", ws.Range("C3"))                 # re-apply to keep cycling
+            expected_h = [4.5, standard_h, 4.5]
+            expected_w = [12, 2, standard_w]
+            self.record(f"sheet with non-default sizes (standard height {standard_h}, width {standard_w}): row height "
+                        "toggles standard <-> 4.5, column width cycles standard -> 12 -> 2 -> standard (each width "
+                        "change undone exactly)",
+                        all(abs(h - e) < 0.3 for h, e in zip(heights, expected_h))
+                        and all(abs(w - e) < 0.06 for w, e in zip(widths, expected_w)) and undo_ok,
+                        heights=heights, widths=widths)
+        finally:
+            wb.Close(SaveChanges=False)
+
     # ----- refusals, conflicts, failures -----
 
     def refusals_and_conflicts(self):
@@ -494,6 +524,7 @@ def main() -> int:
         check.fills_equivalence()
         check.outline_equivalence()
         check.sizes_equivalence()
+        check.standard_sizes()
         check.refusals_and_conflicts()
         check.protection()
         check.failures()

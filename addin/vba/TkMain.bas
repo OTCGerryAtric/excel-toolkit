@@ -72,15 +72,16 @@ Private Function Registry(ByVal id As String) As Variant
             "macro. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
             "", True, "style")
     Case "tkRowHeight"
-        Registry = Array("Row height (15 / 4.5)", "Row height", _
-            "Sets the selected rows to 4.5 points if they are 15, otherwise to 15 - the same as the existing " & _
-            "macro. Hidden rows are not changed: unhide them or leave them out. Undo with Ctrl+Z straight " & _
-            "away, or with Undo Toolkit Action.", _
+        Registry = Array("Row height (standard / 4.5)", "Row height", _
+            "Sets the selected rows to 4.5 points if they are the sheet's standard height (usually 15), " & _
+            "otherwise to the standard height - like the existing macro. Hidden rows are not changed: unhide " & _
+            "them or leave them out. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
             "", True, "style")
     Case "tkColWidth"
-        Registry = Array("Column width (2 / 8.43 / 12)", "Column width", _
-            "Cycles the selected columns through widths 2, 8.43 and 12 - the same as the existing macro. " & _
-            "Hidden columns are not changed. Undo with Ctrl+Z straight away, or with Undo Toolkit Action.", _
+        Registry = Array("Column width (2 / standard / 12)", "Column width", _
+            "Cycles the selected columns through widths 2, the sheet's standard width (usually 8.43) and 12 " & _
+            "- like the existing macro. Hidden columns are not changed. Undo with Ctrl+Z straight away, or " & _
+            "with Undo Toolkit Action.", _
             "", True, "style")
     Case "tkBestFit"
         Registry = Array("Best fit (multiple of 5)", "Best fit width", _

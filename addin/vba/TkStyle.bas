@@ -2,8 +2,10 @@ Attribute VB_Name = "TkStyle"
 ' Excel Toolkit (M3b): fill, outline and size commands ported from PERSONAL.XLSB (legacy keys
 ' Ctrl+Shift+Q / E / W / Z fills, G outline, R row height, C column width, K best fit).
 '
-' Same colours, borders, sizes and decisions as the legacy macros, with one documented fix: a
-' fill toggled off becomes No Fill instead of white (white hid the gridlines). Unlike the legacy
+' Same colours, borders, sizes and decisions as the legacy macros, with two documented changes: a
+' fill toggled off becomes No Fill instead of white (white hid the gridlines), and the row height
+' and column width rules use the sheet's own standard height and width where the macros used
+' Excel's usual 15 and 8.43 (owner decision, 2026-10-12). Unlike the legacy
 ' macros every change can be undone (Ctrl+Z straight away, or Undo Toolkit Action); only the
 ' properties the command changes are captured (TkStyleSnapshot). No keyboard shortcuts yet: keys
 ' move one command at a time after the command passes its live test.
@@ -24,6 +26,10 @@ Private Const MAX_COLUMN_WIDTH As Double = 255
 ' Read-back tolerances: Excel rounds heights and widths to whole screen pixels.
 Private Const ROW_TOLERANCE As Double = 0.75
 Private Const COLUMN_TOLERANCE As Double = 0.25
+' A size "is" a rule's value when within half a pixel of it (at 96 dpi a pixel is 0.75 pt of
+' height and about 0.14 of a character of width).
+Private Const ROW_MATCH As Double = 0.3
+Private Const COLUMN_MATCH As Double = 0.06
 
 ' ---------- Legacy data and rules ----------
 
@@ -50,18 +56,19 @@ Public Function Tk_StyleLabel(ByVal command As String) As String
     End Select
 End Function
 
-' The legacy rules. `current` is the selection's property: Null when mixed, which never matches.
-Public Function Tk_NextRowHeight(ByVal current As Variant) As Double
+' The legacy rules, with the sheet's standard size where the macros had Excel's usual default
+' (15 high, 8.43 wide). `current` is the selection's property: Null when mixed, which never matches.
+Public Function Tk_NextRowHeight(ByVal current As Variant, ByVal standardHeight As Double) As Double
     If Not IsNull(current) Then
-        If current = 15 Then Tk_NextRowHeight = 4.5: Exit Function
+        If Abs(current - standardHeight) <= ROW_MATCH Then Tk_NextRowHeight = 4.5: Exit Function
     End If
-    Tk_NextRowHeight = 15
+    Tk_NextRowHeight = standardHeight
 End Function
 
-Public Function Tk_NextColumnWidth(ByVal current As Variant) As Double
+Public Function Tk_NextColumnWidth(ByVal current As Variant, ByVal standardWidth As Double) As Double
     If Not IsNull(current) Then
-        If current = 2 Then Tk_NextColumnWidth = 8.43: Exit Function
-        If current = 8.43 Then Tk_NextColumnWidth = 12: Exit Function
+        If Abs(current - 2) <= COLUMN_MATCH Then Tk_NextColumnWidth = standardWidth: Exit Function
+        If Abs(current - standardWidth) <= COLUMN_MATCH Then Tk_NextColumnWidth = 12: Exit Function
     End If
     Tk_NextColumnWidth = 2
 End Function
@@ -238,10 +245,10 @@ Private Function Decide(ByVal target As Range, ByVal command As String, ByVal re
         If Not IsNull(current) Then newValue = (current = xlNone)
         If newValue Then okText = "Grey outline added." Else okText = "Outline and inside borders removed."
     Case "rowheight"
-        newValue = Tk_NextRowHeight(target.RowHeight)
+        newValue = Tk_NextRowHeight(target.RowHeight, target.Worksheet.StandardHeight)
         okText = "Row height set to " & newValue & "."
     Case "colwidth"
-        newValue = Tk_NextColumnWidth(target.ColumnWidth)
+        newValue = Tk_NextColumnWidth(target.ColumnWidth, target.Worksheet.StandardWidth)
         okText = "Column width set to " & newValue & "."
     Case "bestfit"
         If reference Is Nothing Then Decide = "There is no active cell to take the column width from.": Exit Function

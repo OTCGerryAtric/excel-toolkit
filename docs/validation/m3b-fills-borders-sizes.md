@@ -23,8 +23,8 @@ passes live, so the toggle still binds only Ctrl+Shift+I/O/P/M and PERSONAL.XLSB
 |---|---|---|
 | Fills | If the selection's `Interior.Color` is the colour, turn it off; otherwise apply the colour (a mixed selection gets the colour). RGB(255,255,210) / (145,245,190) / (221,235,247) / (242,242,242). Only `Interior.Color` is set, so an existing pattern stays | **Off = No Fill**, not white (roadmap known weakness 4) |
 | Grey Outline | If the top edge has no line: left, top, bottom, right, inside vertical, inside horizontal set to continuous, theme colour 1, tint −0.249946592608417, thin (same order). Otherwise, including a mixed top edge, remove all six. Applied to the whole selection at once, as the macro does | — |
-| Row height | 15 → 4.5, anything else (including mixed) → 15 | — |
-| Column width | 2 → 8.43 → 12 → 2; anything else → 2 | — |
+| Row height | 15 → 4.5, anything else (including mixed) → 15 | **15 → the sheet's standard height**, matched within half a pixel (owner decision, below) |
+| Column width | 2 → 8.43 → 12 → 2; anything else → 2 | **8.43 → the sheet's standard width**, matched within half a pixel (owner decision, below) |
 | Best fit | `CColWidth As Integer = Round(ActiveCell.ColumnWidth + 5) / 5`; width = CColWidth × 5 for the selection (both roundings are banker's, as in the macro: 8.43 → 15, 7.5 → 10, 12.5 → 20) | Over 255 (an active column wider than 252.5) is refused instead of a run-time error |
 
 ## Undo design (as revised by the live runs)
@@ -197,13 +197,13 @@ After the checklist: PERSONAL.XLSB SHA-256 unchanged (`A4F5900D…BB81EB7D`, las
 detections; SentinelOne one routine burst of 14 anti-tamper entries (12:40), none naming Excel, Python or the
 add-in; no Excel left running.
 
-## Owner request: use the workbook's default sizes (proposed change, not implemented)
+## Owner decision: use the sheet's standard sizes (implemented 2026-10-12, option 1: before merge)
 
 The legacy macros use fixed numbers for Excel's usual defaults: row height **15** (row toggle 15 ↔ 4.5)
 and column width **8.43** (cycle 2 → 8.43 → 12). Some workbooks have different defaults (another font or
 size, or a changed standard width), and the owner would like these values to be **the workbook's own
-default** instead: the sheet's `StandardHeight` and `StandardWidth`. This changes legacy behaviour, so it
-is listed here for a decision, not made in M3b:
+default** instead: the sheet's `StandardHeight` and `StandardWidth`. The owner chose to make this change
+within M3b, before merge (it still needs the reviewer's acceptance):
 - **Row height:** standard height ↔ 4.5 (instead of 15 ↔ 4.5).
 - **Column width:** 2 → standard width → 12 → 2 (instead of 2 → 8.43 → 12).
 - **Best fit** is unchanged (it is based on the active cell's width).
@@ -213,3 +213,23 @@ is listed here for a decision, not made in M3b:
   width, allowing for pixel rounding, rather than with a fixed number.
 - On a workbook whose defaults are 15 and 8.43, nothing changes. The legacy-equivalence checks would then
   compare against the documented change on other workbooks.
+
+**Run 4: 40/40** (`addin/live/results/m3b_live_20261012_130348.json`), after the change. All earlier checks
+still pass; on the usual defaults (15 / 8.43) the size commands still match the legacy macros in all 50
+cases. A new check on a separate workbook with a 14 pt Normal font and a standard width of 10 (standard
+height 18.75): row height toggles 18.75 ↔ 4.5, column width cycles 10 → 12 → 2 → 10, and each width change
+is undone exactly. Compiles cleanly; PERSONAL.XLSB unchanged; 0 Defender detections; SentinelOne only its
+regular 20-minute bursts (13:00, 13:20), none naming Excel, Python or the add-in. Timings for fills
+matched run 3. Grey Outline and whole-column row height were 2–4 times slower than in run 3 (outline off
+on 10,000 cells 3.2 s; 40,000-cell outline 7.3 s apply, 13.7 s undo; whole-column row height 21 s
+apply), with the owner's own Excel open at the same time. This adds to the variance already recorded
+for those tracked optimisation items.
+
+Quick manual check of the change (owner): see the next section.
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| D1 | New blank workbook; select C3; Size ▸ Column width three times | 8.43 → 12 → 2 (back to the standard after a fourth press) | |
+| D2 | Home ▸ Format ▸ **Default Width** → 10; select E3; Size ▸ Column width twice, then Ctrl+Z | 10 → 12 → 2; Ctrl+Z gives 12 | |
+| D3 | Select row 5's cell; Size ▸ Row height twice | Standard (15) → 4.5 → standard | |
+| D4 | Close Excel, Don't Save | PERSONAL.XLSB unchanged | |

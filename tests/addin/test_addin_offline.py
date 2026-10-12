@@ -234,16 +234,24 @@ def test_outline_reproduces_the_legacy_borders():
     assert "current = target.Borders(xlEdgeTop).LineStyle" in code and "newValue = (current = xlNone)" in code
 
 
-def test_row_height_and_column_width_toggles_reproduce_the_legacy_values():
+def test_row_height_and_column_width_toggles_follow_the_legacy_rules_with_the_sheet_standard_size():
+    """Legacy: 15 <-> 4.5 and 2 -> 8.43 -> 12 -> 2, where 15 and 8.43 are Excel's usual standard row height
+    and column width. Documented change (owner, 2026-10-12): the sheet's own StandardHeight/StandardWidth
+    takes their place, matched within half a pixel; the other values are unchanged."""
     row = _legacy_body("Row_Height_Toggle")
     assert re.findall(r"Selection\.RowHeight = ([\d.]+)", row) == ["15", "4.5", "15"]
     col = _legacy_body("Column_Width_Toggle")
     assert re.findall(r"Selection\.ColumnWidth = ([\d.]+)", col) == ["2", "8.43", "8.43", "12", "2"]
     code = _style_code()
-    assert re.findall(r"If current = ([\d.]+) Then Tk_NextRowHeight = ([\d.]+)", code) == [("15", "4.5")]
-    assert re.search(r"Tk_NextRowHeight = 15\s*\nEnd Function", code)
-    assert re.findall(r"If current = ([\d.]+) Then Tk_NextColumnWidth = ([\d.]+)", code) == [("2", "8.43"), ("8.43", "12")]
-    assert re.search(r"Tk_NextColumnWidth = 2\s*\nEnd Function", code)
+    rows = _vba_function(code, "Tk_NextRowHeight")
+    assert "If Abs(current - standardHeight) <= ROW_MATCH Then Tk_NextRowHeight = 4.5" in rows
+    assert re.search(r"Tk_NextRowHeight = standardHeight\s*$", rows)
+    cols = _vba_function(code, "Tk_NextColumnWidth")
+    assert re.findall(r"If Abs\(current - (\w+)\) <= COLUMN_MATCH Then Tk_NextColumnWidth = (\w+)", cols) == \
+        [("2", "standardWidth"), ("standardWidth", "12")]
+    assert re.search(r"Tk_NextColumnWidth = 2\s*$", cols)
+    assert "Tk_NextRowHeight(target.RowHeight, target.Worksheet.StandardHeight)" in code
+    assert "Tk_NextColumnWidth(target.ColumnWidth, target.Worksheet.StandardWidth)" in code
 
 
 def test_best_fit_uses_the_legacy_expression_and_integer_rounding():
