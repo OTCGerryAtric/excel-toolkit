@@ -1,8 +1,8 @@
 # M3b validation — fills, Grey Outline, row height, column width, best fit
 
 Status: **build, VBA compilation and automated live checks passed: 39/39 on the third run (2026-10-12),
-after two add-in defects found by the first runs were fixed.** Manual checklist (ribbon, real Ctrl+Z) not
-yet run; it awaits review. Not approved for merge. M3c not started.
+after two add-in defects found by the first runs were fixed.** Automated results reviewed and accepted;
+manual checklist (ribbon, real Ctrl+Z) approved, not yet run. Not approved for merge. M3c not started.
 Plan: `docs/product-roadmap.md` (M3, Gate 2). Source: `addin/`.
 
 ## What M3b adds
@@ -163,8 +163,32 @@ correct, but slow for very large selections.
 
 Deliberately changing a legacy value in `TkStyle.bas` makes the tests fail.
 
-## Manual checklist (not yet run — awaits review)
+## Review of the automated results (2026-10-12, at `33aef76`)
 
-Owner's Excel, File → Open the development `.xlam`, new blank workbook. Ribbon, plus **real Ctrl+Z once
-per new undo kind**: fill, outline, row height, column width. PERSONAL.XLSB hash and security checks as
-before.
+39/39 accepted; the border, merged-selection and multi-area fixes are accepted. Uniform-fill speed is
+satisfactory. Grey Outline speed is acceptable for M3b, with large-selection optimisation tracked.
+Whole-column row height needs a future safeguard or optimisation. Numeric row-height restoration is
+accepted for M3b development, with automatic sizing explicitly **not** restored. The border-cell and
+block safeguards stay. No change to M3a, and no M3b shortcuts.
+
+## Manual checklist (approved 2026-10-12)
+
+Owner's normal Excel (PERSONAL.XLSB loads as usual). File → Open the development
+`addin/build/ExcelToolkit.xlam` (the build from run 3), new blank workbook. Nothing installed.
+PERSONAL.XLSB SHA-256 before: `A4F5900D…BB81EB7D`.
+
+| # | Step | Expected | Result |
+|---|---|---|---|
+| 1 | Excel Toolkit tab | Format group: Number formats, **Fill** menu (Yellow, Green, Light blue, Grey), **Grey Outline**, **Size** menu (Row height, Column width, Best fit), each with a tooltip; note any blank icon | |
+| 2 | Select B2:D6; Fill ▸ Yellow | Yellow; Undo Toolkit Action enabled | |
+| 3 | **Ctrl+Z** | No fill again (gridlines visible); button greyed | |
+| 4 | Fill ▸ Yellow twice on B2:D6, then **Ctrl+Z** | Second click gives **No Fill** (gridlines visible, not white); Ctrl+Z brings the yellow back | |
+| 5 | Select F4; Home ▸ Borders ▸ **Thick Box Border**. Select B2:E6; Grey Outline | Thin grey grid on B2:E6; F4's left side becomes thin grey | |
+| 6 | **Ctrl+Z** | Grid gone; **F4's thick box complete again**, left side included | |
+| 7 | Select B10; Size ▸ Row height; then **Ctrl+Z** | Row 10 changes (15 → 4.5, or → 15); Ctrl+Z restores it | |
+| 8 | Select C1; Size ▸ Column width; then **Ctrl+Z** | Column C changes (8.43 → 12); Ctrl+Z restores it | |
+| 9 | Click B1; Size ▸ Best fit; then Undo Toolkit Action **button** | Column B widens to 15; the button restores it and greys out | |
+| 10 | Fill ▸ Green on B2:D6; change C3's fill by hand; Undo Toolkit Action | Refused with a message; C3 keeps its hand-set fill | |
+| 11 | Toolkit shortcuts **off**: on a spare cell, Ctrl+Shift+Q, G, R, K | PERSONAL.XLSB macros (Undo Toolkit Action does not light up) | |
+| 12 | Toolkit shortcuts **on**: the same keys; then Ctrl+Shift+I; then switch off | Q, G, R, K still PERSONAL.XLSB; I runs the toolkit Number format | |
+| 13 | Close Excel, **Don't Save** everywhere | PERSONAL.XLSB unchanged (hash); no security events | |
