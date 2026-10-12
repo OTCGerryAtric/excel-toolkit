@@ -114,6 +114,9 @@ Later: Deep Scan, Audit hardening (ADR requirements), detector extensions, G0 wi
 | Mixed-format number-format undo (one write per uniform block) | 10,000 alternating rows (10,000 blocks): 202 ms apply, 1,279 ms undo (2026-10-12). Uniform and mostly-uniform selections: under 25 ms apply, ~220 ms undo or less | Optimisation candidate; does not block M3a | Must keep exact per-cell format restore |
 | Multi-level toolkit Undo (one-level is the approved requirement and passed in M3a) | Owner noticed during M3a manual testing (2026-10-12): after three changes only the latest can be undone | Possible future feature; not part of M3 | Each level keeps the identity, conflict and verified-restore checks |
 | Shortcut release on add-in close: whether `Auto_Close` or Excel itself drops the `OnKey` bindings when the add-in is closed by code (both gave the correct result in M3a) | Not distinguished | Investigate for reliability across Excel installations before wider shortcut migration | Never edit PERSONAL.XLSB |
+| Grey Outline speed (every cell's borders read, because Excel reports a multi-cell edge from its first cell) | 10,000 cells: ~0.8-0.9 s apply and undo; 40,000: 3.4 s / 3.6 s; over 50,000 cells refused (2026-10-12) | Optimisation candidate (M3b) | Must keep exact per-edge restore |
+| Row height on a whole column (every row read and set) | 7.1 s apply, 14.7 s undo, with large run-to-run variance (2026-10-12) | Optimisation candidate | Whole affected rows must still be restored |
+| Auto-fit row heights: undo restores the height but not automatic sizing | Not detectable through Excel's object model (2026-10-12) | **Product decision needed before release**: accept and document, or investigate detection | Never described as exact |
 | Provisional 100,000-cell safeguard | Retained | Revisit after the optimisation pass | Never truncate a selection |
 
 ## D. M2 — complete (accepted 2026-10-11; specification kept for reference)

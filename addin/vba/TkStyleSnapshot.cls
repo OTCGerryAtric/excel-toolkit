@@ -13,23 +13,29 @@ Attribute VB_Exposed = False
 ' Captures only the properties the command changes, exactly (M3 plan, "Undo for formatting"):
 '   fill      - pattern, colour (RGB, or theme colour + tint) and, for patterned fills, the
 '               pattern colour. Gradient fills are refused.
-'   borders   - each edge's line style, weight and colour (automatic, RGB, or theme colour +
-'               tint) for every cell of the selection, and the facing edge of the cells around
-'               it, which share the selection's outside edges. Those are restored last.
+'   borders   - every edge of every selected cell: line style, weight and colour (automatic, RGB,
+'               or theme colour + tint). Adjacent cells share an edge (writing one side writes
+'               the other), so each edge is held once: each cell's top and left edge, then the
+'               bottom edge of the last row and the right edge of the last column - which are
+'               also the facing edges of the cells around the selection.
 '   rowheight - the height of every affected ROW (whole rows, not just the selected cells).
 '               Hidden rows are refused: their height before hiding cannot be read.
 '   colwidth  - the width of every affected COLUMN; hidden columns are refused likewise.
-' A uniform range is one read; a mixed one is split recursively (columns first, then rows) into
-' uniform blocks, as in TkFormatSnapshot; more than MAX_BLOCKS blocks is refused. Undo-record
+' Fills and sizes: a uniform range is one read; a mixed one is split recursively (columns first,
+' then rows) into uniform blocks, as in TkFormatSnapshot. Borders cannot be read that way - for
+' several cells Excel reports the FIRST cell's edge, never "mixed" (live run, 2026-10-12) - so
+' every cell is read and equal neighbours are joined into runs and rectangles. More than
+' MAX_BLOCKS blocks, or more than MAX_BORDER_CELLS cells for borders, is refused. Undo-record
 ' interface: Description, CheckIdentity, FindConflict, Restore (see TkUndo).
 '
-' Theme colours: Excel's ThemeColor raises an error for a colour that is not a theme colour. For
-' one cell that means "RGB"; for several cells it could also hide a mixture of RGB and theme
-' colours of the same shade, so such a range is split until each block is one cell (exact, but
-' slower for large RGB-coloured areas - measured in the live run).
+' Theme colours: ThemeColor reads 0 for an RGB colour and Null for a mix of theme and RGB
+' colours (live run, 2026-10-12), so a uniform RGB area is one block. An error (seen only on
+' automatic border colours, which are recognised first) is taken as RGB for one cell and
+' splits a larger range.
 Option Explicit
 
 Private Const MAX_BLOCKS As Long = 50000
+Private Const MAX_BORDER_CELLS As Long = 50000
 Private Const NO_THEME As String = "rgb"
 
 Private wb As Workbook
@@ -40,8 +46,8 @@ Private targetAddress As String
 Private commandLabel As String
 Private capturedAt As Date
 Private kind As String                ' "fill", "borders", "rowheight" or "colwidth"
-Private blocks As Collection          ' Range per uniform block: the selection first, then the cells around it
-Private blockEdges As Collection      ' borders: the edge indexes each block's state covers (else Empty)
+Private blocks As Collection          ' Range per uniform block, in restore order
+Private blockEdges As Collection      ' borders: the cell edges each block's state covers (else Empty)
 Private before As Collection          ' each block's state before the command
 Private after As Collection           ' and after it; the conflict check compares against this
 Private refusal As String
@@ -50,7 +56,7 @@ Private refusal As String
 
 ' Returns "" or the reason the command is refused.
 Public Function Capture(ByVal rng As Range, ByVal kindName As String, ByVal label As String) As String
-    Dim area As Range, parts As Collection, part As Variant
+    Dim area As Range, part As Range, ok As Boolean, cellCount As Double
     Set ws = rng.Worksheet
     Set wb = ws.Parent
     wbFullName = wb.FullName
@@ -65,29 +71,32 @@ Public Function Capture(ByVal rng As Range, ByVal kindName As String, ByVal labe
     Set before = New Collection
     Set after = New Collection
 
-    ' Array(range, edges): edges is "all" (every edge of every cell), an Array of edge indexes,
-    ' or Empty for kinds that are not borders.
-    Set parts = New Collection
+    If kind = "borders" Then
+        For Each area In rng.Areas
+            cellCount = cellCount + area.Cells.CountLarge
+        Next area
+        If cellCount > MAX_BORDER_CELLS Then
+            Capture = "Grey Outline can be undone for up to " & Format(MAX_BORDER_CELLS, "#,##0") & " cells at a time " & _
+                "(every cell's borders are recorded); the selection has " & Format(cellCount, "#,##0") & _
+                ". Select fewer cells; nothing was changed."
+            Exit Function
+        End If
+    End If
+
     For Each area In rng.Areas
         Select Case kind
         Case "rowheight"            ' column A of the affected rows: its RowHeight is the rows' height
-            parts.Add Array(ws.Range(ws.Cells(area.Row, 1), ws.Cells(area.Row + area.Rows.Count - 1, 1)), Empty)
+            Set part = ws.Range(ws.Cells(area.Row, 1), ws.Cells(area.Row + area.Rows.Count - 1, 1))
+            ok = AddBlocks(part)
         Case "colwidth"             ' row 1 of the affected columns
-            parts.Add Array(ws.Range(ws.Cells(1, area.Column), ws.Cells(1, area.Column + area.Columns.Count - 1)), Empty)
+            Set part = ws.Range(ws.Cells(1, area.Column), ws.Cells(1, area.Column + area.Columns.Count - 1))
+            ok = AddBlocks(part)
         Case "borders"
-            parts.Add Array(area, "all")
+            ok = AddBorderBlocks(area)
         Case Else
-            parts.Add Array(area, Empty)
+            ok = AddBlocks(area)
         End Select
-    Next area
-    If kind = "borders" Then
-        For Each area In rng.Areas
-            AddSurroundingEdges parts, area
-        Next area
-    End If
-
-    For Each part In parts
-        If Not AddBlocks(part(0), part(1)) Then
+        If Not ok Then
             If Len(refusal) = 0 Then
                 refusal = "The selection has too many differently formatted blocks (more than " & _
                     Format(MAX_BLOCKS, "#,##0") & ") to undo safely. Select a smaller range; nothing was changed."
@@ -95,62 +104,102 @@ Public Function Capture(ByVal rng As Range, ByVal kindName As String, ByVal labe
             Capture = refusal
             Exit Function
         End If
-    Next part
+    Next area
 End Function
 
-' The cells around an area share its outside edges (the cell above shows the area's top edge as
-' its bottom edge), so their facing edge is captured too.
-Private Sub AddSurroundingEdges(ByVal parts As Collection, ByVal area As Range)
-    Dim r1 As Long, r2 As Long, c1 As Long, c2 As Long
-    r1 = area.Row: r2 = r1 + area.Rows.Count - 1
-    c1 = area.Column: c2 = c1 + area.Columns.Count - 1
-    If r1 > 1 Then parts.Add Array(ws.Range(ws.Cells(r1 - 1, c1), ws.Cells(r1 - 1, c2)), Array(xlEdgeBottom))
-    If r2 < ws.Rows.Count Then parts.Add Array(ws.Range(ws.Cells(r2 + 1, c1), ws.Cells(r2 + 1, c2)), Array(xlEdgeTop))
-    If c1 > 1 Then parts.Add Array(ws.Range(ws.Cells(r1, c1 - 1), ws.Cells(r2, c1 - 1)), Array(xlEdgeRight))
-    If c2 < ws.Columns.Count Then parts.Add Array(ws.Range(ws.Cells(r1, c2 + 1), ws.Cells(r2, c2 + 1)), Array(xlEdgeLeft))
-End Sub
+' Part of a range by corner cells. Never Offset (a whole column offset by half runs off the
+' sheet) and never Rows(n)/Columns(n), whose result counts rows/columns rather than cells.
+Private Function SubRange(ByVal rng As Range, ByVal r1 As Long, ByVal c1 As Long, ByVal r2 As Long, ByVal c2 As Long) As Range
+    Set SubRange = ws.Range(rng.Cells(r1, c1), rng.Cells(r2, c2))
+End Function
 
-Private Function AddBlocks(ByVal rng As Range, ByVal edgeSpec As Variant) As Boolean
-    Dim edges As Variant, state As Variant, rows As Long, cols As Long, half As Long, ok As Boolean
-    edges = EdgesFor(rng, edgeSpec)
-    state = ReadState(rng, edges, False)
+' Fills and sizes.
+Private Function AddBlocks(ByVal rng As Range) As Boolean
+    Dim state As Variant, rows As Long, cols As Long, half As Long, ok As Boolean
+    state = ReadState(rng, Empty, False)
     If IsArray(state) Then
-        If blocks.Count >= MAX_BLOCKS Then Exit Function
-        blocks.Add rng
-        blockEdges.Add edges
-        before.Add state
-        AddBlocks = True
+        AddBlocks = AddBlock(rng, Empty, state, False)
         Exit Function
     End If
     If Not IsNull(state) Then refusal = CStr(state): Exit Function         ' unsupported: refused
-    If rng.CountLarge = 1 Then
+    If rng.Cells.CountLarge = 1 Then
         refusal = "The formatting of " & rng.Address(False, False) & " on '" & wsName & _
             "' could not be read exactly, so the change could not be undone; nothing was changed."
         Exit Function
     End If
-    ' The second half starts inside the range, never Offset (see TkFormatSnapshot).
     rows = rng.Rows.Count
     cols = rng.Columns.Count
     If cols > 1 Then
         half = cols \ 2
-        ok = AddBlocks(rng.Resize(, half), edgeSpec)
-        If ok Then ok = AddBlocks(rng.Columns(half + 1).Resize(, cols - half), edgeSpec)
+        ok = AddBlocks(SubRange(rng, 1, 1, rows, half))
+        If ok Then ok = AddBlocks(SubRange(rng, 1, half + 1, rows, cols))
     Else
         half = rows \ 2
-        ok = AddBlocks(rng.Resize(half), edgeSpec)
-        If ok Then ok = AddBlocks(rng.Rows(half + 1).Resize(rows - half), edgeSpec)
+        ok = AddBlocks(SubRange(rng, 1, 1, half, 1))
+        If ok Then ok = AddBlocks(SubRange(rng, half + 1, 1, rows, 1))
     End If
     AddBlocks = ok
 End Function
 
-Private Function EdgesFor(ByVal rng As Range, ByVal edgeSpec As Variant) As Variant
-    If IsArray(edgeSpec) Then
-        EdgesFor = edgeSpec
-    ElseIf IsEmpty(edgeSpec) Then
-        EdgesFor = Empty
-    Else
-        EdgesFor = Tk_CellEdges(rng)
+' Borders: each row's top and left edges, then the last row's bottom edges and the last
+' column's right edges, as runs of equal cells.
+Private Function AddBorderBlocks(ByVal area As Range) As Boolean
+    Dim r As Long, rows As Long, cols As Long
+    rows = area.Rows.Count
+    cols = area.Columns.Count
+    For r = 1 To rows
+        If Not AddRuns(SubRange(area, r, 1, r, cols), Array(xlEdgeTop, xlEdgeLeft)) Then Exit Function
+    Next r
+    If Not AddRuns(SubRange(area, rows, 1, rows, cols), Array(xlEdgeBottom)) Then Exit Function
+    AddBorderBlocks = AddRuns(SubRange(area, 1, cols, rows, cols), Array(xlEdgeRight))
+End Function
+
+' Splits a single row or column into runs of cells whose edges are equal.
+Private Function AddRuns(ByVal strip As Range, ByVal cellEdges As Variant) As Boolean
+    Dim i As Long, n As Long, first As Long, state As Variant, runState As Variant
+    n = strip.Cells.Count
+    For i = 1 To n
+        state = CellBorderState(strip.Cells(i), cellEdges)
+        If Not IsArray(state) Then
+            refusal = "The borders of " & strip.Cells(i).Address(False, False) & " on '" & wsName & _
+                "' could not be read exactly, so the change could not be undone; nothing was changed."
+            Exit Function
+        End If
+        If i = 1 Then
+            first = 1
+            runState = state
+        ElseIf Not SameState(state, runState) Then
+            If Not AddBlock(ws.Range(strip.Cells(first), strip.Cells(i - 1)), cellEdges, runState, True) Then Exit Function
+            first = i
+            runState = state
+        End If
+    Next i
+    AddRuns = AddBlock(ws.Range(strip.Cells(first), strip.Cells(n)), cellEdges, runState, True)
+End Function
+
+' Adds a block; with `canJoin`, a one-row run directly below an equal run of the same columns
+' extends it into a rectangle (so a uniformly bordered area restores in a few writes).
+Private Function AddBlock(ByVal rng As Range, ByVal edges As Variant, ByVal state As Variant, ByVal canJoin As Boolean) As Boolean
+    Dim last As Range, n As Long
+    n = blocks.Count
+    If canJoin And n > 0 Then
+        Set last = blocks(n)
+        If last.Column = rng.Column And last.Columns.Count = rng.Columns.Count And rng.Rows.Count = 1 Then
+            If last.Row + last.Rows.Count = rng.Row Then
+                If SameState(blockEdges(n), edges) And SameState(before(n), state) Then
+                    Set rng = ws.Range(last.Cells(1, 1), rng.Cells(1, rng.Columns.Count))
+                    blocks.Remove n
+                    blockEdges.Remove n
+                    before.Remove n
+                End If
+            End If
+        End If
     End If
+    If blocks.Count >= MAX_BLOCKS Then Exit Function
+    blocks.Add rng
+    blockEdges.Add edges
+    before.Add state
+    AddBlock = True
 End Function
 
 Public Property Get BlockCount() As Long
@@ -168,10 +217,10 @@ End Function
 ' unreadable theme colour as RGB instead of splitting.
 Private Function ReadState(ByVal rng As Range, ByVal edges As Variant, ByVal lenient As Boolean) As Variant
     Dim cellCount As Double
-    If lenient Then cellCount = 1 Else cellCount = rng.CountLarge
+    If lenient Then cellCount = 1 Else cellCount = rng.Cells.CountLarge
     Select Case kind
     Case "fill": ReadState = FillState(rng, cellCount)
-    Case "borders": ReadState = BorderState(rng, edges, cellCount)
+    Case "borders": ReadState = BorderState(rng, edges)
     Case "rowheight": ReadState = SizeState(rng, rng.RowHeight, "rows")
     Case "colwidth": ReadState = SizeState(rng, rng.ColumnWidth, "columns")
     Case Else: ReadState = "Unknown formatting kind '" & kind & "'; nothing was changed."
@@ -206,15 +255,32 @@ Private Function FillState(ByVal rng As Range, ByVal cellCount As Double) As Var
     FillState = Array(pattern, colour, theme, tint, False, patternColour, patternTheme, patternTint)
 End Function
 
-Private Function BorderState(ByVal rng As Range, ByVal edges As Variant, ByVal cellCount As Double) As Variant
+' The cell edges shared by every cell of the range, or Null. Read cell by cell: for several
+' cells Excel reports the first cell's edge, not "mixed".
+Private Function BorderState(ByVal rng As Range, ByVal cellEdges As Variant) As Variant
+    Dim cell As Range, first As Variant, one As Variant
+    For Each cell In rng.Cells
+        one = CellBorderState(cell, cellEdges)
+        If Not IsArray(one) Then BorderState = Null: Exit Function
+        If IsEmpty(first) Then
+            first = one
+        ElseIf Not SameState(first, one) Then
+            BorderState = Null
+            Exit Function
+        End If
+    Next cell
+    BorderState = first
+End Function
+
+Private Function CellBorderState(ByVal cell As Range, ByVal cellEdges As Variant) As Variant
     Dim states() As Variant, i As Long, one As Variant
-    ReDim states(LBound(edges) To UBound(edges))
-    For i = LBound(edges) To UBound(edges)
-        one = EdgeState(rng.Borders(edges(i)), cellCount)
-        If Not IsArray(one) Then BorderState = one: Exit Function
+    ReDim states(LBound(cellEdges) To UBound(cellEdges))
+    For i = LBound(cellEdges) To UBound(cellEdges)
+        one = EdgeState(cell.Borders(cellEdges(i)), 1)
+        If Not IsArray(one) Then CellBorderState = Null: Exit Function
         states(i) = one
     Next i
-    BorderState = states
+    CellBorderState = states
 End Function
 
 Private Function EdgeState(ByVal edge As Border, ByVal cellCount As Double) As Variant
@@ -272,8 +338,19 @@ Private Sub WriteState(ByVal rng As Range, ByVal edges As Variant, ByVal state A
     Select Case kind
     Case "fill": WriteFill rng.Interior, state
     Case "borders"
+        ' A cell edge written on a block: tops (and the rows inside), lefts (and the columns
+        ' inside), or the bottom/right edge of a one-row/one-column strip.
         For i = LBound(edges) To UBound(edges)
-            WriteEdge rng.Borders(edges(i)), state(i)
+            Select Case edges(i)
+            Case xlEdgeTop
+                WriteEdge rng.Borders(xlEdgeTop), state(i)
+                If rng.Rows.Count > 1 Then WriteEdge rng.Borders(xlInsideHorizontal), state(i)
+            Case xlEdgeLeft
+                WriteEdge rng.Borders(xlEdgeLeft), state(i)
+                If rng.Columns.Count > 1 Then WriteEdge rng.Borders(xlInsideVertical), state(i)
+            Case Else
+                WriteEdge rng.Borders(edges(i)), state(i)
+            End Select
         Next i
     Case "rowheight": rng.RowHeight = state(0)
     Case "colwidth": rng.ColumnWidth = state(0)
@@ -342,7 +419,7 @@ Public Function RecordApplied() As String
     Dim i As Long, state As Variant
     Set after = New Collection
     For i = 1 To blocks.Count
-        state = ReadState(blocks(i), blockEdges(i), True)
+        state = AfterState(i)
         If Not IsArray(state) Then
             RecordApplied = "The new formatting of " & blocks(i).Address(False, False) & " could not be read back to check it."
             Exit Function
@@ -359,16 +436,43 @@ End Function
 
 ' "" when every block still holds what the command left there, else what changed.
 Public Function FindConflict() As String
-    Dim i As Long
+    Dim saved As Variant
     FindConflict = Tk_StyleProtectionProblem(ws, kind)
     If Len(FindConflict) > 0 Then Exit Function
+    saved = Tk_QuietExcel()                   ' cell-by-cell border reads are several times faster
+    FindConflict = FirstConflict()
+    Tk_RestoreExcel saved
+End Function
+
+' Never raises.
+Private Function FirstConflict() As String
+    Dim i As Long
+    On Error GoTo Unreadable
     For i = 1 To blocks.Count
-        If Not SameState(ReadState(blocks(i), blockEdges(i), True), after(i)) Then
-            FindConflict = KindPhrase() & " in " & blocks(i).Address(False, False) & " on '" & wsName & _
+        If Not SameState(AfterState(i), after(i)) Then
+            FirstConflict = KindPhrase() & " in " & blocks(i).Address(False, False) & " on '" & wsName & _
                 "' changed since the command."
             Exit Function
         End If
     Next i
+    Exit Function
+Unreadable:
+    FirstConflict = "The changed cells could not be read to check them: " & Err.Description
+End Function
+
+' A block's state after the command, for the conflict check. Fills and sizes stay uniform within
+' each block; borders need not (on a multi-area selection the legacy outline is applied to the
+' whole selection at once), so they are recorded cell by cell.
+Private Function AfterState(ByVal i As Long) As Variant
+    Dim cell As Range, states() As Variant, n As Long
+    If kind <> "borders" Then AfterState = ReadState(blocks(i), blockEdges(i), True): Exit Function
+    ReDim states(1 To blocks(i).Cells.Count)
+    For Each cell In blocks(i).Cells
+        n = n + 1
+        states(n) = CellBorderState(cell, blockEdges(i))
+        If Not IsArray(states(n)) Then AfterState = Null: Exit Function
+    Next cell
+    AfterState = states
 End Function
 
 Private Function KindPhrase() As String
@@ -380,7 +484,7 @@ Private Function KindPhrase() As String
     End Select
 End Function
 
-' Puts every block's original state back, the selection first and the cells around it last.
+' Puts every block's original state back.
 ' Never raises; "" on verified success.
 Public Function Restore(ByVal useHook As Boolean) As String
     Dim i As Long, problems As String, limit As Long, done As Long

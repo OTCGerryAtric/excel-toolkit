@@ -264,12 +264,26 @@ def test_size_undo_captures_whole_rows_and_columns_and_refuses_hidden_ones():
     assert re.search(r"If size = 0 Then", snap)  # hidden rows/columns read as 0 and are refused
 
 
-def test_border_undo_also_captures_the_neighbouring_edges_after_the_selection():
+def test_border_undo_reads_every_cell_and_each_shared_edge_once():
+    """For several cells Excel reports the first cell's edge, never "mixed" (M3b live run), so borders are
+    read cell by cell: each cell's top and left, then the last row's bottoms and the last column's rights
+    (the facing edges of the cells around the selection)."""
     snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
-    capture = snap.split("Public Function Capture(", 1)[1].split("End Function", 1)[0]
-    assert capture.index('parts.Add Array(area, "all")') < capture.index("AddSurroundingEdges parts, area")
-    for facing in ("xlEdgeBottom", "xlEdgeTop", "xlEdgeRight", "xlEdgeLeft"):
-        assert f"Array({facing}))" in snap
+    rows = snap.split("Private Function AddBorderBlocks(", 1)[1].split("End Function", 1)[0]
+    assert rows.index("Array(xlEdgeTop, xlEdgeLeft)") < rows.index("Array(xlEdgeBottom)") < rows.index("Array(xlEdgeRight)")
+    state = snap.split("Private Function BorderState(", 1)[1].split("End Function", 1)[0]
+    assert "For Each cell In rng.Cells" in state and "CellBorderState(cell, cellEdges)" in state
+    assert "CellBorderState(strip.Cells(i), cellEdges)" in snap
+    assert "MAX_BORDER_CELLS" in snap
+
+
+def test_style_snapshot_splits_ranges_by_corner_cells():
+    """Rows(n)/Columns(n) return a range that counts rows/columns, not cells (M3b live run: a mixed
+    selection with a merged cell was refused); Offset runs off the sheet on whole columns."""
+    snap = _code(ROOT / "addin" / "vba" / "TkStyleSnapshot.cls")
+    assert not any(token in snap for token in (".Offset(", ".Resize(", ".Rows(", ".Columns("))
+    assert "Set SubRange = ws.Range(rng.Cells(r1, c1), rng.Cells(r2, c2))" in snap
+    assert ".CountLarge = 1" not in snap.replace("rng.Cells.CountLarge = 1", "")
 
 
 def test_style_undo_refuses_gradients_and_never_compares_a_theme_marker_with_equals():

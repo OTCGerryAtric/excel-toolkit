@@ -1,0 +1,323 @@
+{
+  "results": [
+    {
+      "check": "diagnostics",
+      "passed": true,
+      "fill ThemeColor, RGB single": "0",
+      "fill ThemeColor, RGB two cells": "0",
+      "fill ThemeColor, no fill": "-4142",
+      "fill ThemeColor, theme two cells": "5",
+      "fill ThemeColor, theme white + RGB white": "None",
+      "fill Color, theme white + RGB white": "0.0",
+      "border ThemeColor, automatic": "error",
+      "shared edge: E2 top after E1 bottom set": "1",
+      "row height after 4.5": "4.5",
+      "column width after 8.43": "8.43"
+    },
+    {
+      "check": "fills: toolkit matches the legacy macro property by property (72 cases; 12 switch-offs give No Fill instead of white)",
+      "passed": true,
+      "mismatches": []
+    },
+    {
+      "check": "fills: every change undone exactly (RGB, theme + tint, patterns, mixed)",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "check": "outline: toolkit matches the legacy macro edge by edge, incl. neighbouring cells (30 cases)",
+      "passed": true,
+      "mismatches": []
+    },
+    {
+      "check": "outline: every change undone exactly, incl. the neighbours' facing edges",
+      "passed": false,
+      "failures": [
+        [
+          "B2:D6",
+          "mixed",
+          1,
+          "incomplete: Formatting not restored exactly: B2:D6."
+        ],
+        [
+          "B2:B4,D6:E8",
+          "outlined",
+          1,
+          "incomplete: Formatting not restored exactly: D6:E8."
+        ],
+        [
+          "B2:B4,D6:E8",
+          "neighbours",
+          1,
+          "ok: Undid Grey Outline."
+        ]
+      ]
+    },
+    {
+      "check": "sizes: row height, column width and best fit match the legacy macros (50 cases, incl. whole rows/columns and multi-area)",
+      "passed": true,
+      "mismatches": []
+    },
+    {
+      "check": "sizes: every change undone exactly (whole affected rows and columns)",
+      "passed": true,
+      "failures": []
+    },
+    {
+      "check": "hidden row in the selection: refused, row stays hidden, heights unchanged",
+      "passed": true,
+      "outcome": "refused: The selection includes hidden rows (4:4). Changing their size would unhide them, and the size they had before they were hidden cannot be read, so it could not be undone. Unhide them or leave them out of the selection; nothing was changed."
+    },
+    {
+      "check": "visible rows around a hidden one: applied and undone",
+      "passed": true,
+      "outcome": "ok: Row height set to 4.5."
+    },
+    {
+      "check": "hidden column in the selection: refused, widths unchanged",
+      "passed": true,
+      "outcome": "refused: The selection includes hidden columns (C:C). Changing their size would unhide them, and the size they had before they were hidden cannot be read, so it could not be undone. Unhide them or leave them out of the selection; nothing was changed."
+    },
+    {
+      "check": "gradient fill in the selection: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The formatting of C2:C4 on 'Sheet1' could not be read exactly, so the change could not be undone; nothing was changed."
+    },
+    {
+      "check": "merged cells in a mixed selection: fill and outline applied and undone exactly",
+      "passed": false,
+      "outcomes": [
+        "refused: The formatting of B8:B10 on 'Sheet1' could not be read exactly, so the change could not be undone; nothing was changed.",
+        "nothing: There is no Excel Toolkit change to undo.",
+        "ok: Grey outline added.",
+        "ok: Undid Grey Outline."
+      ]
+    },
+    {
+      "check": "conflict (fill edited): undo refused, nothing restored",
+      "passed": true,
+      "outcome": "refused: The fill in B2:D4 on 'Sheet1' changed since the command. Nothing was changed."
+    },
+    {
+      "check": "conflict (neighbouring edge edited): undo refused, nothing restored",
+      "passed": false,
+      "outcome": "ok: Undid Grey Outline."
+    },
+    {
+      "check": "conflict (width edited): undo refused, width kept",
+      "passed": true,
+      "outcome": "refused: Column widths in H1 on 'Sheet1' changed since the command. Nothing was changed."
+    },
+    {
+      "check": "identity: undo refused after the sheet is renamed",
+      "passed": true,
+      "outcome": "refused: The sheet has been renamed since the change (it was 'Sheet1'). Nothing was changed."
+    },
+    {
+      "check": "protected sheet, fill not allowed: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The sheet is protected and does not allow formatting. Unprotect it first. Nothing was changed."
+    },
+    {
+      "check": "protected sheet, fill allowed: applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied."
+    },
+    {
+      "check": "protected sheet, row height not allowed: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The sheet is protected and does not allow changing row heights. Unprotect it first. Nothing was changed."
+    },
+    {
+      "check": "protected sheet, row height allowed: applied and undone",
+      "passed": true,
+      "outcome": "ok: Row height set to 4.5."
+    },
+    {
+      "check": "protected sheet, column width not allowed: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The sheet is protected and does not allow changing column widths. Unprotect it first. Nothing was changed."
+    },
+    {
+      "check": "protected sheet, column width allowed: applied and undone",
+      "passed": true,
+      "outcome": "ok: Column width set to 12."
+    },
+    {
+      "check": "forced failure after two outline edges: rolled back, every edge identical",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while formatting: Simulated failure (test hook)"
+    },
+    {
+      "check": "forced failure after the first area (row height): rolled back, heights identical",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while formatting: Simulated failure (test hook)"
+    },
+    {
+      "check": "forced restore failure: reported as incomplete, record unusable",
+      "passed": true,
+      "outcome": "incomplete: Formatting not restored: C1:C10 D1:D10 E1:E10 F1:F10."
+    },
+    {
+      "check": "too many distinct fill blocks: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The selection has too many differently formatted blocks (more than 50,000) to undo safely. Select a smaller range; nothing was changed."
+    },
+    {
+      "check": "performance case 'fill on, uniform 10,000 (no fill)': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied.",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'fill off, uniform 10,000 RGB yellow': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill removed (No Fill).",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'fill on, uniform 10,000 theme colour': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied.",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'fill on, 10,000 alternating rows': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied.",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'fill on, whole column uniform': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied.",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'fill on, whole column, 10 exceptions': applied and undone",
+      "passed": true,
+      "outcome": "ok: Yellow Fill applied.",
+      "undo": "ok: Undid Yellow Fill."
+    },
+    {
+      "check": "performance case 'outline on, 10,000 cells (100 x 100)': applied and undone",
+      "passed": true,
+      "outcome": "ok: Grey outline added.",
+      "undo": "ok: Undid Grey Outline."
+    },
+    {
+      "check": "performance case 'outline on, whole column': applied and undone",
+      "passed": true,
+      "outcome": "ok: Grey outline added.",
+      "undo": "ok: Undid Grey Outline."
+    },
+    {
+      "check": "performance case 'row height, whole column (every row)': applied and undone",
+      "passed": true,
+      "outcome": "ok: Row height set to 4.5.",
+      "undo": "ok: Undid Row Height."
+    },
+    {
+      "check": "performance case 'column width, whole row (every column)': applied and undone",
+      "passed": true,
+      "outcome": "ok: Column width set to 12.",
+      "undo": "ok: Undid Column Width."
+    },
+    {
+      "check": "PERSONAL.XLSB unchanged",
+      "passed": true
+    }
+  ],
+  "timings": [
+    {
+      "case": "fill on, uniform 10,000 (no fill)",
+      "outcome": "ok: Yellow Fill applied.",
+      "apply_wall_ms": 20.1,
+      "vba": "blocks=1;capture=0.2;apply+verify=12.4;register=0.1;total=12.8",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 14.5,
+      "undo_vba_ms": 13.2
+    },
+    {
+      "case": "fill off, uniform 10,000 RGB yellow",
+      "outcome": "ok: Yellow Fill removed (No Fill).",
+      "apply_wall_ms": 20.3,
+      "vba": "blocks=1;capture=0.9;apply+verify=10.9;register=0.1;total=12.0",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 15.1,
+      "undo_vba_ms": 14.2
+    },
+    {
+      "case": "fill on, uniform 10,000 theme colour",
+      "outcome": "ok: Yellow Fill applied.",
+      "apply_wall_ms": 18.5,
+      "vba": "blocks=1;capture=1.0;apply+verify=11.4;register=0.1;total=12.5",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 13.7,
+      "undo_vba_ms": 12.5
+    },
+    {
+      "case": "fill on, 10,000 alternating rows",
+      "outcome": "ok: Yellow Fill applied.",
+      "apply_wall_ms": 1253.3,
+      "vba": "blocks=10000;capture=406.5;apply+verify=824.4;register=0.1;total=1231.0",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 3767.2,
+      "undo_vba_ms": 2615.1
+    },
+    {
+      "case": "fill on, whole column uniform",
+      "outcome": "ok: Yellow Fill applied.",
+      "apply_wall_ms": 32.7,
+      "vba": "blocks=1;capture=0.7;apply+verify=15.3;register=0.2;total=16.2",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 17.3,
+      "undo_vba_ms": 15.2
+    },
+    {
+      "case": "fill on, whole column, 10 exceptions",
+      "outcome": "ok: Yellow Fill applied.",
+      "apply_wall_ms": 51.4,
+      "vba": "blocks=175;capture=9.3;apply+verify=25.7;register=0.2;total=35.2",
+      "undo": "ok: Undid Yellow Fill.",
+      "undo_wall_ms": 140.7,
+      "undo_vba_ms": 128.4
+    },
+    {
+      "case": "outline on, 10,000 cells (100 x 100)",
+      "outcome": "ok: Grey outline added.",
+      "apply_wall_ms": 78.7,
+      "vba": "blocks=4;capture=0.5;apply+verify=52.1;register=0.2;total=52.7",
+      "undo": "ok: Undid Grey Outline.",
+      "undo_wall_ms": 29.9,
+      "undo_vba_ms": 23.4
+    },
+    {
+      "case": "outline on, whole column",
+      "outcome": "ok: Grey outline added.",
+      "apply_wall_ms": 16450.2,
+      "vba": "blocks=3;capture=526.5;apply+verify=15904.9;register=0.1;total=16431.6",
+      "undo": "ok: Undid Grey Outline.",
+      "undo_wall_ms": 11443.9,
+      "undo_vba_ms": 4233.8
+    },
+    {
+      "case": "row height, whole column (every row)",
+      "outcome": "ok: Row height set to 4.5.",
+      "apply_wall_ms": 4693.9,
+      "vba": "blocks=1;capture=2968.7;apply+verify=1713.0;register=0.2;total=4681.8",
+      "undo": "ok: Undid Row Height.",
+      "undo_wall_ms": 2662.2,
+      "undo_vba_ms": 1659.5
+    },
+    {
+      "case": "column width, whole row (every column)",
+      "outcome": "ok: Column width set to 12.",
+      "apply_wall_ms": 344.6,
+      "vba": "blocks=1;capture=0.9;apply+verify=42.6;register=0.1;total=43.6",
+      "undo": "ok: Undid Column Width.",
+      "undo_wall_ms": 52.1,
+      "undo_vba_ms": 48.1
+    }
+  ]
+}

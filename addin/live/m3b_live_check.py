@@ -344,7 +344,7 @@ class Check(M3aCheck):
         self.record("conflict (fill edited): undo refused, nothing restored",
                     outcome.startswith("refused:") and self.fills(ws) == after_edit, outcome=outcome)
         self.run("Tk_OutlineRange", ws.Range("B2:D4"))
-        ws.Range("A1").Borders(9).LineStyle = X_DASH      # the edge above the selection, which undo would restore
+        ws.Range("C1").Borders(9).LineStyle = X_DASH      # shared with C2's top edge, which undo would restore
         after_edit = self.borders(ws)
         outcome = self.run("Tk_RestoreLast")
         self.record("conflict (neighbouring edge edited): undo refused, nothing restored",
@@ -451,10 +451,16 @@ class Check(M3aCheck):
             ("fill on, whole column uniform", "Tk_FillRange", ("I:I", "yellow"), lambda: None),
             ("fill on, whole column, 10 exceptions", "Tk_FillRange", ("K:K", "yellow"), column_exceptions),
             ("outline on, 10,000 cells (100 x 100)", "Tk_OutlineRange", ("M1:DH100",), lambda: None),
-            ("outline on, whole column", "Tk_OutlineRange", ("DK:DK",), lambda: None),
+            ("outline off, 10,000 outlined cells (100 x 100)", "Tk_OutlineRange", ("M1:DH100",),
+             lambda: self.run("Tk_OutlineRange", ws.Range("M1:DH100"))),
+            ("outline on, 40,000 cells (100 x 400)", "Tk_OutlineRange", ("M201:DH600",), lambda: None),
             ("row height, whole column (every row)", "Tk_RowHeightRange", ("DM:DM",), lambda: None),
             ("column width, whole row (every column)", "Tk_ColumnWidthRange", ("5:5",), lambda: None),
         ]
+        before = border_state(ws.Range("DK500"))
+        outcome = self.run("Tk_OutlineRange", ws.Range("DK:DK"))
+        self.record("outline on a whole column (over the 50,000-cell limit): refused, nothing changed",
+                    outcome.startswith("refused:") and border_state(ws.Range("DK500")) == before, outcome=outcome)
         for label, procedure, (address, *args), prepare in cases:
             prepare()
             started = time.perf_counter()
