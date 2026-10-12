@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Excel Toolkit ribbon (M3b). Labels, tooltips and enabled/pressed state come from the VBA command
+<!-- Excel Toolkit ribbon (M3c). Labels, tooltips and enabled/pressed state come from the VBA command
      registry (TkMain) through callbacks, so the ribbon cannot drift from it. Built-in icons only. -->
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Tk_RibbonLoaded">
   <ribbon>
@@ -56,6 +56,14 @@
                     getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
                     getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
           </menu>
+        </group>
+        <group id="tkFormulas" label="Formulas">
+          <button id="tkClearSheetRefs" size="large" imageMso="ReplaceDialog" keytip="C"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
+          <button id="tkFindConstants" size="large" imageMso="FindDialog" keytip="H"
+                  getLabel="Tk_GetLabel" getScreentip="Tk_GetScreentip" getSupertip="Tk_GetSupertip"
+                  getEnabled="Tk_GetEnabled" onAction="Tk_OnAction"/>
         </group>
         <group id="tkAuditGroup" label="Audit">
           <button id="tkAudit" size="large" imageMso="ErrorChecking" keytip="A"

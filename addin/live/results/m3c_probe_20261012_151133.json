@@ -1,0 +1,288 @@
+{
+  "names": {
+    "Sheet1": {
+      "stored": "=Sheet1!B2",
+      "value": 1011.0
+    },
+    "Sheet2": {
+      "stored": "=Sheet2!B2",
+      "value": 2011.0
+    },
+    "A": {
+      "stored": "=A!B2",
+      "value": 3011.0
+    },
+    "AB": {
+      "stored": "=AB!B2",
+      "value": 4011.0
+    },
+    "XFD": {
+      "stored": "=XFD!B2",
+      "value": 5011.0
+    },
+    "XFE": {
+      "stored": "=XFE!B2",
+      "value": 6011.0
+    },
+    "A1": {
+      "stored": "='A1'!B2",
+      "value": 7011.0
+    },
+    "XFD1": {
+      "stored": "='XFD1'!B2",
+      "value": 8011.0
+    },
+    "XFE1": {
+      "stored": "=XFE1!B2",
+      "value": 9011.0
+    },
+    "1": {
+      "stored": "='1'!B2",
+      "value": 10011.0
+    },
+    "R": {
+      "stored": "='R'!B2",
+      "value": 11011.0
+    },
+    "C": {
+      "stored": "='C'!B2",
+      "value": 12011.0
+    },
+    "RC": {
+      "stored": "='RC'!B2",
+      "value": 13011.0
+    },
+    "R1C1": {
+      "stored": "='R1C1'!B2",
+      "value": 14011.0
+    },
+    "Data": {
+      "stored": "=Data!B2",
+      "value": 15011.0
+    },
+    "Other": {
+      "stored": "=Other!B2",
+      "value": 16011.0
+    }
+  },
+  "probes": [
+    {
+      "entered": "=SUM(A:Sheet1!B2)",
+      "stored": "=SUM(Sheet1:A!B2)",
+      "value": 6033.0
+    },
+    {
+      "entered": "=SUM(AB:Sheet1!B2)",
+      "stored": "=SUM(Sheet1:AB!B2)",
+      "value": 10044.0
+    },
+    {
+      "entered": "=SUM(XFE:Sheet1!B2)",
+      "stored": "=SUM(Sheet1:XFE!B2)",
+      "value": 21066.0
+    },
+    {
+      "entered": "=SUM(A1:Sheet1!B2)",
+      "stored": "=SUM(A1:Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(XFE1:Sheet1!B2)",
+      "stored": "=SUM(Sheet1:XFE1!B2)",
+      "value": 45099.0
+    },
+    {
+      "entered": "=SUM(Data:Sheet1!B2)",
+      "stored": "=SUM(Sheet1:Data!B2)",
+      "value": 120165.0
+    },
+    {
+      "entered": "=SUM(Sheet1!A:Sheet1!C)",
+      "stored": "=SUM(Sheet1!A:Sheet1!G:G)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(Sheet1!1:Sheet1!3)",
+      "error": "(-2147352567, 'Exception occurred.', (0, None, None, None, 0, -2146827284), None)"
+    },
+    {
+      "entered": "=SUM(Sheet1!A1:Sheet1!B2)",
+      "stored": "=SUM(Sheet1!A1:Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(Sheet1!A1:B2)",
+      "stored": "=SUM(Sheet1!A1:B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(Sheet2!A1:Sheet1!B2)",
+      "stored": "=SUM(Sheet2!A1:Sheet1!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(Sheet2!A1:B2)",
+      "stored": "=SUM(Sheet2!A1:B2)",
+      "value": 8022.0
+    },
+    {
+      "entered": "=SUM(A:B2)",
+      "stored": "=SUM(A:B2)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(1:Sheet1!B2)",
+      "stored": "=SUM('Sheet1:1'!B2)",
+      "value": 55110.0
+    },
+    {
+      "entered": "=SUM(INDEX(Sheet2!A:A,1):Sheet1!B2)",
+      "stored": "=SUM(INDEX(Sheet2!A:A,1):Sheet1!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(INDEX(Sheet2!A:A,1):B2)",
+      "stored": "=SUM(INDEX(Sheet2!A:A,1):B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(INDEX(A:A,1):Sheet1!B2)",
+      "stored": "=SUM(INDEX(A:A,1):Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(INDEX(A:A,1):B2)",
+      "stored": "=SUM(INDEX(A:A,1):B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM($A:Sheet1!B2)",
+      "error": "(-2147352567, 'Exception occurred.', (0, None, None, None, 0, -2146827284), None)"
+    },
+    {
+      "entered": "=SUM($A$1:Sheet1!B2)",
+      "stored": "=SUM($A$1:Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(A$1:Sheet1!B2)",
+      "stored": "=SUM(A$1:Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM($1:Sheet1!B2)",
+      "error": "(-2147352567, 'Exception occurred.', (0, None, None, None, 0, -2146827284), None)"
+    },
+    {
+      "entered": "=SUM(XFD1048576:Sheet1!B2)",
+      "stored": "=SUM(XFD1048576:Sheet1!B2)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(XFD1048577:Sheet1!B2)",
+      "stored": "=SUM(XFD1048577:Sheet1!B2)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(A0:Sheet1!B2)",
+      "stored": "=SUM(A0:Sheet1!B2)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(Sheet2!A1:'Sheet1'!B2)",
+      "stored": "=SUM(Sheet2!A1:Sheet1!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(A1:'Sheet1'!B2)",
+      "stored": "=SUM(A1:Sheet1!B2)",
+      "value": 4022.0
+    },
+    {
+      "entered": "=SUM(AB:'Sheet1'!B2)",
+      "stored": "=SUM(AB:Sheet1!B2)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(Sheet1!A1:Sheet2!B2)",
+      "stored": "=SUM(Sheet1!A1:Sheet2!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(A1:Sheet2!B2)",
+      "stored": "=SUM(A1:Sheet2!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(Sheet1!A:A)",
+      "stored": "=SUM(Sheet1!A:A)",
+      "value": 3030.0
+    },
+    {
+      "entered": "=SUM(Sheet1!A:C)",
+      "stored": "=SUM(Sheet1!A:C)",
+      "value": 9099.0
+    },
+    {
+      "entered": "=SUM(Sheet1!1:3)",
+      "stored": "=SUM(Sheet1!1:3)",
+      "value": 9099.0
+    },
+    {
+      "entered": "=SUM(Sheet1!A1:A!B2)",
+      "stored": "=SUM(Sheet1!A1:A!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(A1:A!B2)",
+      "stored": "=SUM(A1:A!B2)",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(Sheet1!A1:INDEX(A:A,3))",
+      "stored": "=SUM(Sheet1!A1:INDEX(A:A,3))",
+      "value": 3030.0
+    },
+    {
+      "entered": "=SUM(Sheet2!A1:INDEX(A:A,3))",
+      "stored": "=SUM(Sheet2!A1:INDEX(A:A,3))",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(Sheet2!A1:INDEX(Sheet1!A:A,3))",
+      "stored": "=SUM(Sheet2!A1:INDEX(Sheet1!A:A,3))",
+      "value": -2146826273
+    },
+    {
+      "entered": "=SUM(XFD1:Sheet1!B2)",
+      "stored": "=SUM(XFD1:Sheet1!B2)",
+      "value": 4026.0
+    },
+    {
+      "entered": "=SUM(B1048576:Sheet1!B2)",
+      "stored": "=SUM(B1048576:Sheet1!B2)",
+      "value": 2032.0
+    },
+    {
+      "entered": "=SUM(XFD1048576:B2)",
+      "stored": "=SUM(B2:XFD1048576)",
+      "value": -2146826259
+    },
+    {
+      "entered": "=SUM(C5:Sheet1!B2)",
+      "stored": "=SUM(C5:Sheet1!B2)",
+      "value": 4066.0
+    },
+    {
+      "entered": "=SUM(C5:B2)",
+      "stored": "=SUM(B2:C5)",
+      "value": 4066.0
+    },
+    {
+      "entered": "=SUM(Sheet1!C5:Sheet1!B2)",
+      "stored": "=SUM(Sheet1!C5:Sheet1!B2)",
+      "value": 4066.0
+    }
+  ],
+  "personal_unchanged": true
+}
