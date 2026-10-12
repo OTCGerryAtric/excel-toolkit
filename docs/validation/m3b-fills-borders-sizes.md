@@ -2,7 +2,7 @@
 
 Status: **build, VBA compilation and automated live checks passed: 39/39 on the third run (2026-10-12),
 after two add-in defects found by the first runs were fixed.** Automated results reviewed and accepted;
-**manual checklist passed 13/13 (2026-10-12)**; PERSONAL.XLSB unchanged, no security events. Not approved for merge. M3c not started.
+**manual checklist passed 13/13, and the standard-size change D1–D4 (2026-10-12)**; PERSONAL.XLSB unchanged, no security events. Not approved for merge. M3c not started.
 Plan: `docs/product-roadmap.md` (M3, Gate 2). Source: `addin/`.
 
 ## What M3b adds
@@ -229,7 +229,11 @@ Quick manual check of the change (owner):
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| D1 | New blank workbook; select C3; Size ▸ Column width three times | 8.43 → 12 → 2 (back to the standard after a fourth press) | |
-| D2 | Home ▸ Format ▸ **Default Width** → 10; select E3; Size ▸ Column width twice, then Ctrl+Z | 10 → 12 → 2; Ctrl+Z gives 12 | |
-| D3 | Select row 5's cell; Size ▸ Row height twice | Standard (15) → 4.5 → standard | |
-| D4 | Close Excel, Don't Save | PERSONAL.XLSB unchanged | |
+| D1 | New blank workbook; select C3; Size ▸ Column width three times | 8.43 → 12 → 2 (back to the standard after a fourth press) | **Pass** (2026-10-12) |
+| D2 | Home ▸ Format ▸ **Default Width** → 10; select E3; Size ▸ Column width twice, then Ctrl+Z | 10 → 12 → 2; Ctrl+Z gives 12 | **Pass** (2026-10-12) |
+| D3 | Select row 5's cell; Size ▸ Row height twice | Standard (15) → 4.5 → standard | **Pass** (2026-10-12) |
+| D4 | Close Excel, Don't Save | PERSONAL.XLSB unchanged | **Pass** (2026-10-12) |
+
+After the check: PERSONAL.XLSB SHA-256 unchanged (read-only hash; the owner's own Excel was open again);
+0 Defender detections; SentinelOne only its regular bursts (13:20, 13:38-13:39), none naming Excel, Python or
+the add-in.
