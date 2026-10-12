@@ -1,8 +1,8 @@
 # M3a validation — number-format commands and shortcut precedence
 
 Status: **build, VBA compilation and automated live checks passed (19/19, 2026-10-11/12), reviewed and
-accepted at `eabaadf`. Manual checklist and shortcut-precedence test approved to run (2026-10-12); not
-yet run.** Not approved for merge.
+accepted at `eabaadf`. Manual checklist and shortcut-precedence test passed (2026-10-12): original
+PERSONAL.XLSB shortcuts returned after disabling, after closing the add-in and after restarting Excel.** Not approved for merge.
 Plan: `docs/product-roadmap.md` (M3, Gate 1). Source: `addin/`.
 
 ## What M3a adds
@@ -45,11 +45,12 @@ names, declarations, no clipboard or process launch). Not provable offline: comp
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| 1 | Ribbon, before any command | Format ▸ Number formats menu with four commands and tooltips; Settings ▸ Toolkit shortcuts not pressed; **Undo Toolkit Action greyed out** | |
-| 2 | Numbers in A1:A3 with **different** formats; select; Number formats ▸ Number | All become `#,##0` style; Undo Toolkit Action **enabled** | |
-| 3 | Press **Ctrl+Z** | Each cell gets back its **own** original format; Undo Toolkit Action **greyed out** again | |
-| 4 | Currency, Percentage and Date once each: undo the first two with Ctrl+Z, the third with the **Undo Toolkit Action** button | Each applies and undoes; the button greys out after each undo | |
-| 5 | Number on A1; change A1's format by hand (Ctrl+1); click Undo Toolkit Action | Refused with a message; A1 keeps the hand-set format | |
+| 1 | Ribbon, before any command | Format ▸ Number formats menu with four commands and tooltips; Settings ▸ Toolkit shortcuts not pressed; **Undo Toolkit Action greyed out** | **Pass** (2026-10-12) |
+| 2 | Numbers in A1:A3 with **different** formats; select; Number formats ▸ Number | All become `#,##0` style; Undo Toolkit Action **enabled** | **Pass** |
+| 3 | Press **Ctrl+Z** | Each cell gets back its **own** original format; Undo Toolkit Action **greyed out** again | **Pass** |
+| 4 | One at a time, each undone before the next: Currency then Ctrl+Z; Percentage then Ctrl+Z; Date then the **Undo Toolkit Action** button | Each applies and undoes; the button greys out after each undo | **Pass** (2026-10-12): greyed out after each undo |
+| 4b | Three commands in a row, then undo twice | Only the **most recent** is undone; the second undo has nothing to undo (one-level Undo by design) | **Pass** (2026-10-12: three changes in a row; the most recent was restored, the earlier two were not). Owner noticed this unprompted — multi-level toolkit Undo noted as a possible later feature for review |
+| 5 | Number on A1; change A1's format by hand (Ctrl+1); click Undo Toolkit Action | Refused with a message; A1 keeps the hand-set format | **Pass** (2026-10-12): button enabled after Number and still enabled after the hand change; message "number format in A1 on 'Sheet1' has changed since the command… Nothing was changed"; A1 kept the hand-set format. (An earlier grey button was the case with no record: Number had not been re-applied after the previous undo.) |
 
 **Shortcut-precedence test.** The toolkit is identifiable: it enables Undo Toolkit Action and Ctrl+Z
 reverses it; the PERSONAL.XLSB macro does neither. Each step uses all four keys (Ctrl+Shift+I, O, P, M)
@@ -57,19 +58,22 @@ on a cell holding a number.
 
 | # | Step | Expected | Result |
 |---|---|---|---|
-| S0 | **Before opening the add-in**: press each key | PERSONAL.XLSB macros (baseline) | |
-| S1 | Add-in open, toggle **off** (default): each key | PERSONAL.XLSB macros | |
-| S2 | Toggle **on**: each key | Toolkit commands | |
-| S3 | Toggle **off** again: each key | **PERSONAL.XLSB macros again** | |
-| S4 | Ctrl+Shift+V with the toggle on, then off | Always the PERSONAL.XLSB macro (the toolkit does not bind V in M3a) | |
-| S5 | Toggle **on**, then close **only the add-in**: Alt+F11, Ctrl+G, type `Workbooks("ExcelToolkit.xlam").Close False`, Enter, Alt+Q. The Excel Toolkit tab disappears. Press each key | PERSONAL.XLSB macros; **no "Cannot run the macro" message** | |
-| S6 | Close Excel (**Don't Save** everywhere); start Excel normally, without the add-in; press each key | PERSONAL.XLSB macros | |
-| S7 | Close Excel, Don't Save | PERSONAL.XLSB unchanged (hash); no security events | |
+| S0 | **Before opening the add-in**: press each key | PERSONAL.XLSB macros (baseline) | Not done as a separate step (the add-in was already open); S6 gives the same baseline |
+| S1 | Add-in open, toggle **off** (default): each key | PERSONAL.XLSB macros | **Pass** |
+| S2 | Toggle **on**: each key | Toolkit commands | **Pass** |
+| S3 | Toggle **off** again: each key | **PERSONAL.XLSB macros again** | **Pass** |
+| S4 | Ctrl+Shift+V with the toggle on, then off | Always the PERSONAL.XLSB macro (the toolkit does not bind V in M3a) | **Pass** |
+| S5 | Toggle **on**, then close **only the add-in**: Alt+F11, Ctrl+G, type `Workbooks("ExcelToolkit.xlam").Close False`, Enter, Alt+Q. The Excel Toolkit tab disappears. Press each key | PERSONAL.XLSB macros; **no "Cannot run the macro" message** | **Pass**: the Excel Toolkit tab disappeared and stayed gone; each key changed the format with no message and no toolkit undo, i.e. the PERSONAL.XLSB macro ran |
+| S6 | Close Excel (**Don't Save** everywhere); start Excel normally, without the add-in; press each key | PERSONAL.XLSB macros | **Pass** |
+| S7 | Close Excel, Don't Save | PERSONAL.XLSB unchanged (hash); no security events | **Pass**: SHA-256 unchanged (`A4F5900D…BB81EB7D`, last written 15/06/2026); 0 Defender detections; SentinelOne only its regular 20-minute bursts of 14 anti-tamper registry entries, none naming Excel, Python or the add-in; no Excel running |
 
 Known risk in S5: Excel documents that `Auto_Close` does **not** run when a workbook is closed by code, so
 the toggle's switch-off may not run and the keys may still point at the closed add-in. Closing by code is
 the only way to close a File → Open add-in without closing Excel, so the step is kept as written. Excel
 closing (S6) does run `Auto_Close`, and `OnKey` assignments never survive a restart.
+**Observed (2026-10-12): the risk did not materialise** - after closing by code the keys returned to
+PERSONAL.XLSB with no message and the add-in was not reopened. Whether `Auto_Close` ran or Excel dropped
+the orphaned `OnKey` assignments was not distinguished; either way the owner-visible behaviour is correct.
 
 **Stop rule.** If S3, S5 or S6 does not give the PERSONAL.XLSB macro back, record the exact behaviour
 (including any message text), stop the shortcut migration and report. Do not edit PERSONAL.XLSB, repair
