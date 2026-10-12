@@ -13,7 +13,8 @@ Attribute VB_Exposed = False
 ' are never read or written. For each formula whose rewrite differs, the cell, its formula before
 ' (Formula2, exactly as Excel reports it) and the rewritten formula are kept; after writing, the
 ' formula as Excel stored it is kept for the conflict check. Cells in a legacy array formula (CSE)
-' are refused rather than rewritten one by one. Undo-record interface: Description,
+' are refused rather than rewritten one by one. Formulas that hold a range Excel could read two ways
+' are left unchanged and counted (AmbiguousCount), so the command can say so. Undo-record interface: Description,
 ' CheckIdentity, FindConflict, Restore (see TkUndo).
 Option Explicit
 
@@ -31,12 +32,15 @@ Private changed As Collection         ' Range (one cell) per rewritten formula
 Private before As Collection          ' its formula before the command
 Private rewritten As Collection       ' the formula the command writes
 Private after As Collection           ' the formula as Excel stored it afterwards
+Private skippedCount As Long        ' formulas naming this sheet, left unchanged as ambiguous
+Private firstSkipped As String
 
 ' ---------- Capture (no writes) ----------
 
 ' Returns "" or the reason the command is refused. CellCount = 0 means nothing to do.
 Public Function Capture(ByVal scope As Range, ByVal ownSheet As String, ByVal label As String) As String
     Dim formulaCells As Range, area As Range, values As Variant, r As Long, c As Long, oldText As String, newText As String
+    Dim ambiguous As Boolean
     Set ws = scope.Worksheet
     Set wb = ws.Parent
     wbFullName = wb.FullName
@@ -50,6 +54,8 @@ Public Function Capture(ByVal scope As Range, ByVal ownSheet As String, ByVal la
     Set before = New Collection
     Set rewritten = New Collection
     Set after = New Collection
+    skippedCount = 0
+    firstSkipped = ""
 
     On Error Resume Next
     Set formulaCells = scope.SpecialCells(xlCellTypeFormulas)
@@ -63,8 +69,13 @@ Public Function Capture(ByVal scope As Range, ByVal ownSheet As String, ByVal la
             For c = 1 To UBound(values, 2)
                 oldText = CStr(values(r, c))
                 If InStr(1, oldText, "!") > 0 Then
-                    newText = Tk_RemoveSheetPrefix(oldText, sheetName)
-                    If newText <> oldText Then
+                    newText = Tk_RewriteSheetPrefix(oldText, sheetName, ambiguous)
+                    If ambiguous Then
+                        If area.Cells(r, c).HasFormula Then
+                            skippedCount = skippedCount + 1
+                            If skippedCount = 1 Then firstSkipped = area.Cells(r, c).Address(False, False)
+                        End If
+                    ElseIf newText <> oldText Then
                         If Not area.Cells(r, c).HasFormula Then GoTo NextCell      ' a spilled value, not a formula
                         If area.Cells(r, c).HasArray Then
                             Capture = "The cell " & area.Cells(r, c).Address(False, False) & " is part of an array formula " & _
@@ -95,6 +106,14 @@ End Function
 
 Public Property Get CellCount() As Long
     CellCount = changed.Count
+End Property
+
+Public Property Get AmbiguousCount() As Long
+    AmbiguousCount = skippedCount
+End Property
+
+Public Property Get FirstAmbiguous() As String
+    FirstAmbiguous = firstSkipped
 End Property
 
 Public Function Description() As String

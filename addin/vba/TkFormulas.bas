@@ -24,10 +24,32 @@ Private Const STAGE_WRITTEN As Long = 2
 
 ' ---------- The rewrite (pure; no Excel calls) ----------
 
-' The formula with every reference prefix naming `sheetName` removed. Never changes anything
-' inside a string literal, a quoted name of another sheet or workbook, a 3D range or an error value.
+' The formula with every reference prefix naming `sheetName` removed (see Tk_RewriteSheetPrefix).
 Public Function Tk_RemoveSheetPrefix(ByVal formula As String, ByVal sheetName As String) As String
-    Dim result As String, i As Long, j As Long, n As Long, ch As String, prevCh As String, nameText As String
+    Dim ambiguous As Boolean
+    Tk_RemoveSheetPrefix = Tk_RewriteSheetPrefix(formula, sheetName, ambiguous)
+End Function
+
+' The formula with every reference prefix naming `sheetName` removed. Never changes anything inside a
+' string literal, a quoted name of another sheet or workbook, a 3D range or an error value, nor the
+' second half of a range whose first half is on another sheet. A formula that would change but holds a
+' range Excel could read two ways (see HasAmbiguousColon) is returned unchanged, with `ambiguous` set.
+Public Function Tk_RewriteSheetPrefix(ByVal formula As String, ByVal sheetName As String, _
+                                      ByRef ambiguous As Boolean) As String
+    Dim result As String
+    ambiguous = False
+    result = RemovePrefixes(formula, sheetName)
+    If result <> formula Then
+        If HasAmbiguousColon(formula) Or HasAmbiguousColon(result) Then
+            ambiguous = True
+            result = formula
+        End If
+    End If
+    Tk_RewriteSheetPrefix = result
+End Function
+
+Private Function RemovePrefixes(ByVal formula As String, ByVal sheetName As String) As String
+    Dim result As String, i As Long, j As Long, n As Long, ch As String
     n = Len(formula)
     i = 1
     Do While i <= n
@@ -40,8 +62,7 @@ Public Function Tk_RemoveSheetPrefix(ByVal formula As String, ByVal sheetName As
             j = QuoteEnd(formula, i, "'")
             If j < n Then
                 If Mid$(formula, j + 1, 1) = "!" Then
-                    nameText = Replace(Mid$(formula, i + 1, j - i - 1), "''", "'")
-                    If StrComp(nameText, sheetName, vbTextCompare) = 0 Then
+                    If OwnPrefix(formula, i, Replace(Mid$(formula, i + 1, j - i - 1), "''", "'"), sheetName) Then
                         i = j + 2                                ' drop 'name'!
                         GoTo NextToken
                     End If
@@ -50,72 +71,187 @@ Public Function Tk_RemoveSheetPrefix(ByVal formula As String, ByVal sheetName As
             result = result & Mid$(formula, i, j - i + 1)
             i = j + 1
         ElseIf IsNameChar(ch) Then                              ' a word: function, name, cell or sheet
-            j = i
-            Do While j < n
-                If Not IsNameChar(Mid$(formula, j + 1, 1)) Then Exit Do
-                j = j + 1
-            Loop
-            If i > 1 Then prevCh = Mid$(formula, i - 1, 1) Else prevCh = ""
-            If IsOwnSheetWord(formula, i, j, n, prevCh, sheetName) Then
-                i = j + 2                                        ' drop name!
-            Else
-                result = result & Mid$(formula, i, j - i + 1)
-                i = j + 1
+            j = WordEnd(formula, i)
+            If j < n Then
+                If Mid$(formula, j + 1, 1) = "!" Then
+                    If OwnPrefix(formula, i, Mid$(formula, i, j - i + 1), sheetName) Then
+                        i = j + 2                                ' drop name!
+                        GoTo NextToken
+                    End If
+                End If
             End If
+            result = result & Mid$(formula, i, j - i + 1)
+            i = j + 1
         Else
             result = result & ch
             i = i + 1
         End If
 NextToken:
     Loop
-    Tk_RemoveSheetPrefix = result
+    RemovePrefixes = result
 End Function
 
-' A word followed by "!" that names this sheet - unless it follows "]" (an external workbook),
-' "#" (an error value such as #REF!) or a ":" that ends a 3D range (Sheet1:Sheet3!A1). A ":"
-' after a cell reference or ")" is an ordinary range (Sheet1!A1:Sheet1!B2), so the prefix goes.
-Private Function IsOwnSheetWord(ByVal formula As String, ByVal i As Long, ByVal j As Long, ByVal n As Long, _
-                                ByVal prevCh As String, ByVal sheetName As String) As Boolean
-    If j >= n Then Exit Function
-    If Mid$(formula, j + 1, 1) <> "!" Then Exit Function
+' Whether the sheet prefix starting at `i` (its name is `nameText`, followed by "!") can go: it names
+' this sheet, it does not follow "]" (an external workbook) or "#" (an error value such as #REF!), and
+' if it follows ":" the first half of that range is a cell on this sheet or ends with ")" - otherwise
+' the ":" ends a 3D range (Sheet1:Sheet3!A1, A:Sheet1!B2) or the first half is on another sheet
+' (Sheet2!A1:Sheet1!B2 would become Sheet2!A1:B2).
+Private Function OwnPrefix(ByVal formula As String, ByVal i As Long, ByVal nameText As String, _
+                           ByVal sheetName As String) As Boolean
+    Dim prevCh As String
+    If StrComp(nameText, sheetName, vbTextCompare) <> 0 Then Exit Function
+    If i > 1 Then prevCh = Mid$(formula, i - 1, 1)
     If prevCh = "]" Or prevCh = "#" Then Exit Function
     If prevCh = ":" Then
-        If Not RangeBeforeColon(formula, i - 1) Then Exit Function
+        If Not RangeHalfBefore(formula, i - 1, sheetName) Then Exit Function
     End If
-    IsOwnSheetWord = (StrComp(Mid$(formula, i, j - i + 1), sheetName, vbTextCompare) = 0)
+    OwnPrefix = True
 End Function
 
-' Whether what ends just before the ":" at `colon` is a cell, column or row reference ($A$1, A1, A,
-' 1) or a closing bracket - rather than a sheet name starting a 3D range.
-Private Function RangeBeforeColon(ByVal formula As String, ByVal colon As Long) As Boolean
-    Dim k As Long, word As String, ch As String, letters As Long, digits As Long, p As Long
-    k = colon - 1
-    If k < 1 Then Exit Function
-    If Mid$(formula, k, 1) = ")" Then RangeBeforeColon = True: Exit Function
-    Do While k >= 1
-        ch = Mid$(formula, k, 1)
-        If ch = "$" Then
-            k = k - 1
-        ElseIf IsNameChar(ch) Then
-            word = ch & word
-            k = k - 1
-        Else
-            Exit Do
-        End If
-    Loop
-    If Len(word) = 0 Then Exit Function
-    For p = 1 To Len(word)                                       ' letters, then digits, nothing else
-        ch = Mid$(word, p, 1)
-        If ch Like "[A-Za-z]" Then
-            If digits > 0 Then Exit Function
-            letters = letters + 1
-        ElseIf ch Like "#" Then
-            digits = digits + 1
-        Else
+' Whether what ends just before the ":" at `colon` is the first half of an ordinary range on this
+' sheet: ")" (INDEX(...):), or a cell reference ($A$1, A1) with no prefix or this sheet's prefix.
+' Excel reads a column, row or any other word there (A:Sheet1!B2, 1:Sheet1!B2) as a 3D range.
+Private Function RangeHalfBefore(ByVal formula As String, ByVal colon As Long, ByVal sheetName As String) As Boolean
+    Dim k As Long
+    If colon <= 1 Then Exit Function
+    If Mid$(formula, colon - 1, 1) = ")" Then RangeHalfBefore = True: Exit Function
+    k = TokenStart(formula, colon - 1)
+    If Not IsCellReference(Mid$(formula, k, colon - k)) Then Exit Function
+    If k > 1 Then
+        If Mid$(formula, k - 1, 1) = "!" Then                   ' prefixed first half: must be this sheet
+            RangeHalfBefore = (StrComp(PrefixNameBefore(formula, k - 1), sheetName, vbTextCompare) = 0)
             Exit Function
         End If
-    Next p
-    RangeBeforeColon = (letters <= 3 And digits <= 7)
+    End If
+    RangeHalfBefore = True
+End Function
+
+' Whether the formula holds a ":" followed by a sheet prefix whose first half is neither ")", a cell
+' reference nor itself prefixed: Excel stores AB:Sheet1!B2 the same way whether it was entered as a
+' 3D range or not, and reads it back as a 3D range, so such a formula is never rewritten.
+Private Function HasAmbiguousColon(ByVal formula As String) As Boolean
+    Dim i As Long, n As Long, ch As String, k As Long
+    n = Len(formula)
+    i = 1
+    Do While i <= n
+        ch = Mid$(formula, i, 1)
+        If ch = """" Or ch = "'" Then
+            i = QuoteEnd(formula, i, ch) + 1
+        ElseIf ch = ":" Then
+            If PrefixAt(formula, i + 1) Then
+                If i = 1 Then HasAmbiguousColon = True: Exit Function
+                If Mid$(formula, i - 1, 1) <> ")" Then
+                    k = TokenStart(formula, i - 1)
+                    If k = i Then HasAmbiguousColon = True: Exit Function
+                    If Not IsCellReference(Mid$(formula, k, i - k)) Then
+                        If k = 1 Then HasAmbiguousColon = True: Exit Function
+                        If Mid$(formula, k - 1, 1) <> "!" Then HasAmbiguousColon = True: Exit Function
+                    End If
+                End If
+            End If
+            i = i + 1
+        Else
+            i = i + 1
+        End If
+    Loop
+End Function
+
+' Whether a sheet prefix (name! or 'name'!) starts at `p`.
+Private Function PrefixAt(ByVal formula As String, ByVal p As Long) As Boolean
+    Dim j As Long, n As Long
+    n = Len(formula)
+    If p > n Then Exit Function
+    If Mid$(formula, p, 1) = "'" Then
+        j = QuoteEnd(formula, p, "'")
+    ElseIf IsNameChar(Mid$(formula, p, 1)) Then
+        j = WordEnd(formula, p)
+    Else
+        Exit Function
+    End If
+    If j < n Then PrefixAt = (Mid$(formula, j + 1, 1) = "!")
+End Function
+
+' The sheet name of the prefix whose "!" is at `bang` (unescaped if quoted); "" for an external
+' reference or when there is none.
+Private Function PrefixNameBefore(ByVal formula As String, ByVal bang As Long) As String
+    Dim k As Long, closing As Long
+    If bang <= 1 Then Exit Function
+    If Mid$(formula, bang - 1, 1) = "'" Then
+        closing = bang - 1
+        k = closing - 1
+        Do While k >= 1
+            If Mid$(formula, k, 1) = "'" Then
+                If k > 1 Then
+                    If Mid$(formula, k - 1, 1) = "'" Then k = k - 2: GoTo NextChar
+                End If
+                Exit Do
+            End If
+            k = k - 1
+NextChar:
+        Loop
+        If k < 1 Then Exit Function
+        PrefixNameBefore = Replace(Mid$(formula, k + 1, closing - k - 1), "''", "'")
+    Else
+        k = bang - 1
+        Do While k >= 1
+            If Not IsNameChar(Mid$(formula, k, 1)) Then Exit Do
+            k = k - 1
+        Loop
+        If k >= 1 Then
+            If Mid$(formula, k, 1) = "]" Then Exit Function
+        End If
+        PrefixNameBefore = Mid$(formula, k + 1, bang - k - 1)
+    End If
+End Function
+
+' Start of the reference or word ending at `last` (name characters and "$"); last + 1 if none.
+Private Function TokenStart(ByVal formula As String, ByVal last As Long) As Long
+    Dim k As Long, ch As String
+    k = last
+    Do While k >= 1
+        ch = Mid$(formula, k, 1)
+        If ch <> "$" And Not IsNameChar(ch) Then Exit Do
+        k = k - 1
+    Loop
+    TokenStart = k + 1
+End Function
+
+' End of the word starting at `i`.
+Private Function WordEnd(ByVal formula As String, ByVal i As Long) As Long
+    Dim j As Long, n As Long
+    n = Len(formula)
+    j = i
+    Do While j < n
+        If Not IsNameChar(Mid$(formula, j + 1, 1)) Then Exit Do
+        j = j + 1
+    Loop
+    WordEnd = j
+End Function
+
+' Whether `token` is a cell reference within the sheet: [$]A-XFD[$]1-1048576.
+Private Function IsCellReference(ByVal token As String) As Boolean
+    Dim p As Long, n As Long, colNumber As Long, rowText As String, ch As String
+    n = Len(token)
+    p = 1
+    If p <= n Then
+        If Mid$(token, p, 1) = "$" Then p = p + 1
+    End If
+    Do While p <= n
+        ch = UCase$(Mid$(token, p, 1))
+        If Not ch Like "[A-Z]" Then Exit Do
+        If colNumber > 16384 Then Exit Function
+        colNumber = colNumber * 26 + (Asc(ch) - 64)
+        p = p + 1
+    Loop
+    If colNumber < 1 Or colNumber > 16384 Then Exit Function
+    If p <= n Then
+        If Mid$(token, p, 1) = "$" Then p = p + 1
+    End If
+    rowText = Mid$(token, p)
+    If Len(rowText) < 1 Or Len(rowText) > 7 Then Exit Function
+    If rowText Like "*[!0-9]*" Then Exit Function
+    If Left$(rowText, 1) = "0" Then Exit Function
+    IsCellReference = (CLng(rowText) <= 1048576)
 End Function
 
 ' Position of the quote that closes the one at `start` (a doubled quote is an escaped quote), or
@@ -176,8 +312,12 @@ Public Function Tk_ClearSheetReferences(ByVal target As Range) As String
     reason = snap.Capture(scope, target.Worksheet.Name, "Clear Sheet References")
     If Len(reason) > 0 Then Tk_ClearSheetReferences = "refused: " & reason: Exit Function
     If snap.CellCount = 0 Then
-        Tk_ClearSheetReferences = "nothing: No formula in " & ScopeText(target) & " refers to '" & target.Worksheet.Name & _
-            "' by name."
+        If snap.AmbiguousCount > 0 Then
+            Tk_ClearSheetReferences = "nothing: Nothing was changed. " & AmbiguousText(snap)
+        Else
+            Tk_ClearSheetReferences = "nothing: No formula in " & ScopeText(target) & " refers to '" & _
+                target.Worksheet.Name & "' by name."
+        End If
         Exit Function
     End If
     t1 = Tk_Seconds()
@@ -197,6 +337,9 @@ Public Function Tk_ClearSheetReferences(ByVal target As Range) As String
                   ";register=" & Ms(t3 - t2) & ";total=" & Ms(t3 - t0)
     Tk_ClearSheetReferences = "ok: Removed '" & target.Worksheet.Name & "'! from " & snap.CellCount & " formula(s) in " & _
         ScopeText(target) & "."
+    If snap.AmbiguousCount > 0 Then
+        Tk_ClearSheetReferences = "warning: " & Mid$(Tk_ClearSheetReferences, 5) & " " & AmbiguousText(snap)
+    End If
     Exit Function
 
 Failed:
@@ -226,6 +369,12 @@ RollBack:
     Else
         Tk_ClearSheetReferences = "incomplete: " & reason & " Putting the original formulas back also failed: " & rollbackProblem
     End If
+End Function
+
+Private Function AmbiguousText(ByVal snap As TkFormulaSnapshot) As String
+    AmbiguousText = snap.AmbiguousCount & " formula(s) naming this sheet were left unchanged (the first is in " & _
+        snap.FirstAmbiguous & ") because they contain a range Excel could read two ways, such as A:Sheet1!B2 " & _
+        "(a range across sheets, or a column to a cell). Check those by hand."
 End Function
 
 Private Function ScopeText(ByVal target As Range) As String

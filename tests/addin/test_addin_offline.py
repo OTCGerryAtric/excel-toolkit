@@ -306,82 +306,30 @@ def test_style_undo_refuses_gradients_and_never_compares_a_theme_marker_with_equ
 # ---------- Clear Sheet References and Find Constants (M3c) ----------
 
 sys.path.insert(0, str(ROOT / "addin" / "live"))
-from m3c_cases import REWRITE_CASES  # noqa: E402
+from m3c_cases import AMBIGUOUS_CASES, REWRITE_CASES  # noqa: E402
+from m3c_rewrite_model import _is_cell_reference, remove_sheet_prefix, rewrite_sheet_prefix  # noqa: E402
 
 
 def _formulas_code() -> str:
     return _code(ROOT / "addin" / "vba" / "TkFormulas.bas")
 
 
-def _is_name_char(ch: str) -> bool:
-    return bool(re.fullmatch(r"[A-Za-z0-9_.]", ch)) or ord(ch) > 127
-
-
-def _quote_end(formula: str, start: int, quote: str) -> int:
-    k = start + 1
-    while k < len(formula):
-        if formula[k] == quote:
-            if k + 1 < len(formula) and formula[k + 1] == quote:
-                k += 2
-                continue
-            return k
-        k += 1
-    return len(formula) - 1
-
-
-def _range_before_colon(formula: str, colon: int) -> bool:
-    k = colon - 1
-    if k < 0:
-        return False
-    if formula[k] == ")":
-        return True
-    word = ""
-    while k >= 0 and (formula[k] == "$" or _is_name_char(formula[k])):
-        if formula[k] != "$":
-            word = formula[k] + word
-        k -= 1
-    return bool(re.fullmatch(r"[A-Za-z]{0,3}[0-9]{0,7}", word)) and word != ""
-
-
-def remove_sheet_prefix(formula: str, sheet: str) -> str:
-    """Python model of TkFormulas.Tk_RemoveSheetPrefix (same steps, 0-based). The VBA function is
-    checked against the same cases live; this pins down the rules and the case table offline."""
-    out, i, n = [], 0, len(formula)
-    while i < n:
-        ch = formula[i]
-        if ch == '"':
-            j = _quote_end(formula, i, '"')
-            out.append(formula[i:j + 1])
-            i = j + 1
-        elif ch == "'":
-            j = _quote_end(formula, i, "'")
-            if j + 1 < n and formula[j + 1] == "!" and formula[i + 1:j].replace("''", "'").lower() == sheet.lower():
-                i = j + 2
-                continue
-            out.append(formula[i:j + 1])
-            i = j + 1
-        elif _is_name_char(ch):
-            j = i
-            while j + 1 < n and _is_name_char(formula[j + 1]):
-                j += 1
-            prev = formula[i - 1] if i > 0 else ""
-            own = j + 1 < n and formula[j + 1] == "!" and prev not in ("]", "#") \
-                and (prev != ":" or _range_before_colon(formula, i - 1)) and formula[i:j + 1].lower() == sheet.lower()
-            if own:
-                i = j + 2
-            else:
-                out.append(formula[i:j + 1])
-                i = j + 1
-        else:
-            out.append(ch)
-            i += 1
-    return "".join(out)
-
-
 @pytest.mark.parametrize("sheet,before,after", REWRITE_CASES, ids=[f"{s}|{b}" for s, b, _ in REWRITE_CASES])
 def test_clear_sheet_references_rewrite_rules(sheet, before, after):
     assert remove_sheet_prefix(before, sheet) == after
     assert remove_sheet_prefix(after, sheet) == after  # idempotent: what VerifyApplied relies on
+
+
+@pytest.mark.parametrize("sheet,formula", AMBIGUOUS_CASES, ids=[f"{s}|{f}" for s, f in AMBIGUOUS_CASES])
+def test_formulas_excel_could_read_two_ways_are_left_unchanged_and_reported(sheet, formula):
+    assert rewrite_sheet_prefix(formula, sheet) == (formula, True)
+
+
+def test_cell_reference_bounds_follow_excel():
+    for token in ("A1", "$A$1", "A$1", "$A1", "XFD1", "XFD1048576", "b2", "AB12"):
+        assert _is_cell_reference(token), token
+    for token in ("A", "AB", "XFD", "1", "$1", "A0", "XFE1", "XFD1048577", "ABCD1", "A1B", "", "$", "R1C1"):
+        assert not _is_cell_reference(token), token
 
 
 def test_the_legacy_text_replace_damages_what_the_toolkit_keeps():
@@ -392,23 +340,35 @@ def test_the_legacy_text_replace_damages_what_the_toolkit_keeps():
         return re.sub(re.escape(what), "", formula, flags=re.I)
     damaged = [(s, b) for s, b, a in REWRITE_CASES if legacy(b, s) != a]
     for case in [("Sheet1", "=MySheet1!A1"), ("Sheet1", "=[Book.xlsx]Sheet1!A1"), ("Sheet1", '="Sheet1!A1"'),
-                 ("Sheet3", "=SUM(Sheet1:Sheet3!A1)"), ("REF", "=REF!A1+#REF!")]:
+                 ("Sheet3", "=SUM(Sheet1:Sheet3!A1)"), ("REF", "=REF!A1+#REF!"), ("A", "=SUM(AB:A!B2)"),
+                 ("Sheet1", "=SUM(Sheet2!A1:Sheet1!B2)")]:
         assert case in damaged
     assert legacy("Sales note: see Sheet1!A1", "Sheet1") != "Sales note: see Sheet1!A1"  # and text cells
 
 
 def test_rewrite_rules_in_vba_match_the_model():
     code = _formulas_code()
-    fn = _vba_function(code, "Tk_RemoveSheetPrefix")
-    assert 'j = QuoteEnd(formula, i, """")' in fn and "j = QuoteEnd(formula, i, \"'\")" in fn
-    assert "Replace(Mid$(formula, i + 1, j - i - 1), \"''\", \"'\")" in fn
-    assert "StrComp(nameText, sheetName, vbTextCompare) = 0" in fn
-    own = code.split("Private Function IsOwnSheetWord(", 1)[1].split("End Function", 1)[0]
+    fn = _vba_function(code, "Tk_RewriteSheetPrefix")
+    assert "result = RemovePrefixes(formula, sheetName)" in fn
+    assert "If HasAmbiguousColon(formula) Or HasAmbiguousColon(result) Then" in fn and "result = formula" in fn
+    remove = code.split("Private Function RemovePrefixes(", 1)[1].split("End Function", 1)[0]
+    assert 'j = QuoteEnd(formula, i, """")' in remove and "j = QuoteEnd(formula, i, \"'\")" in remove
+    assert "OwnPrefix(formula, i, Replace(Mid$(formula, i + 1, j - i - 1), \"''\", \"'\"), sheetName)" in remove
+    assert "OwnPrefix(formula, i, Mid$(formula, i, j - i + 1), sheetName)" in remove
+    own = code.split("Private Function OwnPrefix(", 1)[1].split("End Function", 1)[0]
+    assert "StrComp(nameText, sheetName, vbTextCompare) <> 0" in own
     assert 'If prevCh = "]" Or prevCh = "#" Then Exit Function' in own
-    assert "If Not RangeBeforeColon(formula, i - 1) Then Exit Function" in own
-    assert "vbTextCompare" in own
+    assert "If Not RangeHalfBefore(formula, i - 1, sheetName) Then Exit Function" in own
+    half = code.split("Private Function RangeHalfBefore(", 1)[1].split("End Function", 1)[0]
+    assert "If Not IsCellReference(Mid$(formula, k, colon - k)) Then Exit Function" in half
+    assert "StrComp(PrefixNameBefore(formula, k - 1), sheetName, vbTextCompare) = 0" in half
+    cell = code.split("Private Function IsCellReference(", 1)[1].split("End Function", 1)[0]
+    assert "colNumber < 1 Or colNumber > 16384" in cell and "CLng(rowText) <= 1048576" in cell
+    assert 'If Left$(rowText, 1) = "0" Then Exit Function' in cell
     assert 'IsNameChar = (ch Like "[A-Za-z0-9_.]") Or code > 127' in code
-    assert "RangeBeforeColon = (letters <= 3 And digits <= 7)" in code
+    snap = _code(ROOT / "addin" / "vba" / "TkFormulaSnapshot.cls")
+    assert "newText = Tk_RewriteSheetPrefix(oldText, sheetName, ambiguous)" in snap
+    assert "If snap.AmbiguousCount > 0 Then" in code and "Check those by hand." in code
 
 
 def test_clear_sheet_references_reads_and_writes_formula_cells_only():

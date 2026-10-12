@@ -1,0 +1,343 @@
+{
+  "results": [
+    {
+      "check": "rewrite rules: VBA Tk_RemoveSheetPrefix gives the expected result for all 57 cases",
+      "passed": true,
+      "wrong": []
+    },
+    {
+      "check": "rewrite rules: all 6 formulas Excel could read two ways are left unchanged",
+      "passed": true,
+      "wrong": []
+    },
+    {
+      "check": "selection: own-sheet prefixes removed; other sheets, similar names, string literals, INDIRECT text and text cells untouched",
+      "passed": true,
+      "outcome": "ok: Removed 'P&L'! from 5 formula(s) in the selection.",
+      "wrong": {}
+    },
+    {
+      "check": "values unchanged by the rewrite",
+      "passed": true
+    },
+    {
+      "check": "undo restores every formula exactly",
+      "passed": true,
+      "undo": "ok: Undid Clear Sheet References."
+    },
+    {
+      "check": "single cell selected: works on the whole sheet, then undone",
+      "passed": true,
+      "outcome": "ok: Removed 'P&L'! from 5 formula(s) in the sheet."
+    },
+    {
+      "check": "mixed selection with nothing to rewrite: 'nothing', no change",
+      "passed": true,
+      "outcome": "nothing: No formula in the selection refers to 'P&L' by name."
+    },
+    {
+      "check": "multi-area selection: only the selected formulas rewritten, then undone",
+      "passed": true,
+      "outcome": "ok: Removed 'P&L'! from 3 formula(s) in the selection."
+    },
+    {
+      "check": "legacy array formula (Ctrl+Shift+Enter) referring to the sheet: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The cell E2 is part of an array formula (entered with Ctrl+Shift+Enter), which is not supported yet; nothing was changed."
+    },
+    {
+      "check": "conflict: undo refused after a rewritten formula is edited, nothing restored",
+      "passed": true,
+      "outcome": "refused: The formula in B3 on 'P&L' has changed since the command. Nothing was changed."
+    },
+    {
+      "check": "identity: undo refused after the sheet is renamed",
+      "passed": true,
+      "outcome": "refused: The sheet has been renamed since the change (it was 'P&L'). Nothing was changed."
+    },
+    {
+      "check": "protected sheet: refused, nothing changed",
+      "passed": true,
+      "outcome": "refused: The sheet is protected, so its formulas cannot be changed. Unprotect it first; nothing was changed."
+    },
+    {
+      "check": "forced failure after two formulas: rolled back, formulas identical",
+      "passed": true,
+      "outcome": "rolled back: Excel reported an error while rewriting formulas: Simulated failure (test hook)"
+    },
+    {
+      "check": "forced restore failure: reported as incomplete, record unusable",
+      "passed": true,
+      "outcome": "incomplete: Formulas not restored: B3 B5 B6."
+    },
+    {
+      "check": "plain own-sheet references: same result as the legacy macro; the legacy macro also changed a string literal and a text cell, the toolkit did not",
+      "passed": true,
+      "got": {
+        "B2": [
+          "=A1+1",
+          "=A1+1"
+        ],
+        "B3": [
+          "=SUM(A1:A3)",
+          "=SUM(A1:A3)"
+        ],
+        "B4": [
+          "=\"A1\"",
+          "=\"Data!A1\""
+        ],
+        "C2": [
+          "A1 is a note",
+          "Data!A1 is a note"
+        ]
+      }
+    },
+    {
+      "check": "meaning on 'Sheet1': 14 formula(s) rewritten, every calculated result unchanged",
+      "passed": true,
+      "outcome": "warning: Removed 'Sheet1'! from 14 formula(s) in the sheet. 2 formula(s) naming this sheet were left unchanged (the first is in E27) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand.",
+      "value_changes": {},
+      "text_wrong": {}
+    },
+    {
+      "check": "meaning on 'Sheet1': 2 formula(s) Excel could read two ways left exactly as they were and reported",
+      "passed": true,
+      "skipped": [
+        "E27",
+        "E28"
+      ],
+      "outcome": "warning: Removed 'Sheet1'! from 14 formula(s) in the sheet. 2 formula(s) naming this sheet were left unchanged (the first is in E27) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand."
+    },
+    {
+      "check": "meaning on 'Sheet1': undo restores every formula and result exactly",
+      "passed": true,
+      "undo": "ok: Undid Clear Sheet References."
+    },
+    {
+      "check": "meaning on 'A': 3 formula(s) rewritten, every calculated result unchanged",
+      "passed": true,
+      "outcome": "warning: Removed 'A'! from 3 formula(s) in the sheet. 1 formula(s) naming this sheet were left unchanged (the first is in E14) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand.",
+      "value_changes": {},
+      "text_wrong": {}
+    },
+    {
+      "check": "meaning on 'A': 1 formula(s) Excel could read two ways left exactly as they were and reported",
+      "passed": true,
+      "skipped": [
+        "E14"
+      ],
+      "outcome": "warning: Removed 'A'! from 3 formula(s) in the sheet. 1 formula(s) naming this sheet were left unchanged (the first is in E14) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand."
+    },
+    {
+      "check": "meaning on 'A': undo restores every formula and result exactly",
+      "passed": true,
+      "undo": "ok: Undid Clear Sheet References."
+    },
+    {
+      "check": "only ambiguous formulas selected: 'nothing', reported, no change",
+      "passed": true,
+      "outcome": "nothing: Nothing was changed. 2 formula(s) naming this sheet were left unchanged (the first is in E27) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand."
+    },
+    {
+      "check": "find constants: selects the same cells as the legacy macro (block, single cell = whole sheet, two areas)",
+      "passed": true,
+      "results": [
+        [
+          "A1:C3",
+          "$A$1,$B$2,$C$3",
+          "$A$1,$B$2,$C$3",
+          "ok: Selected 3 cell(s) with typed-in numbers."
+        ],
+        [
+          "A1",
+          "$A$1,$B$2,$C$3",
+          "$A$1,$B$2,$C$3",
+          "ok: Selected 3 cell(s) with typed-in numbers."
+        ],
+        [
+          "A1:A2,C3",
+          "$A$1,$C$3",
+          "$A$1,$C$3",
+          "ok: Selected 2 cell(s) with typed-in numbers."
+        ]
+      ]
+    },
+    {
+      "check": "find constants with no typed-in numbers: 'nothing'",
+      "passed": true,
+      "outcome": "nothing: There are no typed-in numbers in the selection."
+    },
+    {
+      "check": "find constants leaves the existing undo record alone",
+      "passed": true
+    },
+    {
+      "check": "performance case '10,000 formulas to rewrite'",
+      "passed": true,
+      "outcome": "ok: Removed 'P&L'! from 10000 formula(s) in the selection.",
+      "undo": "ok: Undid Clear Sheet References."
+    },
+    {
+      "check": "performance case '10,000 formulas, nothing to rewrite'",
+      "passed": true,
+      "outcome": "nothing: No formula in the selection refers to 'P&L' by name.",
+      "undo": ""
+    },
+    {
+      "check": "PERSONAL.XLSB unchanged",
+      "passed": true
+    }
+  ],
+  "timings": [
+    {
+      "case": "10,000 formulas to rewrite",
+      "outcome": "ok: Removed 'P&L'! from 10000 formula(s) in the selection.",
+      "apply_wall_ms": 2614.2,
+      "vba": "cells=10000;capture=600.7;apply+verify=2007.0;register=0.2;total=2607.8",
+      "undo": "ok: Undid Clear Sheet References.",
+      "undo_wall_ms": 2042.4
+    },
+    {
+      "case": "10,000 formulas, nothing to rewrite",
+      "outcome": "nothing: No formula in the selection refers to 'P&L' by name.",
+      "apply_wall_ms": 19.3,
+      "vba": "",
+      "undo": "",
+      "undo_wall_ms": 0.0
+    }
+  ],
+  "meaning": [
+    {
+      "sheet": "Sheet1",
+      "outcome": "warning: Removed 'Sheet1'! from 14 formula(s) in the sheet. 2 formula(s) naming this sheet were left unchanged (the first is in E27) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand.",
+      "cells": [
+        {
+          "before": "=Sheet1!B2+1",
+          "after": "=B2+1",
+          "value": 1012.0
+        },
+        {
+          "before": "=SUM(Sheet1!A1:Sheet1!B2)",
+          "after": "=SUM(A1:B2)",
+          "value": 4022.0
+        },
+        {
+          "before": "=SUM(Sheet1!C3:Sheet1!A1)",
+          "after": "=SUM(A1:C3)",
+          "value": 9099.0
+        },
+        {
+          "before": "=SUM(A1:Sheet1!B2)",
+          "after": "=SUM(A1:B2)",
+          "value": 4022.0
+        },
+        {
+          "before": "=SUM($A$1:Sheet1!$B$2)",
+          "after": "=SUM($A$1:$B$2)",
+          "value": 4022.0
+        },
+        {
+          "before": "=SUM(INDEX(A:A,1):Sheet1!B2)",
+          "after": "=SUM(INDEX(A:A,1):B2)",
+          "value": 4022.0
+        },
+        {
+          "before": "=SUM(Sheet1!A1:INDEX(A:A,3))",
+          "after": "=SUM(A1:INDEX(A:A,3))",
+          "value": 3030.0
+        },
+        {
+          "before": "=SUM(Sheet2!A1:Sheet1!B2)",
+          "after": "=SUM(Sheet2!A1:Sheet1!B2)",
+          "value": -2146826273
+        },
+        {
+          "before": "=SUM(Sheet2!A1:B2)+Sheet1!A1",
+          "after": "=SUM(Sheet2!A1:B2)+A1",
+          "value": 21022.0
+        },
+        {
+          "before": "=SUM(Sheet1:A!B2)",
+          "after": "=SUM(Sheet1:A!B2)",
+          "value": 3022.0
+        },
+        {
+          "before": "=SUM(Sheet1:Data!B2)",
+          "after": "=SUM(Sheet1:Data!B2)",
+          "value": 10044.0
+        },
+        {
+          "before": "=A!B2+AB!B2+Sheet1!B2",
+          "after": "=A!B2+AB!B2+B2",
+          "value": 6033.0
+        },
+        {
+          "before": "=SUM(Sheet1!A:A)+SUM(Sheet1!1:3)",
+          "after": "=SUM(A:A)+SUM(1:3)",
+          "value": 12129.0
+        },
+        {
+          "before": "=INDIRECT(\"Sheet1!B2\")+Sheet1!C2",
+          "after": "=INDIRECT(\"Sheet1!B2\")+C2",
+          "value": 2023.0
+        },
+        {
+          "before": "=SUMPRODUCT((Sheet1!A1:A3>1)*Sheet1!B1:B3)",
+          "after": "=SUMPRODUCT((A1:A3>1)*B1:B3)",
+          "value": 3033.0
+        },
+        {
+          "before": "=Sheet1!B2&\" Sheet1!B2\"",
+          "after": "=B2&\" Sheet1!B2\"",
+          "value": "1011 Sheet1!B2"
+        },
+        {
+          "before": "=IFERROR(Sheet1!Z99/0,Sheet1!A1)",
+          "after": "=IFERROR(Z99/0,A1)",
+          "value": 1000.0
+        },
+        {
+          "before": "=SUM(Sheet1:AB!B2)+Sheet1!C1",
+          "after": "=SUM(Sheet1:AB!B2)+Sheet1!C1",
+          "value": 7035.0
+        },
+        {
+          "before": "=SUM(AB:Sheet1!B2)+Sheet1!C1",
+          "after": "=SUM(AB:Sheet1!B2)+Sheet1!C1",
+          "value": -2146826259
+        }
+      ]
+    },
+    {
+      "sheet": "A",
+      "outcome": "warning: Removed 'A'! from 3 formula(s) in the sheet. 1 formula(s) naming this sheet were left unchanged (the first is in E14) because they contain a range Excel could read two ways, such as A:Sheet1!B2 (a range across sheets, or a column to a cell). Check those by hand.",
+      "cells": [
+        {
+          "before": "=A!B2+1",
+          "after": "=B2+1",
+          "value": 2012.0
+        },
+        {
+          "before": "=SUM(A!A1:A!B2)",
+          "after": "=SUM(A1:B2)",
+          "value": 8022.0
+        },
+        {
+          "before": "=SUM(A!B2:A!C3)+AB!A1",
+          "after": "=SUM(B2:C3)+AB!A1",
+          "value": 11066.0
+        },
+        {
+          "before": "=SUM(Sheet1:A!B2)",
+          "after": "=SUM(Sheet1:A!B2)",
+          "value": 3022.0
+        },
+        {
+          "before": "=SUM(A:AB!B2)+A!C1",
+          "after": "=SUM(A:AB!B2)+A!C1",
+          "value": 7024.0
+        }
+      ]
+    }
+  ]
+}

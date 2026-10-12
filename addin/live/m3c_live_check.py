@@ -17,7 +17,8 @@ from pathlib import Path
 
 from m2_live_check import DEFAULT_XLAM, PERSONAL, sha256
 from m3a_live_check import Check as M3aCheck
-from m3c_cases import REWRITE_CASES
+from m3c_cases import AMBIGUOUS_CASES, REWRITE_CASES
+from m3c_rewrite_model import rewrite_sheet_prefix
 
 HERE = Path(__file__).resolve().parent
 OWN = "P&L"
@@ -39,7 +40,46 @@ CELLS = {
 }
 
 
+# Formulas entered (Formula2) on each sheet of the meaning workbook, sheets in order Sheet1, A, AB, Data,
+# Sheet2, Other, each with numbers in A1:C3. Excel stores some of them differently (A:Sheet1!B2 as the 3D
+# range Sheet1:A!B2); the check works on what Excel stored.
+MEANING_FORMULAS = {
+    "Sheet1": [
+        "=Sheet1!B2+1",
+        "=SUM(Sheet1!A1:Sheet1!B2)",
+        "=SUM(Sheet1!C3:Sheet1!A1)",
+        "=SUM(A1:Sheet1!B2)",
+        "=SUM($A$1:Sheet1!$B$2)",
+        "=SUM(INDEX(A:A,1):Sheet1!B2)",
+        "=SUM(Sheet1!A1:INDEX(A:A,3))",
+        "=SUM(Sheet2!A1:Sheet1!B2)",            # first half on another sheet: #VALUE!, kept
+        "=SUM(Sheet2!A1:B2)+Sheet1!A1",
+        "=SUM(A:Sheet1!B2)",                     # stored as the 3D range Sheet1:A!B2
+        "=SUM(Data:Sheet1!B2)",
+        "=A!B2+AB!B2+Sheet1!B2",
+        "=SUM(Sheet1!A:A)+SUM(Sheet1!1:3)",
+        "=INDIRECT(\"Sheet1!B2\")+Sheet1!C2",
+        "=SUMPRODUCT((Sheet1!A1:A3>1)*Sheet1!B1:B3)",
+        "=Sheet1!B2&\" Sheet1!B2\"",
+        "=IFERROR(Sheet1!Z99/0,Sheet1!A1)",
+        "=SUM(AB:Sheet1!B2)+Sheet1!C1",          # 3D range plus an own reference: left unchanged
+        "=SUM(AB:'Sheet1'!B2)+Sheet1!C1",        # stored as AB:Sheet1!B2 (not 3D): left unchanged
+    ],
+    "A": [
+        "=A!B2+1",
+        "=SUM(A!A1:A!B2)",
+        "=SUM(a!B2:A!C3)+AB!A1",
+        "=SUM(Sheet1:A!B2)",                     # 3D range ending at this sheet
+        "=SUM(A:AB!B2)+A!C1",                    # 3D range starting at this sheet: left unchanged
+    ],
+}
+
+
 class Check(M3aCheck):
+    def __init__(self, xlam):
+        super().__init__(xlam)
+        self.meaning_log: list[dict] = []
+
     def build_book(self):
         wb = self.excel.Workbooks.Add()
         while wb.Worksheets.Count < 4:
@@ -75,6 +115,10 @@ class Check(M3aCheck):
                 wrong.append((sheet, before, after, got))
         self.record(f"rewrite rules: VBA Tk_RemoveSheetPrefix gives the expected result for all {len(REWRITE_CASES)} cases",
                     not wrong, wrong=wrong[:10])
+        wrong = [(sheet, formula, got) for sheet, formula in AMBIGUOUS_CASES
+                 if (got := self.run("Tk_RemoveSheetPrefix", formula, sheet)) != formula]
+        self.record(f"rewrite rules: all {len(AMBIGUOUS_CASES)} formulas Excel could read two ways are left unchanged",
+                    not wrong, wrong=wrong)
 
     def clear_references(self):
         wb, own = self.build_book()
@@ -163,7 +207,7 @@ class Check(M3aCheck):
         """Plain own-sheet references on a sheet named Data: same result as the legacy macro. The legacy
         macro's text replace also changes a text cell and a string literal, which the toolkit leaves."""
         contents = {"B2": "=Data!A1+1", "B3": "=SUM(Data!A1:Data!A3)", "B4": '="Data!A1"', "C2": "Data!A1 is a note"}
-        books = []
+        books, original = [], self.legacy.Name
         try:
             for ws in (self.legacy, self.excel.Workbooks.Add().Worksheets(1)):
                 if ws is not self.legacy:
@@ -177,6 +221,7 @@ class Check(M3aCheck):
                     else:
                         ws.Range(address).Value2 = content
             legacy, toolkit = self.legacy, books[0].Worksheets(1)
+            legacy.Parent.Activate()
             legacy.Activate()
             legacy.Range("A1").Select()
             self.run_legacy("Clear_Sheet_Formula_References")
@@ -189,10 +234,65 @@ class Check(M3aCheck):
                         and got["B4"][1] == contents["B4"] and got["C2"][1] == contents["C2"]
                         and got["B4"][0] != contents["B4"] and got["C2"][0] != contents["C2"], got=got)
             self.run("Tk_RestoreLast")
-            legacy.Name = "Sheet1"
+            legacy.Name = original
         finally:
             for book in books:
                 book.Close(SaveChanges=False)
+
+    def meaning(self):
+        """Calculated results are unchanged by the rewrite, including sheets named like columns (A, AB), 3D
+        ranges, a range whose first half is on another sheet, and a formula whose stored text Excel would
+        read back differently (AB:'Sheet1'!B2 is stored as AB:Sheet1!B2, which re-entered is a 3D range).
+        Formulas Excel could read two ways are left exactly as they are and reported; undo is exact."""
+        wb = self.excel.Workbooks.Add()
+        try:
+            names = ("Sheet1", "A", "AB", "Data", "Sheet2", "Other")
+            while wb.Worksheets.Count < len(names):
+                wb.Worksheets.Add(After=wb.Worksheets(wb.Worksheets.Count))
+            for index in range(1, len(names) + 1):
+                wb.Worksheets(index).Name = f"tmp{index}"
+            for index, name in enumerate(names, start=1):
+                ws = wb.Worksheets(index)
+                ws.Name = name
+                ws.Range("A1:C3").Value2 = tuple(tuple(index * 1000 + r * 10 + c for c in range(3)) for r in range(3))
+            for own_name, entries in MEANING_FORMULAS.items():
+                own = wb.Worksheets(own_name)
+                own.Activate()
+                cells = [own.Range(f"E{row}") for row in range(10, 10 + len(entries))]
+                for cell, formula in zip(cells, entries):
+                    cell.Formula2 = formula
+                self.excel.Calculate()
+                before = [(c.Formula2, c.Value2) for c in cells]
+                expected = [rewrite_sheet_prefix(f, own_name) for f, _ in before]
+                changes = sum(1 for (f, _), (new, _) in zip(before, expected) if new != f)
+                skipped = [c.GetAddress(False, False) for c, (_, amb) in zip(cells, expected) if amb]
+                outcome = self.run("Tk_ClearSheetReferences", own.Range("A1"))
+                self.excel.Calculate()
+                after = [(c.Formula2, c.Value2) for c in cells]
+                value_changes = {c.GetAddress(False, False): (b, a) for c, (_, b), (_, a) in zip(cells, before, after) if a != b}
+                text_wrong = {c.GetAddress(False, False): (b[0], e[0], a[0]) for c, b, e, a in zip(cells, before, expected, after)
+                              if (a[0] != b[0]) != (e[0] != b[0])          # changed exactly where expected
+                              or self.run("Tk_RemoveSheetPrefix", a[0], own_name) != a[0]}
+                ambiguous_kept = all(a[0] == b[0] for c, b, a, (_, amb) in zip(cells, before, after, expected) if amb)
+                expected_kind = "warning:" if skipped else "ok:"
+                self.record(f"meaning on '{own_name}': {changes} formula(s) rewritten, every calculated result unchanged",
+                            outcome.startswith(expected_kind) and not value_changes and not text_wrong, outcome=outcome,
+                            value_changes=value_changes, text_wrong=text_wrong)
+                self.record(f"meaning on '{own_name}': {len(skipped)} formula(s) Excel could read two ways left exactly "
+                            "as they were and reported",
+                            ambiguous_kept and len(skipped) > 0 and f"{len(skipped)} formula(s) naming this sheet were left "
+                            f"unchanged (the first is in {skipped[0]})" in outcome, skipped=skipped, outcome=outcome)
+                undo = self.run("Tk_RestoreLast")
+                self.excel.Calculate()
+                self.record(f"meaning on '{own_name}': undo restores every formula and result exactly",
+                            undo.startswith("ok:") and [(c.Formula2, c.Value2) for c in cells] == before, undo=undo)
+                self.meaning_log.append({"sheet": own_name, "outcome": outcome,
+                                         "cells": [{"before": b[0], "after": a[0], "value": b[1]} for b, a in zip(before, after)]})
+            outcome = self.run("Tk_ClearSheetReferences", wb.Worksheets("Sheet1").Range("E27,E28"))
+            self.record("only ambiguous formulas selected: 'nothing', reported, no change",
+                        outcome.startswith("nothing:") and "read two ways" in outcome, outcome=outcome)
+        finally:
+            wb.Close(SaveChanges=False)
 
     def find_constants(self):
         ws = self.legacy
@@ -265,6 +365,7 @@ def main() -> int:
         check.rewrite_rules()
         check.clear_references()
         check.legacy_comparison()
+        check.meaning()
         check.find_constants()
         if args.perf:
             check.performance()
@@ -276,7 +377,8 @@ def main() -> int:
         check.record("run completed without stalling", False, note="watchdog terminated the test Excel")
     passed = sum(r["passed"] for r in check.results)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps({"results": check.results, "timings": check.timings}, indent=2, default=str),
+    args.out.write_text(json.dumps({"results": check.results, "timings": check.timings, "meaning": check.meaning_log},
+                                   indent=2, default=str),
                         encoding="utf-8")
     print(f"\n{passed}/{len(check.results)} checks passed -> {args.out}")
     return 0 if passed == len(check.results) else 1
